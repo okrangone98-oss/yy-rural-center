@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>양양군 농촌활성화지원센터 관리자</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      line-height: 1.6;
+      color: #222;
+      background-color: #f5f5f5;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ffffffcc;
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+    .logo { font-weight: 700; font-size: 1.1rem; }
+    .logo span { color: #0b7c5b; }
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 0.95rem;
+    }
+    .nav-links a {
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+    .nav-links a:hover {
+      background: #0b7c5b;
+      color: #fff;
+    }
+
+    main {
+      padding: 40px 0 60px;
+    }
+    .page-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px 20px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.03);
+      font-size: 0.9rem;
+    }
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+    .card + .card {
+      margin-top: 16px;
+    }
+
+    .login-form label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .login-form input {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background: #0b7c5b;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #096149; }
+    .btn-ghost {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #0b7c5b11;
+      color: #0b7c5b;
+      margin-right: 6px;
+    }
+    .list {
+      list-style: none;
+      margin-top: 4px;
+    }
+    .list li {
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+    .list li:last-child { border-bottom: none; }
+
+    footer {
+      padding: 16px 0 24px;
+      background: #111;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+    footer .container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="logo">
+      양양군 <span>농촌활성화지원센터</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="qna.html">Q&A</a>
+      <a href="admin.html">관리자</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <h1 class="page-title">관리자 페이지</h1>
+    <p class="page-subtitle">
+      센터 홈페이지의 공지, 문의, 프로그램 정보를 정리·관리하는 내부용 화면입니다.
+      (현재는 HTML 연습용으로, 실제 로그인·저장 기능은 포함되어 있지 않습니다.)
+    </p>
+
+    <div class="grid">
+      <!-- 왼쪽: 대시보드 요약 -->
+      <section>
+        <div class="card">
+          <h2>대시보드 요약</h2>
+          <p style="font-size:0.85rem; color:#666; margin-bottom:10px;">
+            최근 일주일 기준으로 프로그램 문의·Q&A 등록 현황을 간단히 정리한 공간입니다.
+          </p>
+          <ul class="list">
+            <li>· 신규 Q&A 문의: <strong>3건</strong></li>
+            <li>· 답변 완료: <strong>2건</strong></li>
+            <li>· 대기 중: <strong>1건</strong></li>
+            <li>· 예정 프로그램 공지: <strong>의기양양 활동가 아카데미 1기</strong></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>공지사항 관리(샘플)</h2>
+          <span class="tag">공지</span>
+          <span class="tag">모집</span>
+          <ul class="list">
+            <li>[모집] 2025 의기양양 두레·동아리 참여자 모집 안내</li>
+            <li>[안내] 양양애(愛) 배달 5월 운영 일정</li>
+            <li>[공지] 농촌활성화지원센터 임시 휴관(예: 태풍 등)</li>
+          </ul>
+          <button class="btn btn-ghost" style="margin-top:10px;">새 공지 작성하기</button>
+        </div>
+
+        <div class="card">
+          <h2>Q&A 문의 관리(샘플)</h2>
+          <ul class="list">
+            <li>· 두레·동아리 예산 집행 관련 문의 – <span style="color:#0b7c5b;">답변 완료</span></li>
+            <li>· 양양애 배달 신청 기준 문의 – <span style="color:#ff9800;">대기</span></li>
+            <li>· 활동가 아카데미 수강료·신청 방법 – <span style="color:#0b7c5b;">답변 완료</span></li>
+          </ul>
+          <button class="btn btn-ghost" style="margin-top:10px;">Q&A 목록 보기</button>
+        </div>
+      </section>
+
+      <!-- 오른쪽: 로그인/관리자 정보 -->
+      <aside>
+        <div class="card">
+          <h2>관리자 로그인</h2>
+          <form class="login-form" onsubmit="event.preventDefault(); alert('연습용 화면입니다 :)');">
+            <label for="admin-id">아이디</label>
+            <input type="text" id="admin-id" placeholder="예: yyrural-admin" />
+            <label for="admin-pw">비밀번호</label>
+            <input type="password" id="admin-pw" placeholder="비밀번호 입력" />
+            <button type="submit" class="btn btn-primary" style="margin-top:4px;">로그인</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>관리 가이드(메모용)</h2>
+          <ul class="list">
+            <li>· Q&A 문의는 주 2회 이상 확인</li>
+            <li>· 공지는 모집 시작 최소 2주 전에 게시</li>
+            <li>· 프로그램이 변경될 경우 홈페이지 & 문자 함께 안내</li>
+            <li>· 연말에는 성과공유회 일정과 함께 한 해 프로그램 정리</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div>© <span id="year"></span> 양양군 농촌활성화지원센터. 관리자 페이지</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
