@@ -784,184 +784,127 @@
       // 푸터 연도 자동 입력
       document.getElementById("year").textContent = new Date().getFullYear();
     </script>
-  <script>
-  // 엑셀 25_강사카드에서 가져온 강사 목록 (요약본)
-  const TEACHERS = [
-    {
-      "name": "강영식",
-      "org": "프리랜서강사",
-      "field": "레크레이션.",
-      "career": "양양체육회 레크레이션 진행, 속초문화재단 버스킹 사회, 양양연합 자율방범대·로터리 송년회 및 체육대회 진행 등 다수 행사 사회·레크레이션 운영.",
-      "email": "apkdh1@naver.com",
-      "category": "레크레이션·진행"
-    },
-    {
-      "name": "구태우",
-      "org": "후진항 어촌신활력증진사업단",
-      "field": "",
-      "career": "",
-      "email": "",
-      "category": "기타"
-    },
-    {
-      "name": "김기업",
-      "org": "(사)마을상생플랫폼",
-      "field": "농촌지역개발정책 변화 및 현장 대응, 일반농산어촌개발사업 계획 수립/시행, 농촌지역 공동체 활성화 및 사회적 경제, 주민참여·리더십·갈등관리, 농업·농촌의 변화와 미래 대응전략.",
-      "career": "한국농어촌공사 원주지사장(1991-2022), 대통령직속 농어업·농어촌 특별대책위 파견근무, 강원연구원 농촌정책 자문, 지역개발·공동체 활성화 관련 강의 다수.",
-      "email": "geokey@hanmail.net",
-      "category": "농촌·공동체·정책"
-    },
-    {
-      "name": "김내철",
-      "org": "세무법인율곡",
-      "field": "세법, 재무회계.",
-      "career": "속초세무서 국세심사위원·납세자보호위원·국선세무대리인, 춘천지방법원 속초지원 민사조정위원, 양양군·속초시 마을공동체 및 사회적경제조직 세무·회계 컨설팅.",
-      "email": "kimnaichul1@naver.com",
-      "category": "세무·회계"
-    },
-    {
-      "name": "김석기",
-      "org": "손양면마을자치위원회, 양양청년협동조합",
-      "field": "사업계획서 작성법 (PSST, 로컬 비즈니스), 브랜드 구축 방법론 및 BI 개발.",
-      "career": "양양청년협동조합 이사장, 전 문체부 관광두레 PD, 로컬 비즈니스 컨설팅 및 브랜드 전략 기획 다수.",
-      "email": "ksk3895@gmail.com",
-      "category": "농촌·공동체·정책"
-    },
-    {
-      "name": "김소의",
-      "org": "양냥점빵",
-      "field": "요리",
-      "career": "양양농촌활성화지원센터 아카이빙 보조 강사, 사회적경제조직 및 마을행사 식사·간식 운영 경험 다수.",
-      "email": "sosskim88@naver.com",
-      "category": "요리·식문화"
-    },
-    {
-      "name": "김시동",
-      "org": "강원아카이브사회적협동조합",
-      "field": "지역아카이브, 마을기록가 양성, 문화예술사진지도사, 홍보마케팅.",
-      "career": "강원아카이브사회적협동조합 대표, 지역아카이브 기획자, 기록물관리전문요원, 공공기관·지자체 기록사업 및 아카이브 교육 다수.",
-      "email": "gac2009@naver.com",
-      "category": "사진·아카이브·영상"
-    },
-    {
-      "name": "김윤지",
-      "org": "가지컴퍼니",
-      "field": "디지털 튜터 강사 (활동 내용에 기반).",
-      "career": "가지피피니 ‘서피송이’ 캐릭터 콘텐츠 제작, 2024 양양군 아카이빙 활동가 양성과정 강사, 디지털 문해·콘텐츠 제작 교육 진행.",
-      "email": "k_yoonj@naver.com",
-      "category": "디지털·AI·문해"
-    },
-    {
-      "name": "김은경",
-      "org": "농촌활성화지원센터 활동가",
-      "field": "정리튜터 1급 전문가, 다문화 가정지도사.",
-      "career": "정리수납·생활환경 정비 프로그램 운영, 다문화 가정 생활코칭 및 상담 활동.",
-      "email": "canoe18@hanmail.net",
-      "category": "정리·실버·복지·치유"
-    },
-    {
-      "name": "김은정",
-      "org": "플래버링",
-      "field": "요리",
-      "career": "2025 속초미식주간 속초미식예술학교 총괄, 양양평생학습관 왕초보기초생활요리 강사, 강원문화재단 어린이 인문학 요리수업, 강원한우 TV CF 푸드 스타일링, 평창도시재생센터 로컬푸드 클래스, 국제음식영화제 케이터링.",
-      "email": "ejsmiling@naver.com",
-      "category": "요리·식문화"
-    },
-    {
-      "name": "김현숙",
-      "org": "양양군 평생학습 시민교육 / 양양새활용센터",
-      "field": "환경, 치유, 생태",
-      "career": "양양군 평생학습 시민교육 환경 분야 강사, 양양새활용센터 환경교육 강사, 의기양양 동아리 워크숍 사회 등.",
-      "email": "yyfarmct@naver.com",
-      "category": "환경·생태"
-    },
-    {
-      "name": "양병진",
-      "org": "설악산생태탐방원",
-      "field": "자연해설",
-      "career": "국립공원공단 설악산생태탐방원 근무, 남대천 생태해설 프로그램 운영.",
-      "email": "",
-      "category": "환경·생태"
-    },
-    {
-      "name": "이규영",
-      "org": "프리랜서, 스킴밐스",
-      "field": "문화기록활동가.",
-      "career": "지역 문화기록 프로젝트 기획 및 운영, 사진·텍스트 기반 아카이빙 작업 다수.",
-      "email": "pyrhic@naver.com",
-      "category": "사진·아카이브·영상"
-    },
-    {
-      "name": "나윤호",
-      "org": "글라시",
-      "field": "사진 ",
-      "career": "로컬 브랜드·행사 사진 촬영 및 아카이빙, 홍보용 사진·영상 제작.",
-      "email": "myyounho2@gmail.com",
-      "category": "사진·아카이브·영상"
-    },
-    {
-      "name": "전옥랑",
-      "org": "새활용주식회사",
-      "field": "미술·새활용, 환경, 기록.",
-      "career": "새활용주식회사 대표, 로컬 기록·전시 기획, 새활용·환경 교육 프로그램 운영.",
-      "email": "okrangone@naver.com",
-      "category": "미술·공예·예술"
-    },
-    {
-      "name": "곽윤미",
-      "org": "농촌활성화지원센터 활동가",
-      "field": "실버인지체육지도, 웃음치료",
-      "career": "실버인지체육지도사·웃음치료사로 어르신 건강·정서 프로그램 진행.",
-      "email": "yunme0729@naver.com",
-      "category": "정리·실버·복지·치유"
-    },
-    {
-      "name": "임효선",
-      "org": "농촌활성화지원센터 활동가",
-      "field": "",
-      "career": "",
-      "email": "sunny6247@naver.com",
-      "category": "기타"
-    },
-    {
-      "name": "홍서우",
-      "org": "동호회",
-      "field": "",
-      "career": "양양 연어축제 ‘줍줍양양’ 체험부스 현장 운영 보조 등.",
-      "email": "ssopia_93@naver.com",
-      "category": "기타"
-    },
-    {
-      "name": "박현숙",
-      "org": "국립공원공단 설악산생태탐방원",
-      "field": "환경, 치유, 생태",
-      "career": "2017년부터 설악산생태탐방원 재직, 남대천 생태해설 및 환경교육 프로그램 운영.",
-      "email": "",
-      "category": "환경·생태"
-    },
-    {
-      "name": "홍은진",
-      "org": "",
-      "field": "요리 수업 보조 강사",
-      "career": "",
-      "email": "eunjini1014@naver.com",
-      "category": "요리·식문화"
-    }
-    // … (엑셀에 있는 나머지 강사들도 같은 형식으로 이어서 넣으시면 됩니다)
-  ];
+ <script>
+  // ✅ 1) 구글 시트 CSV 주소
+  const SHEET_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
 
-  // 강사 카드 렌더링 함수
+  // 전역 강사 배열 (시트에서 불러와 채움)
+  let TEACHERS = [];
+
+  // ✅ 2) CSV 파서 (쉼표 + 큰따옴표 처리)
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let field = "";
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+
+      if (c === '"') {
+        if (insideQuotes && text[i + 1] === '"') {
+          // "" → " 로 처리
+          field += '"';
+          i++;
+        } else {
+          insideQuotes = !insideQuotes;
+        }
+      } else if (c === "," && !insideQuotes) {
+        row.push(field);
+        field = "";
+      } else if ((c === "\n" || c === "\r") && !insideQuotes) {
+        if (field !== "" || row.length > 0) {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = "";
+        }
+      } else {
+        field += c;
+      }
+    }
+    if (field !== "" || row.length > 0) {
+      row.push(field);
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  // ✅ 3) 구글 시트에서 강사 데이터 불러오기
+  async function loadTeachersFromSheet() {
+    try {
+      const res = await fetch(SHEET_CSV_URL);
+      const text = await res.text();
+      const rows = parseCSV(text);
+
+      if (!rows.length) return;
+
+      const headers = rows[0].map((h) => h.trim());
+      const dataRows = rows.slice(1);
+
+      // 헤더 이름 기반으로 컬럼 인덱스 찾기 (한국어/영어 둘 다 대비)
+      const colIndex = {
+        name: headers.findIndex((h) => h.includes("성명") || h.toLowerCase().includes("name")),
+        org: headers.findIndex((h) => h.includes("소속") || h.toLowerCase().includes("org")),
+        field: headers.findIndex(
+          (h) =>
+            h.replace(/\s/g, "").includes("강의분야") ||
+            h.toLowerCase().includes("field")
+        ),
+        career: headers.findIndex(
+          (h) =>
+            h.replace(/\s/g, "").includes("주요경력") ||
+            h.replace(/\s/g, "").includes("주요경력요약") ||
+            h.toLowerCase().includes("career")
+        ),
+        email: headers.findIndex(
+          (h) => h.includes("이메일") || h.toLowerCase().includes("email")
+        ),
+        category: headers.findIndex(
+          (h) =>
+            h.includes("카테고리") ||
+            h.toLowerCase().includes("category") ||
+            h.toLowerCase().includes("분류")
+        ),
+      };
+
+      // 실제 TEACHERS 배열 구성
+      TEACHERS = dataRows
+        .filter((r) => r[colIndex.name] && r[colIndex.name].trim() !== "")
+        .map((r) => ({
+          name: (r[colIndex.name] || "").trim(),
+          org: (r[colIndex.org] || "").trim(),
+          field: (r[colIndex.field] || "").trim(),
+          career: (r[colIndex.career] || "").trim(),
+          email: (r[colIndex.email] || "").trim(),
+          category: (r[colIndex.category] || "").trim() || "기타",
+        }));
+
+      // 첫 로딩 시 전체 보여주기
+      renderTeachers("전체");
+    } catch (err) {
+      console.error("강사 시트 로딩 오류:", err);
+    }
+  }
+
+  // ✅ 4) 강사 카드 렌더링 (주요경력 100자 제한)
   function renderTeachers(filterCategory) {
     const listEl = document.getElementById("teacher-list");
     if (!listEl) return;
 
-    const target = filterCategory && filterCategory !== "전체"
-      ? TEACHERS.filter(t => t.category === filterCategory)
-      : TEACHERS;
+    const target =
+      filterCategory && filterCategory !== "전체"
+        ? TEACHERS.filter((t) => t.category === filterCategory)
+        : TEACHERS;
 
     listEl.innerHTML = "";
 
-    target.forEach(t => {
+    target.forEach((t) => {
+      const careerText = t.career || "";
+      const shortCareer =
+        careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
+
       const card = document.createElement("article");
       card.className = "teacher-card";
       card.innerHTML = `
@@ -969,38 +912,41 @@
         <div class="teacher-org">${t.org || ""}</div>
         <div class="teacher-field">${t.field || ""}</div>
         <p class="teacher-note">
-          ${(t.career || "").length > 120
-            ? (t.career || "").slice(0, 120) + "…"
-            : (t.career || "")}
+          ${shortCareer}
         </p>
-        ${t.email
-          ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
-          : ""}
+        ${
+          t.email
+            ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
+            : ""
+        }
         <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
-          #${t.category}
+          #${t.category || "기타"}
         </div>
       `;
       listEl.appendChild(card);
     });
   }
 
-  // 필터 버튼 이벤트
+  // ✅ 5) 필터 버튼 세팅 + 시트 로딩
   document.addEventListener("DOMContentLoaded", function () {
-    renderTeachers("전체");
-
+    // 필터 버튼 클릭 이벤트
     const buttons = document.querySelectorAll(".filter-btn");
-    buttons.forEach(btn => {
+    buttons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        buttons.forEach(b => b.classList.remove("active"));
+        buttons.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const cat = btn.getAttribute("data-filter");
         renderTeachers(cat);
       });
     });
+
+    // 구글 시트에서 강사 목록 불러오기
+    loadTeachersFromSheet();
   });
 </script>
 
   </body>
 
 </html>
+
 
