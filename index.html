@@ -264,89 +264,46 @@
   background: transparent;
 }
 
-/* 강사 카드 전체 */
 .teacher-card {
   background: #fff;
   border-radius: 16px;
-  padding: 16px 18px;
-  text-align: left;
+  padding: 16px;
+  text-align: center;
   border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+
+  /* 가로 스크롤용 카드 너비 설정 */
+  flex: 0 0 260px;            /* 한 카드당 고정 너비(대략 260px) */
+  min-width: 220px;
+  scroll-snap-align: start;   /* 스크롤 멈출 때 카드 시작 부분에 맞춤 */
 }
 
-/* 상단: 이름 + 소속 + 카테고리 뱃지 */
-.teacher-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.teacher-name {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.teacher-org {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.teacher-category {
-  font-size: 0.75rem;
-  color: #0b7c5b;
-  background: #0b7c5b11;
-  padding: 3px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-/* 중간: 라벨 형식 정보 블록 */
-.teacher-meta {
-  border-top: 1px solid #f0f0f0;
-  padding-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.teacher-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 0.82rem;
-  line-height: 1.5;
-}
-
-.teacher-label {
-  flex: 0 0 60px;
-  color: #888;
-}
-
-.teacher-value {
-  flex: 1;
-  color: #333;
-}
-
-/* 주요경력(긴 문장)용 */
-.teacher-note {
-  font-size: 0.82rem;
-  color: #555;
-}
-
-/* 이메일 */
-.teacher-email a {
-  color: #0b7c5b;
-  text-decoration: none;
-}
-.teacher-email a:hover {
-  text-decoration: underline;
-}
+    .teacher-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 2px solid #0b7c5b33;
+    }
+    .teacher-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .teacher-field {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .teacher-note {
+      font-size: 0.8rem;
+      color: #777;
+    }
+    .teacher-role {
+      font-size: 0.8rem;
+      color: #0b7c5b;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
 
     /* 사진 섹션 */
     .gallery-grid {
@@ -932,60 +889,43 @@
   }
 
   // ✅ 4) 강사 카드 렌더링 (주요경력 100자 제한)
- // ✅ 강사 카드 렌더링 (주요경력 100자 제한 + 디자인 개선)
-function renderTeachers(filterCategory) {
-  const listEl = document.getElementById("teacher-list");
-  if (!listEl) return;
+  function renderTeachers(filterCategory) {
+    const listEl = document.getElementById("teacher-list");
+    if (!listEl) return;
 
-  const target =
-    filterCategory && filterCategory !== "전체"
-      ? TEACHERS.filter((t) => t.category === filterCategory)
-      : TEACHERS;
+    const target =
+      filterCategory && filterCategory !== "전체"
+        ? TEACHERS.filter((t) => t.category === filterCategory)
+        : TEACHERS;
 
-  listEl.innerHTML = "";
+    listEl.innerHTML = "";
 
-  target.forEach((t) => {
-    const careerText = t.career || "";
-    const shortCareer =
-      careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
+    target.forEach((t) => {
+      const careerText = t.career || "";
+      const shortCareer =
+        careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
 
-    const card = document.createElement("article");
-    card.className = "teacher-card";
-    card.innerHTML = `
-      <div class="teacher-header">
-        <div>
-          <div class="teacher-name">${t.name}</div>
-          <div class="teacher-org">${t.org || ""}</div>
-        </div>
-        <div class="teacher-category">#${t.category || "기타"}</div>
-      </div>
-
-      <div class="teacher-meta">
-        <div class="teacher-row">
-          <span class="teacher-label">강의분야</span>
-          <span class="teacher-value">${t.field || "-"}</span>
-        </div>
-        <div class="teacher-row">
-          <span class="teacher-label">주요경력</span>
-          <span class="teacher-value teacher-note">${shortCareer || "-"}</span>
-        </div>
+      const card = document.createElement("article");
+      card.className = "teacher-card";
+      card.innerHTML = `
+        <div class="teacher-name">${t.name}</div>
+        <div class="teacher-org">${t.org || ""}</div>
+        <div class="teacher-field">${t.field || ""}</div>
+        <p class="teacher-note">
+          ${shortCareer}
+        </p>
         ${
           t.email
-            ? `
-        <div class="teacher-row teacher-email">
-          <span class="teacher-label">이메일</span>
-          <span class="teacher-value">
-            <a href="mailto:${t.email}">${t.email}</a>
-          </span>
-        </div>
-        `
+            ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
             : ""
         }
-      </div>
-    `;
-    listEl.appendChild(card);
-  });
-}
+        <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
+          #${t.category || "기타"}
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+  }
 
   // ✅ 5) 필터 버튼 세팅 + 시트 로딩
   document.addEventListener("DOMContentLoaded", function () {
@@ -1008,8 +948,4 @@ function renderTeachers(filterCategory) {
   </body>
 
 </html>
-
-
-
-
 
