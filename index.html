@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>양양군 농촌활성화지원센터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- 웹폰트 -->
+  <!-- 웹폰트 -->            
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -632,14 +632,15 @@
         양양군 <span>농촌활성화지원센터</span>
       </div>
       <nav class="nav-links">
-        <a href="#about">센터소개</a>
-        <a href="#programs">주요사업</a>
-        <a href="#teachers">강사진</a>
-        <a href="#gallery">활동사진</a>
-        <a href="#contact">오시는길</a>
-        <a href="qna.html">Q&A</a>
-        <a href="admin.html">관리자</a>
-      </nav>
+  <a href="#about">센터소개</a>
+  <a href="#programs">주요사업</a>
+  <a href="#notice">공지사항</a>   <!-- ✅ 공지사항 추가 -->
+  <a href="#teachers">강사진</a>
+  <a href="#gallery">활동사진</a>
+  <a href="#contact">오시는길</a>
+  <a href="qna.html">Q&A</a>
+  <a href="admin.html">관리자</a>
+</nav>
     </div>
   </header>
 
@@ -743,38 +744,34 @@
       </div>
     </div>
   </section>    <!-- 여기까지가 #programs(주요사업) 섹션 끝 -->
-
 <!-- ⬇⬇⬇ 여기에 공지사항 섹션 추가 ⬇⬇⬇ -->
+  
+    <!-- 공지사항 -->
+    <section id="notice">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">공지사항</h2>
+          <p class="section-subtitle">
+            양양군 농촌활성화지원센터의 주요 안내와 새 소식을 확인하실 수 있습니다.
+          </p>
+        </div>
 
-<section id="notice">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">공지사항</h2>
-      <p class="section-subtitle">
-        양양군 농촌활성화지원센터의 주요 안내와 새 소식을 확인하실 수 있습니다.
-      </p>
-    </div>
-
-    <div class="notice-wrapper">
-      <table class="notice-table">
-        <thead>
-          <tr>
-            <th style="width: 80px;">구분</th>
-            <th>제목</th>
-            <th style="width: 110px;">날짜</th>
-          </tr>
-        </thead>
-        <tbody id="notice-tbody">
-          <tr>
-            <td colspan="3" class="notice-empty">
-              공지사항을 불러오는 중입니다...
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+        <div class="notice-wrapper">
+          <table class="notice-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">구분</th>
+                <th>제목</th>
+                <th style="width: 120px;">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="notice-body">
+              <!-- JS로 최신 5개 행이 들어옵니다 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
 <!-- ⬆⬆⬆ 공지사항 섹션 끝 ⬆⬆⬆ -->
 
@@ -1145,7 +1142,7 @@
       renderNotices();
     } catch (err) {
       console.error("공지사항 시트 로딩 오류:", err);
-      const tbody = document.getElementById("notice-tbody");
+      const tbody = document.getElementById("notice-body");
       if (tbody) {
         tbody.innerHTML = `
           <tr><td colspan="3" class="notice-empty">
@@ -1196,54 +1193,58 @@
   }
 
   // ✅ 5) 공지사항 테이블 렌더링
-  function renderNotices() {
-    const tbody = document.getElementById("notice-tbody");
-    if (!tbody) return;
-
-    if (!NOTICES.length) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="3" class="notice-empty">
-            등록된 공지사항이 없습니다.
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    tbody.innerHTML = "";
-    NOTICES.forEach((n) => {
-      const tr = document.createElement("tr");
-
-      const typeTd = document.createElement("td");
-      typeTd.className = "notice-type";
-      typeTd.textContent = n.type || "공지";
-
-      const titleTd = document.createElement("td");
-      titleTd.className = "notice-title";
-      if (n.url) {
-        const a = document.createElement("a");
-        a.href = n.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = n.title;
-        titleTd.appendChild(a);
-      } else {
-        titleTd.textContent = n.title;
-      }
-
-      const dateTd = document.createElement("td");
-      dateTd.className = "notice-date";
-      dateTd.textContent = n.date;
-
-      tr.appendChild(typeTd);
-      tr.appendChild(titleTd);
-      tr.appendChild(dateTd);
-
-      tbody.appendChild(tr);
-    });
+ function renderNotices() {
+  const tbody = document.getElementById("notice-body");
+  if (!tbody) return;
+  ...
+}
+  if (!NOTICES.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" class="notice-empty">
+          등록된 공지사항이 없습니다.
+        </td>
+      </tr>
+    `;
+    return;
   }
 
+  tbody.innerHTML = "";
+
+  // ✅ 최신 5개만 표시 (시트에서 위에 있는 순서 기준)
+  const latest = NOTICES.slice(0, 5);
+
+  latest.forEach((n) => {
+    const tr = document.createElement("tr");
+
+    const typeTd = document.createElement("td");
+    typeTd.className = "notice-type";
+    typeTd.textContent = n.type || "공지";
+
+    const titleTd = document.createElement("td");
+    titleTd.className = "notice-title";
+    if (n.url) {
+      const a = document.createElement("a");
+      a.href = n.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = n.title;
+      titleTd.appendChild(a);
+    } else {
+      titleTd.textContent = n.title;
+    }
+
+    const dateTd = document.createElement("td");
+    dateTd.className = "notice-date";
+    dateTd.textContent = n.date;
+
+    tr.appendChild(typeTd);
+    tr.appendChild(titleTd);
+    tr.appendChild(dateTd);
+
+    tbody.appendChild(tr);
+  });
+}
   // ✅ 6) DOM 로드 시 초기화
   document.addEventListener("DOMContentLoaded", function () {
     // 강사 필터 버튼
@@ -1315,7 +1316,3 @@
   </script>
 </body>
 </html>
-
-
-
-
