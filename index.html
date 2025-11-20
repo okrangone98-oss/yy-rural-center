@@ -359,6 +359,26 @@
   border: 1px solid #e5e5e5;
   background: #000;        /* 로딩 전 배경색 */
 }
+.map-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: #0b7c5b;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+.map-open-btn span {
+  font-size: 1.1rem;
+}
+.map-open-btn:hover {
+  background: #096149;
+}
 
 /* 선택사항: 모바일에서 높이 조금 줄이고 싶다면 */
 .map-placeholder iframe {
@@ -764,7 +784,7 @@
             </div>
           </div>
 
-         <div class="map-placeholder">
+        <div class="map-placeholder">
   <iframe 
     src="https://naver.me/5mhpqk0D"
     width="100%"
@@ -774,7 +794,15 @@
     allowfullscreen>
   </iframe>
 </div>
-      </div>
+
+<button
+  type="button"
+  class="map-open-btn"
+  onclick="window.open('https://naver.me/5mhpqk0D', '_blank')"
+>
+  <span>📍</span> 지도 크게 보기
+</button>
+
     </section>
 
     <!-- 푸터 -->
@@ -953,6 +981,7 @@
   </body>
 
 </html>
+
 
 
 
