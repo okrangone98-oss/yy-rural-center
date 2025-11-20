@@ -241,7 +241,7 @@
       color: #777;
     }
 
-    /* 강사 섹션 – 가로 스크롤 카드 리스트 */
+    /* 강사 섹션 – 가로 스크롤 */
     .teacher-grid {
       display: flex;
       flex-wrap: nowrap;
@@ -347,44 +347,72 @@
       font-weight: 600;
     }
 
-    /* 오른쪽 "찾아오는 길" 카드 */
-    .map-card {
-      background: #fff;
+    /* 지도 안내 박스 (지도는 팝업만) */
+    .map-box {
+      background: #f0faf5;
       border-radius: 16px;
       padding: 18px;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d4ebe0;
       font-size: 0.9rem;
     }
-    .map-card h3 {
-      margin-bottom: 8px;
+    .map-box-title {
+      font-weight: 600;
+      margin-bottom: 6px;
     }
-    .map-card p {
+    .map-box-desc {
       font-size: 0.85rem;
       color: #555;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-
-    /* 찾아오는 길 버튼 */
     .map-open-btn {
-      width: 100%;
-      padding: 12px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      padding: 10px 18px;
       background: #0b7c5b;
       color: #fff;
       border-radius: 999px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       border: none;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
     }
     .map-open-btn span {
       font-size: 1.1rem;
     }
     .map-open-btn:hover {
       background: #096149;
+    }
+
+    /* 채널 & 소식 모아보기 영역 */
+    .channel-link-wrap {
+      margin-top: 32px;
+      padding: 18px 20px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e5e5e5;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .channel-link-text {
+      margin-bottom: 12px;
+      color: #555;
+    }
+    .channel-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: #f3f3f3;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .channel-link-btn:hover {
+      background: #e7e7e7;
     }
 
     /* 푸터 */
@@ -459,34 +487,77 @@
       color: #0b7c5b;
     }
 
-    /* --- 지도 팝업 모달 --- */
-    .modal {
-      display: none;
+    /* 지도 모달 */
+    .map-modal {
       position: fixed;
       inset: 0;
-      z-index: 9999;
-      background-color: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
     }
-    .modal-content {
-      background: #fff;
-      width: 90%;
-      max-width: 900px;
-      height: 70vh;
-      margin: 60px auto;
-      border-radius: 16px;
-      overflow: hidden;
-      position: relative;
+    .map-modal.is-open {
+      display: flex;
     }
-    .modal .close {
+    .map-modal-overlay {
       position: absolute;
-      right: 16px;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+    }
+    .map-modal-dialog {
+      position: relative;
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 18px 20px;
+      width: min(960px, 96vw);
+      max-height: 90vh;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1;
+    }
+    .map-modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .map-modal-desc {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .map-modal-body {
+      flex: 1;
+      min-height: 300px;
+    }
+    .map-modal-body iframe {
+      width: 100%;
+      height: 60vh;
+      max-height: 580px;
+      border-radius: 12px;
+      border: 0;
+    }
+    .map-modal-close {
+      position: absolute;
       top: 10px;
-      font-size: 32px;
-      font-weight: bold;
-      color: #fff;
+      right: 10px;
+      border: none;
+      background: #f5f5f5;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
       cursor: pointer;
-      z-index: 10000;
+      font-size: 18px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+    .map-modal-close:hover {
+      background: #e2e2e2;
     }
   </style>
 </head>
@@ -503,7 +574,7 @@
         <a href="#teachers">강사진</a>
         <a href="#gallery">활동사진</a>
         <a href="#contact">오시는길</a>
-        <a href="qna.html">Q&amp;A</a>
+        <a href="qna.html">Q&A</a>
         <a href="admin.html">관리자</a>
       </nav>
     </div>
@@ -543,7 +614,7 @@
 
       <div class="about-grid">
         <div class="about-card">
-          <h3>미션 &amp; 비전</h3>
+          <h3>미션 & 비전</h3>
           <ul class="about-list">
             <li>· 농촌 주민의 역량을 기반으로 한 자립형 공동체 구축</li>
             <li>· 지역 자원을 활용한 공동체 활성화</li>
@@ -556,7 +627,7 @@
           <h3>핵심 역할</h3>
           <ul class="about-list">
             <li>· 시군역량강화사업 총괄 기획 및 운영</li>
-            <li>· 의기양양 두레&amp;동아리 발굴·지원</li>
+            <li>· 의기양양 두레&동아리 발굴·지원</li>
             <li>· 활동가 양성 아카데미 기획·운영</li>
             <li>· 컨설팅, 교육, 네트워크 구축 지원</li>
           </ul>
@@ -565,7 +636,7 @@
     </div>
   </section>
 
-  <!-- 주요사업 -->
+  <!-- 주요 사업 -->
   <section id="programs">
     <div class="container">
       <div class="section-header">
@@ -579,7 +650,7 @@
       <div class="program-grid">
         <article class="program-card">
           <div class="program-label">동아리·두레</div>
-          <h3 class="program-title">의기양양 두레 &amp; 동아리 지원</h3>
+          <h3 class="program-title">의기양양 두레 & 동아리 지원</h3>
           <p class="program-desc">
             주민이 스스로 기획하는 동아리·두레 활동을 지원하여, 지역 공동체를 활성화하고
             관계망을 촘촘히 만들어 가도록 돕고 있습니다.
@@ -594,7 +665,7 @@
             농번기철 마을로 찾아가 취약계층 및 노약자들에게 식사·문화 프로그램을 함께 전달하여,
             건강과 정서적 돌봄을 연결합니다.
           </p>
-          <p class="program-meta">· 대상: 농번기철 취약계층 및 노약자</p>
+          <p class="program-meta">· 대상: 농번기철 취약계층 및 노약자자</p>
         </article>
 
         <article class="program-card">
@@ -614,21 +685,20 @@
   <section id="teachers">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">강사진 &amp; PD</h2>
+        <h2 class="section-title">강사진 & PD</h2>
         <p class="section-subtitle">
           양양군 농촌활성화지원센터의 교육 프로그램과 현장 프로젝트를 함께 이끌어 가는
           강사·컨설턴트, PD(프로그램 운영 주민활동가)님들을 소개합니다.
         </p>
       </div>
 
-      <!-- 엑셀 기반 센터 강사진 -->
+      <!-- 1) 센터 강사진 -->
       <h3 style="font-size:1.05rem; margin-bottom:12px;">센터 강사진</h3>
       <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
         아래 강사진은 「25_강사카드」 자료를 바탕으로 정리한 목록입니다.
         상단 카테고리를 눌러 분야별로 필터링해서 보실 수 있습니다.
       </p>
 
-      <!-- 카테고리 필터 버튼 -->
       <div class="teacher-filter">
         <button class="filter-btn active" data-filter="전체">전체</button>
         <button class="filter-btn" data-filter="농촌·공동체·정책">농촌·공동체·정책</button>
@@ -643,22 +713,17 @@
         <button class="filter-btn" data-filter="기타">기타</button>
       </div>
 
-      <!-- JS가 강사 카드를 자동으로 채워 넣을 영역 -->
       <div class="teacher-grid" id="teacher-list"></div>
 
-      <!-- PD & 현장 활동가 -->
-      <h3 style="font-size:1.05rem; margin:40px 0 12px;">PD &amp; 현장 코디네이터</h3>
+      <!-- 2) PD & 현장 활동가 -->
+      <h3 style="font-size:1.05rem; margin:40px 0 12px;">PD & 현장 코디네이터</h3>
       <p style="font-size:0.85rem; color:#666; margin-bottom:20px;">
         각 프로젝트를 이끄는 중간관리자이자 활동가로서, 주민과 현장을 연결하는 역할을 수행합니다.
       </p>
 
       <div class="teacher-grid">
         <article class="teacher-card">
-          <img
-            src="images/PD사진/성동제.png"
-            alt="성동제 PD"
-            class="teacher-photo"
-          />
+          <img src="images/PD사진/성동제.png" alt="성동제 PD" class="teacher-photo" />
           <div class="teacher-name">성동제</div>
           <div class="teacher-role">양양애(愛)문화건강배달 PD · 활동가</div>
           <p class="teacher-note">
@@ -668,11 +733,7 @@
         </article>
 
         <article class="teacher-card">
-          <img
-            src="images/PD사진/김윤지.png"
-            alt="김윤지 PD"
-            class="teacher-photo"
-          />
+          <img src="images/PD사진/김윤지.png" alt="김윤지 PD" class="teacher-photo" />
           <div class="teacher-name">김윤지</div>
           <div class="teacher-role">아카이빙활동가 PD · 활동가</div>
           <p class="teacher-note">
@@ -682,11 +743,7 @@
         </article>
 
         <article class="teacher-card">
-          <img
-            src="images/PD사진/심예슬.png"
-            alt="심예슬 PD"
-            class="teacher-photo"
-          />
+          <img src="images/PD사진/심예슬.png" alt="심예슬 PD" class="teacher-photo" />
           <div class="teacher-name">심예슬</div>
           <div class="teacher-role">두레동아리 PD · 활동가</div>
           <p class="teacher-note">
@@ -696,11 +753,7 @@
         </article>
 
         <article class="teacher-card">
-          <img
-            src="images/PD사진/김소의.png"
-            alt="김소의 PD"
-            class="teacher-photo"
-          />
+          <img src="images/PD사진/김소의.png" alt="김소의 PD" class="teacher-photo" />
           <div class="teacher-name">김소의</div>
           <div class="teacher-role">양양애(愛)식사 PD · 활동가</div>
           <p class="teacher-note">
@@ -730,8 +783,7 @@
           <img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" />
         </div>
         <div class="gallery-item">
-          <img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg"
-               alt="두레동아리 워크숍" />
+          <img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg" alt="두레동아리 워크숍" />
         </div>
         <div class="gallery-item">
           <img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" />
@@ -768,7 +820,7 @@
   <section id="contact">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">문의 &amp; 오시는 길</h2>
+        <h2 class="section-title">문의 & 오시는 길</h2>
         <p class="section-subtitle">
           주민 사업 제안, 교육 의뢰 등 궁금하신 점은 언제든지 연락 주세요.
         </p>
@@ -795,13 +847,35 @@
           </div>
         </div>
 
-        <div class="map-card">
-          <h3>찾아오는 길</h3>
-          <p>아래 버튼을 누르시면 네이버 지도 팝업에서 위치를 자세히 확인하실 수 있습니다.</p>
-          <button type="button" class="map-open-btn">
+        <div class="map-box">
+          <div class="map-box-title">찾아오는 길</div>
+          <p class="map-box-desc">
+            버튼을 클릭하시면 네이버 지도가 새 창(또는 탭)으로 열려
+            길찾기, 주변 정류장 등을 자세히 확인하실 수 있습니다.
+          </p>
+          <button
+            type="button"
+            id="open-map-modal"
+            class="map-open-btn"
+          >
             <span>📍</span> 찾아오는 길
           </button>
         </div>
+      </div>
+
+      <!-- 센터 채널 & 소식 모아보기 -->
+      <div class="channel-link-wrap">
+        <p class="channel-link-text">
+          센터의 다양한 채널 및 소식은 아래 링크에서 한 번에 확인하실 수 있습니다.
+        </p>
+        <a
+          href="https://example.com/center-channels"
+          class="channel-link-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          센터 채널 & 소식 모아보기
+        </a>
       </div>
     </div>
   </section>
@@ -810,39 +884,22 @@
   <footer>
     <div class="container">
       <div>© <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.</div>
-      <div>양양군 시군역량강화사업 전담기관.</div>
+      <div>본 홈페이지는 HTML/CSS 학습을 위해 직접 코딩하여 제작되었습니다.</div>
     </div>
   </footer>
 
-  <!-- 지도 팝업 모달 -->
-  <div id="mapModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <iframe
-        src="https://naver.me/5mhpqk0D"
-        width="100%"
-        height="100%"
-        frameborder="0"
-        style="border:0;"
-        allowfullscreen>
-      </iframe>
-    </div>
-  </div>
-
+  <!-- 푸터 연도 -->
   <script>
-    // 푸터 연도 자동 입력
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 
+  <!-- 강사 목록 스크립트 -->
   <script>
-    // ✅ 1) 구글 시트 CSV 주소
     const SHEET_CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
 
-    // 전역 강사 배열 (시트에서 불러와 채움)
     let TEACHERS = [];
 
-    // ✅ 2) CSV 파서
     function parseCSV(text) {
       const rows = [];
       let row = [];
@@ -880,7 +937,6 @@
       return rows;
     }
 
-    // ✅ 3) 구글 시트에서 강사 데이터 불러오기
     async function loadTeachersFromSheet() {
       try {
         const res = await fetch(SHEET_CSV_URL);
@@ -934,7 +990,6 @@
       }
     }
 
-    // ✅ 4) 강사 카드 렌더링
     function renderTeachers(filterCategory) {
       const listEl = document.getElementById("teacher-list");
       if (!listEl) return;
@@ -973,7 +1028,6 @@
       });
     }
 
-    // ✅ 5) 필터 버튼 세팅 + 시트 로딩
     document.addEventListener("DOMContentLoaded", function () {
       const buttons = document.querySelectorAll(".filter-btn");
       buttons.forEach((btn) => {
@@ -989,28 +1043,54 @@
     });
   </script>
 
+  <!-- 지도 팝업 모달 -->
+  <div id="mapModal" class="map-modal">
+    <div class="map-modal-overlay"></div>
+    <div class="map-modal-dialog">
+      <button class="map-modal-close" id="close-map-modal" aria-label="닫기">×</button>
+      <div class="map-modal-title">양양군 농촌활성화지원센터 오시는 길</div>
+      <div class="map-modal-desc">
+        네이버 지도를 통해 길찾기 및 대중교통 정보를 확인하실 수 있습니다.
+      </div>
+      <div class="map-modal-body">
+        <iframe
+          src="https://naver.me/5mhpqk0D"
+          frameborder="0"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- 지도 모달 JS -->
   <script>
-    // 지도 모달 열고 닫기
     const mapModal = document.getElementById("mapModal");
-    const mapOpenBtn = document.querySelector(".map-open-btn");
-    const mapCloseBtn = document.querySelector("#mapModal .close");
+    const openMapBtn = document.getElementById("open-map-modal");
+    const closeMapBtn = document.getElementById("close-map-modal");
 
-    if (mapOpenBtn && mapModal && mapCloseBtn) {
-      mapOpenBtn.addEventListener("click", () => {
-        mapModal.style.display = "block";
-      });
-
-      mapCloseBtn.addEventListener("click", () => {
-        mapModal.style.display = "none";
-      });
-
-      window.addEventListener("click", (e) => {
-        if (e.target === mapModal) {
-          mapModal.style.display = "none";
-        }
-      });
+    function openMap() {
+      mapModal.classList.add("is-open");
+      document.body.style.overflow = "hidden";
     }
+    function closeMap() {
+      mapModal.classList.remove("is-open");
+      document.body.style.overflow = "";
+    }
+
+    if (openMapBtn) openMapBtn.addEventListener("click", openMap);
+    if (closeMapBtn) closeMapBtn.addEventListener("click", closeMap);
+
+    mapModal.addEventListener("click", (e) => {
+      if (e.target.classList.contains("map-modal-overlay")) {
+        closeMap();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mapModal.classList.contains("is-open")) {
+        closeMap();
+      }
+    });
   </script>
 </body>
 </html>
-
