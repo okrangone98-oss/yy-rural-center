@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>양양군 농촌활성화지원센터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- 웹폰트 (선택사항, 인터넷 연결 필요) -->
+  <!-- 웹폰트 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -241,42 +241,35 @@
       color: #777;
     }
 
-    /* 강사 섹션 */
-   /* 강사 섹션 – 가로 스크롤 카드 리스트 */
-.teacher-grid {
-  display: flex;              /* 가로로 나열 */
-  flex-wrap: nowrap;          /* 줄바꿈 없이 한 줄로 */
-  gap: 20px;
-  overflow-x: auto;           /* 가로 스크롤 활성화 */
-  padding-bottom: 12px;
-  scroll-snap-type: x mandatory; /* 카드 단위로 착착 붙게 */
-}
-
-/* 스크롤바 살짝만 보이게 (선택사항) */
-.teacher-grid::-webkit-scrollbar {
-  height: 6px;
-}
-.teacher-grid::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 999px;
-}
-.teacher-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.teacher-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
-  text-align: center;
-  border: 1px solid #e5e5e5;
-
-  /* 가로 스크롤용 카드 너비 설정 */
-  flex: 0 0 260px;            /* 한 카드당 고정 너비(대략 260px) */
-  min-width: 220px;
-  scroll-snap-align: start;   /* 스크롤 멈출 때 카드 시작 부분에 맞춤 */
-}
-
+    /* 강사 섹션 – 가로 스크롤 카드 리스트 */
+    .teacher-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 20px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scroll-snap-type: x mandatory;
+    }
+    .teacher-grid::-webkit-scrollbar {
+      height: 6px;
+    }
+    .teacher-grid::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 999px;
+    }
+    .teacher-grid::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .teacher-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #e5e5e5;
+      flex: 0 0 260px;
+      min-width: 220px;
+      scroll-snap-align: start;
+    }
     .teacher-photo {
       width: 80px;
       height: 80px;
@@ -353,40 +346,48 @@
       width: 70px;
       font-weight: 600;
     }
-  .map-placeholder {
-  border-radius: 16px;
-  overflow: hidden;        /* 둥근 모서리에 맞춰 iframe이 잘려 나가도록 */
-  border: 1px solid #e5e5e5;
-  background: #000;        /* 로딩 전 배경색 */
-}
-.map-open-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-  padding: 8px 14px;
-  background: #0b7c5b;
-  color: #fff;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-}
-.map-open-btn span {
-  font-size: 1.1rem;
-}
-.map-open-btn:hover {
-  background: #096149;
-}
 
-/* 선택사항: 모바일에서 높이 조금 줄이고 싶다면 */
-.map-placeholder iframe {
-  display: block;
-  width: 100%;
-  height: 320px;           /* 필요하면 280~380px 사이로 조절 */
-}
+    /* 오른쪽 "찾아오는 길" 카드 */
+    .map-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid #e5e5e5;
+      font-size: 0.9rem;
+    }
+    .map-card h3 {
+      margin-bottom: 8px;
+    }
+    .map-card p {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 14px;
+    }
 
+    /* 찾아오는 길 버튼 */
+    .map-open-btn {
+      width: 100%;
+      padding: 12px 0;
+      background: #0b7c5b;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .map-open-btn span {
+      font-size: 1.1rem;
+    }
+    .map-open-btn:hover {
+      background: #096149;
+    }
+
+    /* 푸터 */
     footer {
       padding: 16px 0 24px;
       background: #111;
@@ -415,9 +416,10 @@
         font-size: 1.8rem;
       }
       .nav-links {
-        display: none; /* 모바일에서는 간단히 숨김 (1시간 버전이므로 메뉴 토글 생략) */
+        display: none;
       }
     }
+
     /* 강사진 필터 버튼 */
     .teacher-filter {
       display: flex;
@@ -438,7 +440,6 @@
       color: #fff;
       border-color: #0b7c5b;
     }
-    /* 강사 카드 안의 소속/이메일 작은 글씨 */
     .teacher-org {
       font-size: 0.8rem;
       color: #666;
@@ -457,7 +458,36 @@
     .teacher-email a {
       color: #0b7c5b;
     }
-  
+
+    /* --- 지도 팝업 모달 --- */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+    }
+    .modal-content {
+      background: #fff;
+      width: 90%;
+      max-width: 900px;
+      height: 70vh;
+      margin: 60px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    .modal .close {
+      position: absolute;
+      right: 16px;
+      top: 10px;
+      font-size: 32px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      z-index: 10000;
+    }
   </style>
 </head>
 <body>
@@ -468,522 +498,518 @@
         양양군 <span>농촌활성화지원센터</span>
       </div>
       <nav class="nav-links">
-  <a href="#about">센터소개</a>
-  <a href="#programs">주요사업</a>
-  <a href="#teachers">강사진</a>
-  <a href="#gallery">활동사진</a>
-  <a href="#contact">오시는길</a>
-  <a href="qna.html">Q&A</a>
-  <a href="admin.html">관리자</a>
-</nav>
-
+        <a href="#about">센터소개</a>
+        <a href="#programs">주요사업</a>
+        <a href="#teachers">강사진</a>
+        <a href="#gallery">활동사진</a>
+        <a href="#contact">오시는길</a>
+        <a href="qna.html">Q&amp;A</a>
+        <a href="admin.html">관리자</a>
+      </nav>
     </div>
   </header>
 
-    <!-- 히어로 섹션 -->
-    <section class="hero">
-      <div class="container hero-inner">
-        <div class="hero-badges">
-          <span class="badge">공동체 활성화</span>
-          <span class="badge">완료지구 활성화</span>
-          <span class="badge">주민 역량강화</span>
-        </div>
-        <h1 class="hero-title">양양 농촌의 내일을 함께 디자인합니다.</h1>
-        <p class="hero-subtitle">
-          양양군 농촌활성화지원센터는 주민과 함께 배우고, 기획하고, 실행하는
-          농림부 시군역량강화사업 전담기관입니다. 동아리·두레, 활동가 양성, 문화·복지·교육
-          프로그램 등을 통해 더 살기 좋은 양양을 만들어갑니다.
+  <!-- 히어로 섹션 -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-badges">
+        <span class="badge">공동체 활성화</span>
+        <span class="badge">완료지구 활성화</span>
+        <span class="badge">주민 역량강화</span>
+      </div>
+      <h1 class="hero-title">양양 농촌의 내일을 함께 디자인합니다.</h1>
+      <p class="hero-subtitle">
+        양양군 농촌활성화지원센터는 주민과 함께 배우고, 기획하고, 실행하는
+        농림부 시군역량강화사업 전담기관입니다. 동아리·두레, 활동가 양성, 문화·복지·교육
+        프로그램 등을 통해 더 살기 좋은 양양을 만들어갑니다.
+      </p>
+      <div class="hero-buttons">
+        <a href="#programs" class="btn btn-primary">2025 주요 사업 보기</a>
+        <a href="#contact" class="btn btn-ghost">문의 및 상담</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 센터 소개 -->
+  <section id="about">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">센터 소개</h2>
+        <p class="section-subtitle">
+          양양군 농촌지역의 주민이 스스로 기획하고 실행하는 구조를 만들기 위해
+          교육·컨설팅·네트워크를 지원합니다.
         </p>
-        <div class="hero-buttons">
-          <a href="#programs" class="btn btn-primary">2025 주요 사업 보기</a>
-          <a href="#contact" class="btn btn-ghost">문의 및 상담</a>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>미션 &amp; 비전</h3>
+          <ul class="about-list">
+            <li>· 농촌 주민의 역량을 기반으로 한 자립형 공동체 구축</li>
+            <li>· 지역 자원을 활용한 공동체 활성화</li>
+            <li>· 주민이 주도하는 지속가능한 농촌재생</li>
+            <li>· 생활과 문화, 돌봄이 함께 있는 농촌 만들기</li>
+          </ul>
+        </div>
+
+        <div class="about-card">
+          <h3>핵심 역할</h3>
+          <ul class="about-list">
+            <li>· 시군역량강화사업 총괄 기획 및 운영</li>
+            <li>· 의기양양 두레&amp;동아리 발굴·지원</li>
+            <li>· 활동가 양성 아카데미 기획·운영</li>
+            <li>· 컨설팅, 교육, 네트워크 구축 지원</li>
+          </ul>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 센터 소개 -->
-    <section id="about">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">센터 소개</h2>
-          <p class="section-subtitle">
-            양양군 농촌지역의 주민이 스스로 기획하고 실행하는 구조를 만들기 위해
-            교육·컨설팅·네트워크를 지원합니다.
-          </p>
-        </div>
-
-        <div class="about-grid">
-          <div class="about-card">
-            <h3>미션 & 비전</h3>
-            <ul class="about-list">
-              <li>· 농촌 주민의 역량을 기반으로 한 자립형 공동체 구축</li>
-              <li>· 지역 자원을 활용한 공동체 활성화</li>
-              <li>· 주민이 주도하는 지속가능한 농촌재생</li>
-              <li>· 생활과 문화, 돌봄이 함께 있는 농촌 만들기</li>
-            </ul>
-          </div>
-
-          <div class="about-card">
-            <h3>핵심 역할</h3>
-            <ul class="about-list">
-              <li>· 시군역량강화사업 총괄 기획 및 운영</li>
-              <li>· 의기양양 두레&동아리 발굴·지원</li>
-              <li>· 활동가 양성 아카데미 기획·운영</li>
-              <li>· 컨설팅, 교육, 네트워크 구축 지원</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 주요사업 -->
-    <section id="programs">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">주요 사업</h2>
-          <p class="section-subtitle">
-            주민 삶의 질 향상과 공동체 활성화를 위해 연중 다양한 프로그램을
-            운영합니다. 
-          </p>
-        </div>
-
-        <div class="program-grid">
-          <article class="program-card">
-            <div class="program-label">동아리·두레</div>
-            <h3 class="program-title">의기양양 두레 & 동아리 지원</h3>
-            <p class="program-desc">
-              주민이 스스로 기획하는 동아리·두레 활동을 지원하여, 지역 공동체를 활성화하고
-              관계망을 촘촘히 만들어 가도록 돕고 있습니다.
-            </p>
-            <p class="program-meta">· 대상: 양양군 주민 / 매년 4월 초 모집</p>
-          </article>
-
-          <article class="program-card">
-            <div class="program-label">복지·돌봄</div>
-            <h3 class="program-title">양양애(愛) 배달</h3>
-            <p class="program-desc">
-              농번기철 마을로 찾아가 취약계층 및 노약자들에게 식사·문화 프로그램을 함께 전달하여,
-              건강과 정서적 돌봄을 연결합니다.
-            </p>
-            <p class="program-meta">· 대상: 농번기철 취약계층 및 노약자자</p>
-          </article>
-
-          <article class="program-card">
-            <div class="program-label">교육·양성</div>
-            <h3 class="program-title">의기양양 활동가 아카데미</h3>
-            <p class="program-desc">
-              AI, 아카이빙, 마을디자인 등 주민 활동가가 현장에서 바로 활용할 수
-              있는 실무형 교육 과정을 운영합니다.
-            </p>
-            <p class="program-meta">· 과정: 25년 30회 운영 / 모집 공고 별도 안내</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-      <!-- 강사 & PD 소개 -->
-    <section id="teachers">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">강사진 & PD</h2>
-          <p class="section-subtitle">
-            양양군 농촌활성화지원센터의 교육 프로그램과 현장 프로젝트를 함께 이끌어 가는
-            강사·컨설턴트, PD(프로그램 운영 주민활동가)님들을 소개합니다.
-          </p>
-        </div>
-
-               <!-- 1) 엑셀 기반 센터 강사진 -->
-        <h3 style="font-size:1.05rem; margin-bottom:12px;">센터 강사진</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
-          아래 강사진은 「25_강사카드」 자료를 바탕으로 정리한 목록입니다.
-          상단 카테고리를 눌러 분야별로 필터링해서 보실 수 있습니다.
+  <!-- 주요사업 -->
+  <section id="programs">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">주요 사업</h2>
+        <p class="section-subtitle">
+          주민 삶의 질 향상과 공동체 활성화를 위해 연중 다양한 프로그램을
+          운영합니다.
         </p>
+      </div>
 
-        <!-- 카테고리 필터 버튼 -->
-        <div class="teacher-filter">
-          <button class="filter-btn active" data-filter="전체">전체</button>
-          <button class="filter-btn" data-filter="농촌·공동체·정책">농촌·공동체·정책</button>
-          <button class="filter-btn" data-filter="환경·생태">환경·생태</button>
-          <button class="filter-btn" data-filter="사진·아카이브·영상">사진·아카이브·영상</button>
-          <button class="filter-btn" data-filter="요리·식문화">요리·식문화</button>
-          <button class="filter-btn" data-filter="디지털·AI·문해">디지털·AI·문해</button>
-          <button class="filter-btn" data-filter="정리·실버·복지·치유">정리·실버·복지·치유</button>
-          <button class="filter-btn" data-filter="미술·공예·예술">미술·공예·예술</button>
-          <button class="filter-btn" data-filter="세무·회계">세무·회계</button>
-          <button class="filter-btn" data-filter="레크레이션·진행">레크레이션·진행</button>
-          <button class="filter-btn" data-filter="기타">기타</button>
-        </div>
+      <div class="program-grid">
+        <article class="program-card">
+          <div class="program-label">동아리·두레</div>
+          <h3 class="program-title">의기양양 두레 &amp; 동아리 지원</h3>
+          <p class="program-desc">
+            주민이 스스로 기획하는 동아리·두레 활동을 지원하여, 지역 공동체를 활성화하고
+            관계망을 촘촘히 만들어 가도록 돕고 있습니다.
+          </p>
+          <p class="program-meta">· 대상: 양양군 주민 / 매년 4월 초 모집</p>
+        </article>
 
-        <!-- JS가 강사 카드를 자동으로 채워 넣을 영역 -->
-        <div class="teacher-grid" id="teacher-list"></div>
+        <article class="program-card">
+          <div class="program-label">복지·돌봄</div>
+          <h3 class="program-title">양양애(愛) 배달</h3>
+          <p class="program-desc">
+            농번기철 마을로 찾아가 취약계층 및 노약자들에게 식사·문화 프로그램을 함께 전달하여,
+            건강과 정서적 돌봄을 연결합니다.
+          </p>
+          <p class="program-meta">· 대상: 농번기철 취약계층 및 노약자</p>
+        </article>
 
-        <!-- 2) PD & 현장 활동가 (사진 포함) -->
-        <h3 style="font-size:1.05rem; margin:40px 0 12px;">PD & 현장 코디네이터</h3>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:20px;">
-          각 프로젝트를 이끄는 중간관리자이자 활동가로서, 주민과 현장을 연결하는 역할을 수행합니다.
+        <article class="program-card">
+          <div class="program-label">교육·양성</div>
+          <h3 class="program-title">의기양양 활동가 아카데미</h3>
+          <p class="program-desc">
+            AI, 아카이빙, 마을디자인 등 주민 활동가가 현장에서 바로 활용할 수
+            있는 실무형 교육 과정을 운영합니다.
+          </p>
+          <p class="program-meta">· 과정: 25년 30회 운영 / 모집 공고 별도 안내</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 강사 & PD 소개 -->
+  <section id="teachers">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">강사진 &amp; PD</h2>
+        <p class="section-subtitle">
+          양양군 농촌활성화지원센터의 교육 프로그램과 현장 프로젝트를 함께 이끌어 가는
+          강사·컨설턴트, PD(프로그램 운영 주민활동가)님들을 소개합니다.
         </p>
+      </div>
 
-        <div class="teacher-grid">
-          <article class="teacher-card">
-            <img
-              src="images/PD사진/성동제.png"
-              alt="성동제 PD"
-              class="teacher-photo"
-            />
-            <div class="teacher-name">성동제</div>
-            <div class="teacher-role">양양애(愛)문화건강배달 PD · 활동가</div>
-            <p class="teacher-note">
-              양양애 문화건강배달사업등, 농촌 현장에서 다양한 프로젝트를 기획·조정하며
-              현장 소통을 이끄는 전문가입니다.
-            </p>
-          </article>
+      <!-- 엑셀 기반 센터 강사진 -->
+      <h3 style="font-size:1.05rem; margin-bottom:12px;">센터 강사진</h3>
+      <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
+        아래 강사진은 「25_강사카드」 자료를 바탕으로 정리한 목록입니다.
+        상단 카테고리를 눌러 분야별로 필터링해서 보실 수 있습니다.
+      </p>
 
-          <article class="teacher-card">
-            <img
-              src="images/PD사진/김윤지.png"
-              alt="김윤지 PD"
-              class="teacher-photo"
-            />
-            <div class="teacher-name">김윤지</div>
-            <div class="teacher-role">아카이빙활동가 PD · 활동가</div>
-            <p class="teacher-note">
-              현장 아카이빙과 기록, 운영 지원을 통해
-              프로그램의 흐름과 성과가 잘 드러나도록 돕는 역할을 맡고 있습니다.
-            </p>
-          </article>
+      <!-- 카테고리 필터 버튼 -->
+      <div class="teacher-filter">
+        <button class="filter-btn active" data-filter="전체">전체</button>
+        <button class="filter-btn" data-filter="농촌·공동체·정책">농촌·공동체·정책</button>
+        <button class="filter-btn" data-filter="환경·생태">환경·생태</button>
+        <button class="filter-btn" data-filter="사진·아카이브·영상">사진·아카이브·영상</button>
+        <button class="filter-btn" data-filter="요리·식문화">요리·식문화</button>
+        <button class="filter-btn" data-filter="디지털·AI·문해">디지털·AI·문해</button>
+        <button class="filter-btn" data-filter="정리·실버·복지·치유">정리·실버·복지·치유</button>
+        <button class="filter-btn" data-filter="미술·공예·예술">미술·공예·예술</button>
+        <button class="filter-btn" data-filter="세무·회계">세무·회계</button>
+        <button class="filter-btn" data-filter="레크레이션·진행">레크레이션·진행</button>
+        <button class="filter-btn" data-filter="기타">기타</button>
+      </div>
 
-          <article class="teacher-card">
-            <img
-              src="images/PD사진/심예슬.png"
-              alt="심예슬 PD"
-              class="teacher-photo"
-            />
-            <div class="teacher-name">심예슬</div>
-            <div class="teacher-role">두레동아리 PD · 활동가</div>
-            <p class="teacher-note">
-              두레·동아리 프로그램 운영을 지원하며,
-              주민과 함께 성장하는 로컬 프로젝트를 설계합니다.
-            </p>
-          </article>
+      <!-- JS가 강사 카드를 자동으로 채워 넣을 영역 -->
+      <div class="teacher-grid" id="teacher-list"></div>
 
-          <article class="teacher-card">
-            <img
-              src="images/PD사진/김소의.png"
-              alt="김소의 PD"
-              class="teacher-photo"
-            />
-            <div class="teacher-name">김소의</div>
-            <div class="teacher-role">양양애(愛)식사 PD · 활동가</div>
-            <p class="teacher-note">
-              행사 운영과 참가자 응대, 현장 분위기 조성 등을 담당하며,
-              주민이 편안하게 프로그램에 참여할 수 있도록 지원합니다.
-            </p>
-          </article>
+      <!-- PD & 현장 활동가 -->
+      <h3 style="font-size:1.05rem; margin:40px 0 12px;">PD &amp; 현장 코디네이터</h3>
+      <p style="font-size:0.85rem; color:#666; margin-bottom:20px;">
+        각 프로젝트를 이끄는 중간관리자이자 활동가로서, 주민과 현장을 연결하는 역할을 수행합니다.
+      </p>
+
+      <div class="teacher-grid">
+        <article class="teacher-card">
+          <img
+            src="images/PD사진/성동제.png"
+            alt="성동제 PD"
+            class="teacher-photo"
+          />
+          <div class="teacher-name">성동제</div>
+          <div class="teacher-role">양양애(愛)문화건강배달 PD · 활동가</div>
+          <p class="teacher-note">
+            양양애 문화건강배달사업 등, 농촌 현장에서 다양한 프로젝트를 기획·조정하며
+            현장 소통을 이끄는 전문가입니다.
+          </p>
+        </article>
+
+        <article class="teacher-card">
+          <img
+            src="images/PD사진/김윤지.png"
+            alt="김윤지 PD"
+            class="teacher-photo"
+          />
+          <div class="teacher-name">김윤지</div>
+          <div class="teacher-role">아카이빙활동가 PD · 활동가</div>
+          <p class="teacher-note">
+            현장 아카이빙과 기록, 운영 지원을 통해
+            프로그램의 흐름과 성과가 잘 드러나도록 돕는 역할을 맡고 있습니다.
+          </p>
+        </article>
+
+        <article class="teacher-card">
+          <img
+            src="images/PD사진/심예슬.png"
+            alt="심예슬 PD"
+            class="teacher-photo"
+          />
+          <div class="teacher-name">심예슬</div>
+          <div class="teacher-role">두레동아리 PD · 활동가</div>
+          <p class="teacher-note">
+            두레·동아리 프로그램 운영을 지원하며,
+            주민과 함께 성장하는 로컬 프로젝트를 설계합니다.
+          </p>
+        </article>
+
+        <article class="teacher-card">
+          <img
+            src="images/PD사진/김소의.png"
+            alt="김소의 PD"
+            class="teacher-photo"
+          />
+          <div class="teacher-name">김소의</div>
+          <div class="teacher-role">양양애(愛)식사 PD · 활동가</div>
+          <p class="teacher-note">
+            행사 운영과 참가자 응대, 현장 분위기 조성 등을 담당하며,
+            주민이 편안하게 프로그램에 참여할 수 있도록 지원합니다.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 사진 갤러리 -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">활동 사진</h2>
+        <p class="section-subtitle">
+          현장 프로그램, 교육, 행사의 모습을 일부 담았습니다.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="images/PD사진/24성과공유회 (2).JPG" alt="성과공유회 사진" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg"
+               alt="두레동아리 워크숍" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/두레동아리 (3).jpg" alt="두레동아리 활동 2" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/두레동아리 (4).jpg" alt="두레동아리 활동 3" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/두레동아리.jpg" alt="두레동아리 활동 4" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/문화배달 (1).jpg" alt="문화배달 활동 1" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/문화배달 (2).jpg" alt="문화배달 활동 2" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/문화배달 (3).jpg" alt="문화배달 활동 3" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/문화배달 (4).jpg" alt="문화배달 활동 4" />
+        </div>
+        <div class="gallery-item">
+          <img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 활동 5" />
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-
-       <!-- 사진 갤러리 -->
-    <section id="gallery">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">활동 사진</h2>
-          <p class="section-subtitle">
-            현장 프로그램, 교육, 행사의 모습을 일부 담았습니다.
-          </p>
-        </div>
-
-        <div class="gallery-grid">
-
-          <!-- 성과공유회 -->
-          <div class="gallery-item">
-            <img src="images/PD사진/24성과공유회 (2).JPG" alt="성과공유회 사진" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" />
-          </div>
-
-          <!-- 두레동아리 워크숍 / 활동 -->
-          <div class="gallery-item">
-            <img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg"
-                 alt="두레동아리 워크숍" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/두레동아리 (3).jpg" alt="두레동아리 활동 2" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/두레동아리 (4).jpg" alt="두레동아리 활동 3" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/두레동아리.jpg" alt="두레동아리 활동 4" />
-          </div>
-
-          <!-- 양양애 문화배달 -->
-          <div class="gallery-item">
-            <img src="images/PD사진/문화배달 (1).jpg" alt="문화배달 활동 1" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/문화배달 (2).jpg" alt="문화배달 활동 2" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/문화배달 (3).jpg" alt="문화배달 활동 3" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/문화배달 (4).jpg" alt="문화배달 활동 4" />
-          </div>
-
-          <div class="gallery-item">
-            <img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 활동 5" />
-          </div>
-
-        </div> <!-- .gallery-grid 끝 -->
-
-      </div> <!-- .container 끝 -->
-    </section> <!-- #gallery 끝 -->
-
-    <!-- 연락처 & 오시는 길 -->
-    <section id="contact">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">문의 & 오시는 길</h2>
-          <p class="section-subtitle">
-            주민 사업 제안, 교육 의뢰 등 궁금하신 점은 언제든지 연락 주세요.
-          </p>
-        </div>
-
-        <div class="contact-grid">
-          <div class="contact-card">
-            <h3>연락처 정보</h3>
-            <div class="contact-row">
-              <span class="contact-label">전화</span>
-              <span>033-673-0221</span>
-            </div>
-            <div class="contact-row">
-              <span class="contact-label">이메일</span>
-              <span>yyfarmct@naver.com</span>
-            </div>
-            <div class="contact-row">
-              <span class="contact-label">주소</span>
-              <span>강원특별자치도 양양군 동해대로 2558, 행복나눔터2층 (농촌활성화지원센터)</span>
-            </div>
-            <div class="contact-row">
-              <span class="contact-label">운영시간</span>
-              <span>월–금 09:00–18:00 (공휴일 휴무)</span>
-            </div>
-          </div>
-
-        <div class="map-placeholder">
-  <iframe 
-    src="https://naver.me/5mhpqk0D"
-    width="100%"
-    height="320"
-    frameborder="0"
-    style="border:0;"
-    allowfullscreen>
-  </iframe>
-</div>
-
-<button
-  type="button"
-  class="map-open-btn"
-  onclick="window.open('https://naver.me/5mhpqk0D', '_blank')"
->
-  <span>📍</span> 지도 크게 보기
-</button>
-
-    </section>
-
-    <!-- 푸터 -->
-    <footer>
-      <div class="container">
-        <div>© <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.</div>
-        <div>본 홈페이지는 HTML/CSS 학습을 위해 직접 코딩하여 제작되었습니다.</div>
+  <!-- 연락처 & 오시는 길 -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">문의 &amp; 오시는 길</h2>
+        <p class="section-subtitle">
+          주민 사업 제안, 교육 의뢰 등 궁금하신 점은 언제든지 연락 주세요.
+        </p>
       </div>
-    </footer>
 
-    <script>
-      // 푸터 연도 자동 입력
-      document.getElementById("year").textContent = new Date().getFullYear();
-    </script>
- <script>
-  // ✅ 1) 구글 시트 CSV 주소
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h3>연락처 정보</h3>
+          <div class="contact-row">
+            <span class="contact-label">전화</span>
+            <span>033-673-0221</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">이메일</span>
+            <span>yyfarmct@naver.com</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">주소</span>
+            <span>강원특별자치도 양양군 동해대로 2558, 행복나눔터2층 (농촌활성화지원센터)</span>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">운영시간</span>
+            <span>월–금 09:00–18:00 (공휴일 휴무)</span>
+          </div>
+        </div>
 
-  // 전역 강사 배열 (시트에서 불러와 채움)
-  let TEACHERS = [];
+        <div class="map-card">
+          <h3>찾아오는 길</h3>
+          <p>아래 버튼을 누르시면 네이버 지도 팝업에서 위치를 자세히 확인하실 수 있습니다.</p>
+          <button type="button" class="map-open-btn">
+            <span>📍</span> 찾아오는 길
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  // ✅ 2) CSV 파서 (쉼표 + 큰따옴표 처리)
-  function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let insideQuotes = false;
+  <!-- 푸터 -->
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.</div>
+      <div>본 홈페이지는 HTML/CSS 학습을 위해 직접 코딩하여 제작되었습니다.</div>
+    </div>
+  </footer>
 
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
+  <!-- 지도 팝업 모달 -->
+  <div id="mapModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <iframe
+        src="https://naver.me/5mhpqk0D"
+        width="100%"
+        height="100%"
+        frameborder="0"
+        style="border:0;"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
 
-      if (c === '"') {
-        if (insideQuotes && text[i + 1] === '"') {
-          // "" → " 로 처리
-          field += '"';
-          i++;
-        } else {
-          insideQuotes = !insideQuotes;
-        }
-      } else if (c === "," && !insideQuotes) {
-        row.push(field);
-        field = "";
-      } else if ((c === "\n" || c === "\r") && !insideQuotes) {
-        if (field !== "" || row.length > 0) {
+  <script>
+    // 푸터 연도 자동 입력
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    // ✅ 1) 구글 시트 CSV 주소
+    const SHEET_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
+
+    // 전역 강사 배열 (시트에서 불러와 채움)
+    let TEACHERS = [];
+
+    // ✅ 2) CSV 파서
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+
+        if (c === '"') {
+          if (insideQuotes && text[i + 1] === '"') {
+            field += '"';
+            i++;
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (c === "," && !insideQuotes) {
           row.push(field);
-          rows.push(row);
-          row = [];
           field = "";
+        } else if ((c === "\n" || c === "\r") && !insideQuotes) {
+          if (field !== "" || row.length > 0) {
+            row.push(field);
+            rows.push(row);
+            row = [];
+            field = "";
+          }
+        } else {
+          field += c;
         }
-      } else {
-        field += c;
+      }
+      if (field !== "" || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    // ✅ 3) 구글 시트에서 강사 데이터 불러오기
+    async function loadTeachersFromSheet() {
+      try {
+        const res = await fetch(SHEET_CSV_URL);
+        const text = await res.text();
+        const rows = parseCSV(text);
+
+        if (!rows.length) return;
+
+        const headers = rows[0].map((h) => h.trim());
+        const dataRows = rows.slice(1);
+
+        const colIndex = {
+          name: headers.findIndex((h) => h.includes("성명") || h.toLowerCase().includes("name")),
+          org: headers.findIndex((h) => h.includes("소속") || h.toLowerCase().includes("org")),
+          field: headers.findIndex(
+            (h) =>
+              h.replace(/\s/g, "").includes("강의분야") ||
+              h.toLowerCase().includes("field")
+          ),
+          career: headers.findIndex(
+            (h) =>
+              h.replace(/\s/g, "").includes("주요경력") ||
+              h.replace(/\s/g, "").includes("주요경력요약") ||
+              h.toLowerCase().includes("career")
+          ),
+          email: headers.findIndex(
+            (h) => h.includes("이메일") || h.toLowerCase().includes("email")
+          ),
+          category: headers.findIndex(
+            (h) =>
+              h.includes("카테고리") ||
+              h.toLowerCase().includes("category") ||
+              h.toLowerCase().includes("분류")
+          ),
+        };
+
+        TEACHERS = dataRows
+          .filter((r) => r[colIndex.name] && r[colIndex.name].trim() !== "")
+          .map((r) => ({
+            name: (r[colIndex.name] || "").trim(),
+            org: (r[colIndex.org] || "").trim(),
+            field: (r[colIndex.field] || "").trim(),
+            career: (r[colIndex.career] || "").trim(),
+            email: (r[colIndex.email] || "").trim(),
+            category: (r[colIndex.category] || "").trim() || "기타",
+          }));
+
+        renderTeachers("전체");
+      } catch (err) {
+        console.error("강사 시트 로딩 오류:", err);
       }
     }
-    if (field !== "" || row.length > 0) {
-      row.push(field);
-      rows.push(row);
-    }
-    return rows;
-  }
 
-  // ✅ 3) 구글 시트에서 강사 데이터 불러오기
-  async function loadTeachersFromSheet() {
-    try {
-      const res = await fetch(SHEET_CSV_URL);
-      const text = await res.text();
-      const rows = parseCSV(text);
+    // ✅ 4) 강사 카드 렌더링
+    function renderTeachers(filterCategory) {
+      const listEl = document.getElementById("teacher-list");
+      if (!listEl) return;
 
-      if (!rows.length) return;
+      const target =
+        filterCategory && filterCategory !== "전체"
+          ? TEACHERS.filter((t) => t.category === filterCategory)
+          : TEACHERS;
 
-      const headers = rows[0].map((h) => h.trim());
-      const dataRows = rows.slice(1);
+      listEl.innerHTML = "";
 
-      // 헤더 이름 기반으로 컬럼 인덱스 찾기 (한국어/영어 둘 다 대비)
-      const colIndex = {
-        name: headers.findIndex((h) => h.includes("성명") || h.toLowerCase().includes("name")),
-        org: headers.findIndex((h) => h.includes("소속") || h.toLowerCase().includes("org")),
-        field: headers.findIndex(
-          (h) =>
-            h.replace(/\s/g, "").includes("강의분야") ||
-            h.toLowerCase().includes("field")
-        ),
-        career: headers.findIndex(
-          (h) =>
-            h.replace(/\s/g, "").includes("주요경력") ||
-            h.replace(/\s/g, "").includes("주요경력요약") ||
-            h.toLowerCase().includes("career")
-        ),
-        email: headers.findIndex(
-          (h) => h.includes("이메일") || h.toLowerCase().includes("email")
-        ),
-        category: headers.findIndex(
-          (h) =>
-            h.includes("카테고리") ||
-            h.toLowerCase().includes("category") ||
-            h.toLowerCase().includes("분류")
-        ),
-      };
+      target.forEach((t) => {
+        const careerText = t.career || "";
+        const shortCareer =
+          careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
 
-      // 실제 TEACHERS 배열 구성
-      TEACHERS = dataRows
-        .filter((r) => r[colIndex.name] && r[colIndex.name].trim() !== "")
-        .map((r) => ({
-          name: (r[colIndex.name] || "").trim(),
-          org: (r[colIndex.org] || "").trim(),
-          field: (r[colIndex.field] || "").trim(),
-          career: (r[colIndex.career] || "").trim(),
-          email: (r[colIndex.email] || "").trim(),
-          category: (r[colIndex.category] || "").trim() || "기타",
-        }));
-
-      // 첫 로딩 시 전체 보여주기
-      renderTeachers("전체");
-    } catch (err) {
-      console.error("강사 시트 로딩 오류:", err);
-    }
-  }
-
-  // ✅ 4) 강사 카드 렌더링 (주요경력 100자 제한)
-  function renderTeachers(filterCategory) {
-    const listEl = document.getElementById("teacher-list");
-    if (!listEl) return;
-
-    const target =
-      filterCategory && filterCategory !== "전체"
-        ? TEACHERS.filter((t) => t.category === filterCategory)
-        : TEACHERS;
-
-    listEl.innerHTML = "";
-
-    target.forEach((t) => {
-      const careerText = t.career || "";
-      const shortCareer =
-        careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
-
-      const card = document.createElement("article");
-      card.className = "teacher-card";
-      card.innerHTML = `
-        <div class="teacher-name">${t.name}</div>
-        <div class="teacher-org">${t.org || ""}</div>
-        <div class="teacher-field">${t.field || ""}</div>
-        <p class="teacher-note">
-          ${shortCareer}
-        </p>
-        ${
-          t.email
-            ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
-            : ""
-        }
-        <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
-          #${t.category || "기타"}
-        </div>
-      `;
-      listEl.appendChild(card);
-    });
-  }
-
-  // ✅ 5) 필터 버튼 세팅 + 시트 로딩
-  document.addEventListener("DOMContentLoaded", function () {
-    // 필터 버튼 클릭 이벤트
-    const buttons = document.querySelectorAll(".filter-btn");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        buttons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const cat = btn.getAttribute("data-filter");
-        renderTeachers(cat);
+        const card = document.createElement("article");
+        card.className = "teacher-card";
+        card.innerHTML = `
+          <div class="teacher-name">${t.name}</div>
+          <div class="teacher-org">${t.org || ""}</div>
+          <div class="teacher-field">${t.field || ""}</div>
+          <p class="teacher-note">
+            ${shortCareer}
+          </p>
+          ${
+            t.email
+              ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
+              : ""
+          }
+          <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
+            #${t.category || "기타"}
+          </div>
+        `;
+        listEl.appendChild(card);
       });
+    }
+
+    // ✅ 5) 필터 버튼 세팅 + 시트 로딩
+    document.addEventListener("DOMContentLoaded", function () {
+      const buttons = document.querySelectorAll(".filter-btn");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const cat = btn.getAttribute("data-filter");
+          renderTeachers(cat);
+        });
+      });
+
+      loadTeachersFromSheet();
     });
+  </script>
 
-    // 구글 시트에서 강사 목록 불러오기
-    loadTeachersFromSheet();
-  });
-</script>
+  <script>
+    // 지도 모달 열고 닫기
+    const mapModal = document.getElementById("mapModal");
+    const mapOpenBtn = document.querySelector(".map-open-btn");
+    const mapCloseBtn = document.querySelector("#mapModal .close");
 
-  </body>
+    if (mapOpenBtn && mapModal && mapCloseBtn) {
+      mapOpenBtn.addEventListener("click", () => {
+        mapModal.style.display = "block";
+      });
 
+      mapCloseBtn.addEventListener("click", () => {
+        mapModal.style.display = "none";
+      });
+
+      window.addEventListener("click", (e) => {
+        if (e.target === mapModal) {
+          mapModal.style.display = "none";
+        }
+      });
+    }
+  </script>
+</body>
 </html>
-
-
-
-
-
-
