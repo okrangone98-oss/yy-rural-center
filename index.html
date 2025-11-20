@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>양양군 농촌활성화지원센터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- 웹폰트 -->            
+  <!-- 웹폰트 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -559,69 +559,6 @@
     .map-modal-close:hover {
       background: #e2e2e2;
     }
-
-    /* 공지사항 섹션 */
-.notice-wrapper {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e5e5e5;
-  padding: 16px 18px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
-}
-
-.notice-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.notice-table thead {
-  background: #f5f7f6;
-}
-
-.notice-table th,
-.notice-table td {
-  padding: 10px 8px;
-  border-bottom: 1px solid #ececec;
-  text-align: left;
-}
-
-.notice-table th {
-  font-weight: 600;
-  color: #444;
-}
-
-.notice-table tbody tr:hover {
-  background: #f4fbf7;
-}
-
-.notice-type {
-  font-size: 0.8rem;
-  color: #0b7c5b;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.notice-title a {
-  color: #222;
-}
-
-.notice-title a:hover {
-  text-decoration: underline;
-}
-
-.notice-date {
-  font-size: 0.8rem;
-  color: #777;
-  white-space: nowrap;
-}
-
-.notice-empty {
-  text-align: center;
-  color: #888;
-  padding: 18px 0;
-}
- 
   </style>
 </head>
 <body>
@@ -632,15 +569,14 @@
         양양군 <span>농촌활성화지원센터</span>
       </div>
       <nav class="nav-links">
-  <a href="#about">센터소개</a>
-  <a href="#programs">주요사업</a>
-  <a href="#notice">공지사항</a>   <!-- ✅ 공지사항 추가 -->
-  <a href="#teachers">강사진</a>
-  <a href="#gallery">활동사진</a>
-  <a href="#contact">오시는길</a>
-  <a href="qna.html">Q&A</a>
-  <a href="admin.html">관리자</a>
-</nav>
+        <a href="#about">센터소개</a>
+        <a href="#programs">주요사업</a>
+        <a href="#teachers">강사진</a>
+        <a href="#gallery">활동사진</a>
+        <a href="#contact">오시는길</a>
+        <a href="qna.html">Q&A</a>
+        <a href="admin.html">관리자</a>
+      </nav>
     </div>
   </header>
 
@@ -743,37 +679,7 @@
         </article>
       </div>
     </div>
-  </section>    <!-- 여기까지가 #programs(주요사업) 섹션 끝 -->
-<!-- ⬇⬇⬇ 여기에 공지사항 섹션 추가 ⬇⬇⬇ -->
-  
-    <!-- 공지사항 -->
-    <section id="notice">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">공지사항</h2>
-          <p class="section-subtitle">
-            양양군 농촌활성화지원센터의 주요 안내와 새 소식을 확인하실 수 있습니다.
-          </p>
-        </div>
-
-        <div class="notice-wrapper">
-          <table class="notice-table">
-            <thead>
-              <tr>
-                <th style="width: 80px;">구분</th>
-                <th>제목</th>
-                <th style="width: 120px;">날짜</th>
-              </tr>
-            </thead>
-            <tbody id="notice-body">
-              <!-- JS로 최신 5개 행이 들어옵니다 -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-<!-- ⬆⬆⬆ 공지사항 섹션 끝 ⬆⬆⬆ -->
+  </section>
 
   <!-- 강사 & PD 소개 -->
   <section id="teachers">
@@ -989,281 +895,153 @@
 
   <!-- 강사 목록 스크립트 -->
   <script>
-  // ✅ 1) 구글 시트 CSV 주소들
-  // 강사카드 시트
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
+    const SHEET_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
 
-  // 공지사항 시트 (대훈님이 새로 만든 CSV 주소)
-  const NOTICE_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-nO9mN5drB-7o2QujXc4C8M3tlRbLsSlMXV3plJLBo-Ff8ojdWm8LYE0kHj-_816VroYXqgAnU9a1/pub?gid=0&single=true&output=csv";
+    let TEACHERS = [];
 
-  // 전역 배열
-  let TEACHERS = [];
-  let NOTICES = [];
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let insideQuotes = false;
 
-  // ✅ 공통 CSV 파서 (강사/공지 둘 다 사용)
-  function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let insideQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
 
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-
-      if (c === '"') {
-        if (insideQuotes && text[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else {
-          insideQuotes = !insideQuotes;
-        }
-      } else if (c === "," && !insideQuotes) {
-        row.push(field);
-        field = "";
-      } else if ((c === "\n" || c === "\r") && !insideQuotes) {
-        if (field !== "" || row.length > 0) {
+        if (c === '"') {
+          if (insideQuotes && text[i + 1] === '"') {
+            field += '"';
+            i++;
+          } else {
+            insideQuotes = !insideQuotes;
+          }
+        } else if (c === "," && !insideQuotes) {
           row.push(field);
-          rows.push(row);
-          row = [];
           field = "";
+        } else if ((c === "\n" || c === "\r") && !insideQuotes) {
+          if (field !== "" || row.length > 0) {
+            row.push(field);
+            rows.push(row);
+            row = [];
+            field = "";
+          }
+        } else {
+          field += c;
         }
-      } else {
-        field += c;
+      }
+      if (field !== "" || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    async function loadTeachersFromSheet() {
+      try {
+        const res = await fetch(SHEET_CSV_URL);
+        const text = await res.text();
+        const rows = parseCSV(text);
+
+        if (!rows.length) return;
+
+        const headers = rows[0].map((h) => h.trim());
+        const dataRows = rows.slice(1);
+
+        const colIndex = {
+          name: headers.findIndex((h) => h.includes("성명") || h.toLowerCase().includes("name")),
+          org: headers.findIndex((h) => h.includes("소속") || h.toLowerCase().includes("org")),
+          field: headers.findIndex(
+            (h) =>
+              h.replace(/\s/g, "").includes("강의분야") ||
+              h.toLowerCase().includes("field")
+          ),
+          career: headers.findIndex(
+            (h) =>
+              h.replace(/\s/g, "").includes("주요경력") ||
+              h.replace(/\s/g, "").includes("주요경력요약") ||
+              h.toLowerCase().includes("career")
+          ),
+          email: headers.findIndex(
+            (h) => h.includes("이메일") || h.toLowerCase().includes("email")
+          ),
+          category: headers.findIndex(
+            (h) =>
+              h.includes("카테고리") ||
+              h.toLowerCase().includes("category") ||
+              h.toLowerCase().includes("분류")
+          ),
+        };
+
+        TEACHERS = dataRows
+          .filter((r) => r[colIndex.name] && r[colIndex.name].trim() !== "")
+          .map((r) => ({
+            name: (r[colIndex.name] || "").trim(),
+            org: (r[colIndex.org] || "").trim(),
+            field: (r[colIndex.field] || "").trim(),
+            career: (r[colIndex.career] || "").trim(),
+            email: (r[colIndex.email] || "").trim(),
+            category: (r[colIndex.category] || "").trim() || "기타",
+          }));
+
+        renderTeachers("전체");
+      } catch (err) {
+        console.error("강사 시트 로딩 오류:", err);
       }
     }
-    if (field !== "" || row.length > 0) {
-      row.push(field);
-      rows.push(row);
-    }
-    return rows;
-  }
 
-  // ✅ 2) 강사 데이터 불러오기
-  async function loadTeachersFromSheet() {
-    try {
-      const res = await fetch(SHEET_CSV_URL);
-      const text = await res.text();
-      const rows = parseCSV(text);
+    function renderTeachers(filterCategory) {
+      const listEl = document.getElementById("teacher-list");
+      if (!listEl) return;
 
-      if (!rows.length) return;
+      const target =
+        filterCategory && filterCategory !== "전체"
+          ? TEACHERS.filter((t) => t.category === filterCategory)
+          : TEACHERS;
 
-      const headers = rows[0].map((h) => h.trim());
-      const dataRows = rows.slice(1);
+      listEl.innerHTML = "";
 
-      const colIndex = {
-        name: headers.findIndex((h) => h.includes("성명") || h.toLowerCase().includes("name")),
-        org: headers.findIndex((h) => h.includes("소속") || h.toLowerCase().includes("org")),
-        field: headers.findIndex(
-          (h) =>
-            h.replace(/\s/g, "").includes("강의분야") ||
-            h.toLowerCase().includes("field")
-        ),
-        career: headers.findIndex(
-          (h) =>
-            h.replace(/\s/g, "").includes("주요경력") ||
-            h.replace(/\s/g, "").includes("주요경력요약") ||
-            h.toLowerCase().includes("career")
-        ),
-        email: headers.findIndex(
-          (h) => h.includes("이메일") || h.toLowerCase().includes("email")
-        ),
-        category: headers.findIndex(
-          (h) =>
-            h.includes("카테고리") ||
-            h.toLowerCase().includes("category") ||
-            h.toLowerCase().includes("분류")
-        ),
-      };
+      target.forEach((t) => {
+        const careerText = t.career || "";
+        const shortCareer =
+          careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
 
-      TEACHERS = dataRows
-        .filter((r) => r[colIndex.name] && r[colIndex.name].trim() !== "")
-        .map((r) => ({
-          name: (r[colIndex.name] || "").trim(),
-          org: (r[colIndex.org] || "").trim(),
-          field: (r[colIndex.field] || "").trim(),
-          career: (r[colIndex.career] || "").trim(),
-          email: (r[colIndex.email] || "").trim(),
-          category: (r[colIndex.category] || "").trim() || "기타",
-        }));
-
-      renderTeachers("전체");
-    } catch (err) {
-      console.error("강사 시트 로딩 오류:", err);
-    }
-  }
-
-  // ✅ 3) 공지사항 데이터 불러오기
-  async function loadNoticesFromSheet() {
-    try {
-      const res = await fetch(NOTICE_CSV_URL);
-      const text = await res.text();
-      const rows = parseCSV(text);
-      if (!rows.length) return;
-
-      const headers = rows[0].map((h) => h.trim());
-      const dataRows = rows.slice(1);
-
-      const colIndex = {
-        type: headers.findIndex(
-          (h) =>
-            h.includes("구분") ||
-            h.includes("분류") ||
-            h.toLowerCase().includes("type")
-        ),
-        title: headers.findIndex(
-          (h) =>
-            h.includes("제목") ||
-            h.toLowerCase().includes("title")
-        ),
-        date: headers.findIndex(
-          (h) =>
-            h.includes("날짜") ||
-            h.includes("등록일") ||
-            h.toLowerCase().includes("date")
-        ),
-        url: headers.findIndex(
-          (h) =>
-            h.toLowerCase().includes("url") ||
-            h.includes("링크")
-        ),
-      };
-
-      NOTICES = dataRows
-        .filter((r) => r[colIndex.title] && r[colIndex.title].trim() !== "")
-        .map((r) => ({
-          type: colIndex.type >= 0 ? (r[colIndex.type] || "").trim() : "공지",
-          title: (r[colIndex.title] || "").trim(),
-          date: colIndex.date >= 0 ? (r[colIndex.date] || "").trim() : "",
-          url: colIndex.url >= 0 ? (r[colIndex.url] || "").trim() : "",
-        }));
-
-      renderNotices();
-    } catch (err) {
-      console.error("공지사항 시트 로딩 오류:", err);
-      const tbody = document.getElementById("notice-body");
-      if (tbody) {
-        tbody.innerHTML = `
-          <tr><td colspan="3" class="notice-empty">
-            공지사항을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-          </td></tr>
+        const card = document.createElement("article");
+        card.className = "teacher-card";
+        card.innerHTML = `
+          <div class="teacher-name">${t.name}</div>
+          <div class="teacher-org">${t.org || ""}</div>
+          <div class="teacher-field">${t.field || ""}</div>
+          <p class="teacher-note">
+            ${shortCareer}
+          </p>
+          ${
+            t.email
+              ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
+              : ""
+          }
+          <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
+            #${t.category || "기타"}
+          </div>
         `;
-      }
-    }
-  }
-
-  // ✅ 4) 강사 카드 렌더링
-  function renderTeachers(filterCategory) {
-    const listEl = document.getElementById("teacher-list");
-    if (!listEl) return;
-
-    const target =
-      filterCategory && filterCategory !== "전체"
-        ? TEACHERS.filter((t) => t.category === filterCategory)
-        : TEACHERS;
-
-    listEl.innerHTML = "";
-
-    target.forEach((t) => {
-      const careerText = t.career || "";
-      const shortCareer =
-        careerText.length > 100 ? careerText.slice(0, 100) + "…" : careerText;
-
-      const card = document.createElement("article");
-      card.className = "teacher-card";
-      card.innerHTML = `
-        <div class="teacher-name">${t.name}</div>
-        <div class="teacher-org">${t.org || ""}</div>
-        <div class="teacher-field">${t.field || ""}</div>
-        <p class="teacher-note">
-          ${shortCareer}
-        </p>
-        ${
-          t.email
-            ? `<div class="teacher-email">이메일: <a href="mailto:${t.email}">${t.email}</a></div>`
-            : ""
-        }
-        <div style="margin-top:6px; font-size:0.75rem; color:#0b7c5b;">
-          #${t.category || "기타"}
-        </div>
-      `;
-      listEl.appendChild(card);
-    });
-  }
-
-  // ✅ 5) 공지사항 테이블 렌더링
- function renderNotices() {
-  const tbody = document.getElementById("notice-body");
-  if (!tbody) return;
-  ...
-}
-  if (!NOTICES.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="3" class="notice-empty">
-          등록된 공지사항이 없습니다.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = "";
-
-  // ✅ 최신 5개만 표시 (시트에서 위에 있는 순서 기준)
-  const latest = NOTICES.slice(0, 5);
-
-  latest.forEach((n) => {
-    const tr = document.createElement("tr");
-
-    const typeTd = document.createElement("td");
-    typeTd.className = "notice-type";
-    typeTd.textContent = n.type || "공지";
-
-    const titleTd = document.createElement("td");
-    titleTd.className = "notice-title";
-    if (n.url) {
-      const a = document.createElement("a");
-      a.href = n.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.textContent = n.title;
-      titleTd.appendChild(a);
-    } else {
-      titleTd.textContent = n.title;
-    }
-
-    const dateTd = document.createElement("td");
-    dateTd.className = "notice-date";
-    dateTd.textContent = n.date;
-
-    tr.appendChild(typeTd);
-    tr.appendChild(titleTd);
-    tr.appendChild(dateTd);
-
-    tbody.appendChild(tr);
-  });
-}
-  // ✅ 6) DOM 로드 시 초기화
-  document.addEventListener("DOMContentLoaded", function () {
-    // 강사 필터 버튼
-    const buttons = document.querySelectorAll(".filter-btn");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        buttons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const cat = btn.getAttribute("data-filter");
-        renderTeachers(cat);
+        listEl.appendChild(card);
       });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const buttons = document.querySelectorAll(".filter-btn");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const cat = btn.getAttribute("data-filter");
+          renderTeachers(cat);
+        });
+      });
+
+      loadTeachersFromSheet();
     });
-
-    // 데이터 로딩
-    loadTeachersFromSheet();
-    loadNoticesFromSheet();
-  });
-</script>
-
+  </script>
 
   <!-- 지도 팝업 모달 -->
   <div id="mapModal" class="map-modal">
