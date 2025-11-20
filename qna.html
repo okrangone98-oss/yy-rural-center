@@ -57,8 +57,9 @@
       color: #fff;
     }
 
-    main { padding: 40px 0 60px; }
-
+    main {
+      padding: 40px 0 60px;
+    }
     .page-title {
       font-size: 1.6rem;
       font-weight: 700;
@@ -70,7 +71,7 @@
       margin-bottom: 24px;
     }
 
-    .layout {
+    .grid {
       display: grid;
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       gap: 24px;
@@ -89,52 +90,20 @@
       font-size: 1.05rem;
       margin-bottom: 10px;
     }
+    .card + .card {
+      margin-top: 16px;
+    }
 
-    .faq-item {
+    .list {
+      list-style: none;
+      margin-top: 4px;
+    }
+    .list li {
+      padding: 6px 0;
       border-bottom: 1px solid #f0f0f0;
-      padding: 10px 0;
-    }
-    .faq-item:last-child { border-bottom: none; }
-    .faq-q {
-      font-weight: 600;
-      font-size: 0.9rem;
-      margin-bottom: 4px;
-    }
-    .faq-a {
       font-size: 0.85rem;
-      color: #555;
     }
-    .badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #0b7c5b11;
-      color: #0b7c5b;
-      margin-right: 6px;
-    }
-
-    .form-row {
-      margin-bottom: 10px;
-    }
-    .form-row label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-    .form-row input,
-    .form-row textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-    .form-row textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
+    .list li:last-child { border-bottom: none; }
 
     .btn {
       display: inline-flex;
@@ -152,6 +121,28 @@
       color: #fff;
     }
     .btn-primary:hover { background: #096149; }
+    .btn-ghost {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #0b7c5b11;
+      color: #0b7c5b;
+      margin-right: 6px;
+    }
+
+    iframe {
+      border: none;
+      border-radius: 12px;
+      width: 100%;
+      min-height: 800px;
+      background: #fafafa;
+    }
 
     footer {
       padding: 16px 0 24px;
@@ -167,7 +158,8 @@
 
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .layout { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      iframe { min-height: 900px; }
     }
   </style>
 </head>
@@ -187,92 +179,90 @@
 
 <main>
   <div class="container">
-    <h1 class="page-title">Q&A / 문의</h1>
+    <h1 class="page-title">Q&A · 강사카드 입력</h1>
     <p class="page-subtitle">
-      프로그램 참여, 두레·동아리 지원, 양양애(愛) 배달 등
-      궁금하신 내용을 남겨주시면 순차적으로 답변 드립니다.
+      센터 사업, 동아리·두레, 양양애(愛) 배달, 활동가 아카데미 등에 대한
+      궁금한 점을 정리하는 공간입니다. 아래에는 자주 묻는 질문과
+      <strong>강사카드 입력 전용 폼(구글 설문지)</strong>을 함께 안내합니다.
     </p>
 
-    <div class="layout">
-      <!-- 왼쪽: 자주 묻는 질문 -->
-      <section class="card">
-        <h2>자주 묻는 질문</h2>
-
-        <div class="faq-item">
-          <div class="faq-q">
-            <span class="badge">두레·동아리</span>
-            동아리/두레는 누가, 어떻게 신청할 수 있나요?
-          </div>
-          <div class="faq-a">
-            양양군에 거주하거나 생활권을 두고 있는 주민이라면
-            3인 이상으로 팀을 구성해 신청하실 수 있습니다.
-            매년 3~4월 신청 기간에 공고문과 함께 신청서를 양양군청,
-            농촌활성화지원센터 홈페이지, SNS 등에 게시합니다.
-          </div>
+    <div class="grid">
+      <!-- 왼쪽: Q&A / FAQ -->
+      <section>
+        <div class="card">
+          <h2>자주 묻는 질문(샘플)</h2>
+          <ul class="list">
+            <li>
+              <strong>Q. 의기양양 두레·동아리는 누구나 신청할 수 있나요?</strong><br />
+              A. 양양군에 거주하거나 생활권이 있는 주민·단체라면 누구나 가능합니다.
+              모집 공고 시기에 맞춰 신청서를 제출해 주시면 됩니다.
+            </li>
+            <li>
+              <strong>Q. 양양애(愛) 배달은 어떤 기준으로 선정되나요?</strong><br />
+              A. 읍·면 행정복지센터와 협력하여 취약계층, 돌봄이 필요한 가구를
+              우선으로 선정합니다.
+            </li>
+            <li>
+              <strong>Q. 활동가 아카데미 수료 후에는 어떤 활동을 하게 되나요?</strong><br />
+              A. 두레·동아리, 완료지구 활성화 프로그램, 양양애 배달 등
+              센터의 다양한 사업에 기록·기획·운영 파트너로 함께 참여합니다.
+            </li>
+          </ul>
         </div>
 
-        <div class="faq-item">
-          <div class="faq-q">
-            <span class="badge">양양애(愛) 배달</span>
-            양양애 배달 대상은 어떻게 선정되나요?
-          </div>
-          <div class="faq-a">
-            행정복지센터, 마을 이장님, 복지기관과의 협의를 통해
-            돌봄이 필요한 취약계층 어르신, 1인가구, 장애인 가구 등을 우선 선정합니다.
-            필요 시 센터로 제보·문의 주시면 검토 후 안내드립니다.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q">
-            <span class="badge">교육·아카데미</span>
-            활동가 아카데미 수강료와 모집 인원은 어떻게 되나요?
-          </div>
-          <div class="faq-a">
-            과정별로 상이하나, 대부분 무료 또는 소액의 교재비만 받고 있으며
-            모집 인원은 15~25명 내외입니다. 상세 내용은 매 회차 모집 공고에서 안내드립니다.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q">
-            <span class="badge">기타</span>
-            센터 방문 상담이 가능한가요?
-          </div>
-          <div class="faq-a">
-            평일 09:00~18:00(점심시간 12:00~13:00 제외)에 방문 상담이 가능합니다.
-            미리 전화(033-673-0221)로 예약해 주시면 보다 원활한 상담이 가능합니다.
-          </div>
+        <div class="card">
+          <h2>일반 문의 안내</h2>
+          <p style="font-size:0.85rem; color:#666; margin-bottom:8px;">
+            세부 사업 문의는 전화·이메일을 통해 언제든지 문의해 주세요.
+          </p>
+          <ul class="list">
+            <li>전화: 033-673-0221</li>
+            <li>이메일: yyfarmct@naver.com</li>
+            <li>운영시간: 월–금 09:00–18:00 (공휴일 휴무)</li>
+          </ul>
+          <a
+            href="mailto:yyfarmct@naver.com?subject=[QnA]%20양양군%20농촌활성화지원센터%20문의"
+            class="btn btn-ghost"
+            style="margin-top:10px;"
+          >
+            이메일로 문의하기
+          </a>
         </div>
       </section>
 
-      <!-- 오른쪽: 문의 작성 폼 -->
-      <section class="card">
-        <h2>문의 남기기</h2>
-        <p style="font-size:0.85rem; color:#666; margin-bottom:12px;">
-          아래 양식을 작성해 주시면 담당자가 확인 후 순차적으로 연락드립니다.
-          (연습용 페이지이므로 실제 전송 기능은 구현되어 있지 않습니다.)
-        </p>
-        <form onsubmit="event.preventDefault(); alert('문의가 접수된 것처럼 동작하는 연습 화면입니다 :)');">
-          <div class="form-row">
-            <label for="name">이름</label>
-            <input type="text" id="name" placeholder="ex) 홍길동" required />
-          </div>
-          <div class="form-row">
-            <label for="contact">연락처 또는 이메일</label>
-            <input type="text" id="contact" placeholder="전화번호 또는 이메일" required />
-          </div>
-          <div class="form-row">
-            <label for="category">문의 분야</label>
-            <input type="text" id="category" placeholder="두레·동아리 / 양양애 배달 / 교육 등" />
-          </div>
-          <div class="form-row">
-            <label for="message">문의 내용</label>
-            <textarea id="message" placeholder="궁금하신 내용을 자세히 적어 주세요." required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">문의 보내기 (연습용)</button>
-        </form>
-      </section>
+      <!-- 오른쪽: 강사카드 입력 폼 -->
+      <aside>
+        <div class="card">
+          <h2>강사카드 입력 폼</h2>
+          <p style="font-size:0.85rem; color:#666; margin-bottom:10px;">
+            센터와 함께 프로그램을 운영하시는 강사님·운영자님은
+            아래 <span class="badge">강사카드 양식</span>을 작성해 주세요.
+          </p>
+
+          <!-- 새 창으로 여는 버튼 -->
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-primary"
+            style="width:100%; margin-bottom:12px;"
+          >
+            강사카드 입력하기 (새 창에서 열기)
+          </a>
+
+          <p style="font-size:0.8rem; color:#777; margin-bottom:8px;">
+            아래에서도 바로 작성하실 수 있습니다.
+            (모바일에서는 새 창으로 여는 방식을 권장합니다.)
+          </p>
+
+          <!-- 페이지 내에 바로 삽입된 구글 설문지 -->
+          <iframe
+            src="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform?embedded=true"
+          >
+            로딩 중입니다…
+          </iframe>
+        </div>
+      </aside>
     </div>
   </div>
 </main>
