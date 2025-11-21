@@ -373,32 +373,40 @@
     }
 
     // 간단 마크다운 → HTML (**굵게**, [링크](url), 줄바꿈)
-    function markdownToHtml(src){
-      if(!src) return "";
+    // 간단 마크다운 → HTML (**굵게**, [링크](url), 줄바꿈, 일반 URL 자동 링크)
+function markdownToHtml(src){
+  if(!src) return "";
 
-      // 1) HTML escape (기본적으로는 XSS 막기)
-      let html = src
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;");
+  // 1) HTML escape (기본적으로는 XSS 방지)
+  let html = src
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
 
-      // 2) 링크: [텍스트](https://...)
-      html = html.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-      );
+  // 2) 마크다운 링크: [텍스트](https://...)
+  html = html.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
 
-      // 3) 굵게: **텍스트**
-      html = html.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  // 3) 굵게: **텍스트**
+  html = html.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
 
-      // 4) 이탤릭: *텍스트*
-      html = html.replace(/\*([^*]+)\*/g,"<em>$1</em>");
+  // 4) 기울임: *텍스트*
+  html = html.replace(/\*([^*]+)\*/g,"<em>$1</em>");
 
-      // 5) 줄바꿈 → <br>
-      html = html.replace(/\r\n|\r|\n/g,"<br>");
+  // 5) 일반 URL 자동 링크 (https://... 형태를 a 태그로)
+  //    앞에 " 또는 ' 가 아닌 경우에만 감싸도록 해서 href="..." 안은 건드리지 않게 함
+  html = html.replace(
+    /(^|[^"'])(https?:\/\/[^\s<]+)/g,
+    '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>'
+  );
 
-      return html;
-    }
+  // 6) 줄바꿈을 <br>로
+  html = html.replace(/\r\n|\r|\n/g,"<br>");
+
+  return html;
+}
 
     // 공지 불러오기
     async function loadNotices(){
@@ -594,3 +602,4 @@
   </script>
 </body>
 </html>
+
