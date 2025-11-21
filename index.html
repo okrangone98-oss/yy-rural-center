@@ -482,6 +482,99 @@
       .about-grid,
       .contact-grid{grid-template-columns:1fr;}
     }
+ /* ====== 주요 사업 가로 스크롤 카드 ====== */
+.section-title{
+  font-size:1.6rem;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.section-sub{
+  font-size:0.95rem;
+  color:#555;
+  margin-bottom:18px;
+}
+
+/* 탭 버튼 */
+.program-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:16px;
+}
+.program-tab-btn{
+  padding:6px 14px;
+  border-radius:999px;
+  border:1px solid #d0e4dd;
+  background:#f5faf8;
+  font-size:0.85rem;
+  color:#0b7c5b;
+  cursor:pointer;
+}
+.program-tab-btn.is-active{
+  background:#0b7c5b;
+  color:#fff;
+  border-color:#0b7c5b;
+}
+
+/* 가로 스크롤 래퍼 */
+.program-scroll{
+  overflow-x:auto;
+  padding-bottom:4px;
+}
+.program-scroll::-webkit-scrollbar{
+  height:6px;
+}
+.program-scroll::-webkit-scrollbar-thumb{
+  background:#d1d1d1;
+  border-radius:999px;
+}
+.program-scroll::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+/* 카드 리스트 */
+.program-list{
+  display:flex;
+  gap:16px;
+  padding:2px 2px 10px;
+}
+
+/* 개별 카드 */
+.program-card{
+  flex:0 0 auto;
+  min-width:260px;
+  max-width:280px;
+  background:#fff;
+  border-radius:16px;
+  padding:14px 16px 16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.04);
+  border:1px solid #e5f0ea;
+}
+.program-tag{
+  display:inline-flex;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:0.78rem;
+  background:#e6f5ef;
+  color:#0b7c5b;
+  margin-bottom:6px;
+}
+.program-title{
+  font-size:1rem;
+  font-weight:700;
+  margin-bottom:6px;
+  color:#222;
+}
+.program-desc{
+  font-size:0.88rem;
+  color:#555;
+  margin-bottom:6px;
+}
+.program-meta{
+  font-size:0.8rem;
+  color:#777;
+}
+   
   </style>
 </head>
 <body>
@@ -562,46 +655,26 @@
 <!-- 주요 사업 -->
 <section id="programs">
   <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">주요 사업</h2>
-      <p class="section-subtitle">
-        주민 삶의 질 향상과 공동체 활성화를 위해 연중 다양한 프로그램을 운영합니다.
-      </p>
+    <h2 class="section-title">주요 사업</h2>
+    <p class="section-sub">
+      양양군 농촌활성화지원센터의 핵심 사업을 한눈에 볼 수 있습니다.
+      카테고리를 선택하고 왼쪽·오른쪽으로 스크롤하며 살펴보세요.
+    </p>
+
+    <!-- 상단 카테고리 탭 -->
+    <div class="program-tabs" id="program-tabs">
+      <!-- JS에서 채워짐 (전체 / 공동체 활성화 / 완료지구 활성화 / 인적자원 양성) -->
     </div>
 
-    <div class="program-grid">
-      <article class="program-card">
-        <div class="program-label">동아리·두레</div>
-        <h3 class="program-title">의기양양 두레 & 동아리 지원</h3>
-        <p class="program-desc">
-          주민이 스스로 기획하는 동아리·두레 활동을 지원하여, 지역 공동체를 활성화하고
-          관계망을 촘촘히 만들어 가도록 돕고 있습니다.
-        </p>
-        <p class="program-meta">· 대상: 양양군 주민 / 매년 4월 초 모집</p>
-      </article>
-
-      <article class="program-card">
-        <div class="program-label">복지·돌봄</div>
-        <h3 class="program-title">양양애(愛) 배달</h3>
-        <p class="program-desc">
-          농번기철 마을로 찾아가 취약계층 및 노약자들에게 식사·문화 프로그램을 함께 전달하여,
-          건강과 정서적 돌봄을 연결합니다.
-        </p>
-        <p class="program-meta">· 대상: 농번기철 취약계층 및 노약자</p>
-      </article>
-
-      <article class="program-card">
-        <div class="program-label">교육·양성</div>
-        <h3 class="program-title">의기양양 활동가 아카데미</h3>
-        <p class="program-desc">
-          AI, 아카이빙, 마을디자인 등 주민 활동가가 현장에서 바로 활용할 수 있는
-          실무형 교육 과정을 운영합니다.
-        </p>
-        <p class="program-meta">· 과정: 25년 30회 운영 / 모집 공고 별도 안내</p>
-      </article>
+    <!-- 가로 스크롤 카드 영역 -->
+    <div class="program-scroll">
+      <div class="program-list" id="program-list">
+        <!-- JS로 카드가 채워집니다 -->
+      </div>
     </div>
   </div>
 </section>
+
 
 <!-- 강사진 & PD -->
 <section id="teachers">
@@ -1114,5 +1187,172 @@
     if(e.key === "Escape" && mapModal.style.display === "flex") closeMap();
   });
 </script>
+<script>
+  // ====== 주요 사업: 스프레드시트 연동 ======
+
+  // 1) 스프레드시트 CSV URL
+  //   👉 기존 pubhtml 링크에서 'pubhtml?...' 을 'pub?...&output=csv' 로 변경
+  const PROGRAM_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=10875331&single=true&output=csv";
+
+  let PROGRAMS = [];
+  let currentProgramCategory = "전체";
+
+  // (필요 시 공용으로 써도 되는) CSV 파서
+  function parseCSV(text){
+    const rows = [];
+    let row = [], field = "", insideQuotes = false;
+
+    for(let i=0;i<text.length;i++){
+      const c = text[i];
+      if(c === '"'){
+        if(insideQuotes && text[i+1] === '"'){ field+='"'; i++; }
+        else insideQuotes = !insideQuotes;
+      }else if(c === "," && !insideQuotes){
+        row.push(field); field="";
+      }else if((c === "\n" || c === "\r") && !insideQuotes){
+        if(field!=="" || row.length>0){ row.push(field); rows.push(row); row=[]; field=""; }
+      }else{
+        field += c;
+      }
+    }
+    if(field!=="" || row.length>0){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  // 2) 데이터 불러오기
+  async function loadPrograms(){
+    try{
+      const res = await fetch(PROGRAM_CSV_URL);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      if(!rows.length) return;
+
+      const headers = rows[0].map(h => h.trim());
+      const dataRows = rows.slice(1);
+
+      const colIndex = {
+        category: headers.findIndex(h => h.includes("카테고리") || h.toLowerCase().includes("category")),
+        title:    headers.findIndex(h => h.includes("제목")     || h.toLowerCase().includes("title")),
+        desc:     headers.findIndex(h => h.includes("설명")     || h.toLowerCase().includes("desc")),
+        meta:     headers.findIndex(h => h.includes("대상") || h.includes("과정") || h.toLowerCase().includes("meta"))
+      };
+
+      PROGRAMS = dataRows
+        .filter(r => r[colIndex.title] && r[colIndex.title].trim() !== "")
+        .map(r => ({
+          category: colIndex.category >= 0 ? (r[colIndex.category] || "").trim() : "기타",
+          title:    (r[colIndex.title]    || "").trim(),
+          desc:     colIndex.desc >= 0 ? (r[colIndex.desc] || "").trim() : "",
+          meta:     colIndex.meta >= 0 ? (r[colIndex.meta] || "").trim() : ""
+        }));
+
+      buildProgramTabs();
+      renderProgramCards();
+    }catch(e){
+      console.error("주요 사업 로딩 오류:", e);
+      const listEl = document.getElementById("program-list");
+      if(listEl){
+        listEl.innerHTML = "<p>주요 사업 정보를 불러오지 못했습니다.</p>";
+      }
+    }
+  }
+
+  // 3) 상단 탭 만들기
+  function buildProgramTabs(){
+    const tabsEl = document.getElementById("program-tabs");
+    if(!tabsEl) return;
+
+    tabsEl.innerHTML = "";
+
+    // 시트에 있는 카테고리 목록 추출
+    const set = new Set(
+      PROGRAMS.map(p => p.category && p.category.trim() ? p.category.trim() : "기타")
+    );
+
+    // 원하는 순서대로 정렬 (없으면 뒤에 붙기)
+    const preferOrder = ["공동체 활성화", "완료지구 활성화", "인적자원 양성"];
+    const categories = [];
+
+    // 우선순위 카테고리
+    preferOrder.forEach(name => {
+      if(set.has(name)){
+        categories.push(name);
+        set.delete(name);
+      }
+    });
+    // 나머지 기타 카테고리
+    set.forEach(name => categories.push(name));
+
+    // "전체" 탭 추가
+    const allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "program-tab-btn is-active";
+    allBtn.dataset.category = "전체";
+    allBtn.textContent = "전체";
+    tabsEl.appendChild(allBtn);
+
+    categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "program-tab-btn";
+      btn.dataset.category = cat;
+      btn.textContent = cat;
+      tabsEl.appendChild(btn);
+    });
+
+    tabsEl.addEventListener("click", (e)=>{
+      const btn = e.target.closest(".program-tab-btn");
+      if(!btn) return;
+
+      currentProgramCategory = btn.dataset.category || "전체";
+
+      // active 클래스 토글
+      tabsEl.querySelectorAll(".program-tab-btn").forEach(b=>{
+        b.classList.toggle("is-active", b === btn);
+      });
+
+      renderProgramCards();
+    });
+  }
+
+  // 4) 카드 렌더링 (가로 스크롤)
+  function renderProgramCards(){
+    const listEl = document.getElementById("program-list");
+    if(!listEl) return;
+
+    const filtered = PROGRAMS.filter(p => {
+      if(currentProgramCategory === "전체") return true;
+      return p.category === currentProgramCategory;
+    });
+
+    if(!filtered.length){
+      listEl.innerHTML = "<p>해당 카테고리의 사업이 아직 등록되지 않았습니다.</p>";
+      return;
+    }
+
+    listEl.innerHTML = "";
+    filtered.forEach(p => {
+      const card = document.createElement("article");
+      card.className = "program-card";
+
+      card.innerHTML = `
+        <div class="program-tag">${p.category || "사업"}</div>
+        <h3 class="program-title">${p.title}</h3>
+        <p class="program-desc">${p.desc || ""}</p>
+        <p class="program-meta">${p.meta || ""}</p>
+      `;
+
+      listEl.appendChild(card);
+    });
+  }
+
+  // 5) 페이지 로드시 실행
+  document.addEventListener("DOMContentLoaded", ()=>{
+    loadPrograms();
+  });
+</script>
+  
 </body>
 </html>
+
