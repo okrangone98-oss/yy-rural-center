@@ -130,6 +130,32 @@
       padding:18px 0;
     }
 
+    /* 페이지네이션 */
+    .notice-pagination{
+      margin-top:12px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:8px;
+      font-size:0.85rem;
+    }
+    .notice-page-btn{
+      border:1px solid #ddd;
+      background:#fff;
+      border-radius:999px;
+      padding:4px 10px;
+      cursor:pointer;
+      font-size:0.8rem;
+    }
+    .notice-page-btn[disabled]{
+      opacity:0.4;
+      cursor:default;
+    }
+    .notice-page-info{
+      color:#666;
+      font-size:0.85rem;
+    }
+
     footer{
       padding:16px 0 24px;
       background:#111;
@@ -184,6 +210,55 @@
       color:#777;
       margin-bottom:8px;
     }
+
+    /* 이미지 슬라이더 영역 */
+    .modal-images{
+      margin:4px 0 6px;
+      display:none;          /* 기본은 숨김, 이미지 있을 때만 flex */
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .modal-img-frame{
+      position:relative;
+      flex:1;
+      max-height:320px;
+      border-radius:12px;
+      overflow:hidden;
+      background:#f7f7f7;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .modal-img-frame img{
+      max-width:100%;
+      max-height:320px;
+      display:block;
+    }
+    .modal-img-indicator{
+      position:absolute;
+      right:8px;
+      bottom:8px;
+      background:rgba(0,0,0,0.6);
+      color:#fff;
+      font-size:0.75rem;
+      padding:2px 6px;
+      border-radius:999px;
+    }
+    .modal-img-nav{
+      border:none;
+      background:#f2f2f2;
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .modal-img-nav:hover{background:#e0e0e0;}
+
     .modal-body{
       flex:1;
       overflow-y:auto;
@@ -315,6 +390,11 @@
             <!-- JS로 전체 공지가 채워집니다 -->
           </tbody>
         </table>
+
+        <!-- 🔢 페이지네이션 영역 -->
+        <div class="notice-pagination" id="notice-pagination">
+          <!-- JS에서 버튼·페이지 정보가 채워집니다 -->
+        </div>
       </div>
     </div>
   </main>
@@ -334,6 +414,17 @@
       <div class="modal-meta">
         <span id="modal-type"></span> · <span id="modal-date"></span>
       </div>
+
+      <!-- 🖼 포스터 이미지 슬라이더 -->
+      <div class="modal-images" id="modal-images">
+        <button type="button" class="modal-img-nav" id="modal-img-prev">‹</button>
+        <div class="modal-img-frame">
+          <img id="modal-img" src="" alt="공지 이미지" />
+          <div class="modal-img-indicator" id="modal-img-indicator"></div>
+        </div>
+        <button type="button" class="modal-img-nav" id="modal-img-next">›</button>
+      </div>
+
       <div class="modal-body" id="modal-content"></div>
       <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer">
         자세히 보기 / 관련 링크 열기
@@ -348,11 +439,18 @@
     const NOTICE_CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv";
 
-    let NOTICES = [];
+    let NOTICES = [];            // 원본 공지 전체
+    let FILTERED_NOTICES = [];   // 검색/필터 적용 후 목록
     let currentTypeFilter = "전체";
     let currentKeyword = "";
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
 
-    // 공통 CSV 파서
+    // 이미지 슬라이더 상태
+    let currentImages = [];
+    let currentImageIndex = 0;
+
+    // ===== CSV 파서 =====
     function parseCSV(text){
       const rows=[];let row=[];let field="";let insideQuotes=false;
       for(let i=0;i<text.length;i++){
@@ -372,43 +470,62 @@
       return rows;
     }
 
-    // 간단 마크다운 → HTML (**굵게**, [링크](url), 줄바꿈)
-    // 간단 마크다운 → HTML (**굵게**, [링크](url), 줄바꿈, 일반 URL 자동 링크)
-function markdownToHtml(src){
-  if(!src) return "";
+    // 날짜 파싱 (YYYY-MM-DD / YYYY.MM.DD 등 지원) → 숫자(타임스탬프)
+    function parseDateToTime(str){
+      if(!str) return 0;
+      const m = str.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+      if(!m) return 0;
+      const y = m[1];
+      const mo = m[2].padStart(2,"0");
+      const d = m[3].padStart(2,"0");
+      const dt = new Date(`${y}-${mo}-${d}`);
+      const t = dt.getTime();
+      return isNaN(t) ? 0 : t;
+    }
 
-  // 1) HTML escape (기본적으로는 XSS 방지)
-  let html = src
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+    // 이미지 셀 → 배열 (줄바꿈 또는 쉼표 기준)
+    function parseImages(cell){
+      if(!cell) return [];
+      return cell
+        .split(/[\n,]/)
+        .map(s=>s.trim())
+        .filter(Boolean);
+    }
 
-  // 2) 마크다운 링크: [텍스트](https://...)
-  html = html.replace(
-    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-  );
+    // 간단 마크다운 → HTML + URL 링크 처리
+    function markdownToHtml(src){
+      if(!src) return "";
 
-  // 3) 굵게: **텍스트**
-  html = html.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+      let html = src
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
 
-  // 4) 기울임: *텍스트*
-  html = html.replace(/\*([^*]+)\*/g,"<em>$1</em>");
+      // [텍스트](https://...)
+      html = html.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+      );
 
-  // 5) 일반 URL 자동 링크 (https://... 형태를 a 태그로)
-  //    앞에 " 또는 ' 가 아닌 경우에만 감싸도록 해서 href="..." 안은 건드리지 않게 함
-  html = html.replace(
-    /(^|[^"'])(https?:\/\/[^\s<]+)/g,
-    '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>'
-  );
+      // **굵게**
+      html = html.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
 
-  // 6) 줄바꿈을 <br>로
-  html = html.replace(/\r\n|\r|\n/g,"<br>");
+      // *기울임*
+      html = html.replace(/\*([^*]+)\*/g,"<em>$1</em>");
 
-  return html;
-}
+      // 일반 URL 자동 링크
+      html = html.replace(
+        /(^|[^"'])(https?:\/\/[^\s<]+)/g,
+        '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>'
+      );
 
-    // 공지 불러오기
+      // 줄바꿈 → <br>
+      html = html.replace(/\r\n|\r|\n/g,"<br>");
+
+      return html;
+    }
+
+    // ===== 공지 불러오기 =====
     async function loadNotices(){
       try{
         const res = await fetch(NOTICE_CSV_URL);
@@ -427,18 +544,29 @@ function markdownToHtml(src){
           content: headers.findIndex(h =>
             h.includes("내용") || h.includes("상세") ||
             h.toLowerCase().includes("content") || h.toLowerCase().includes("body")
+          ),
+          image: headers.findIndex(h =>
+            h.includes("이미지") || h.toLowerCase().includes("image") || h.toLowerCase().includes("poster")
           )
         };
 
         NOTICES = dataRows
           .filter(r => r[colIndex.title] && r[colIndex.title].trim() !== "")
-          .map(r => ({
-            type: colIndex.type >= 0 ? (r[colIndex.type] || "").trim() : "공지",
-            title: (r[colIndex.title] || "").trim(),
-            date: colIndex.date >= 0 ? (r[colIndex.date] || "").trim() : "",
-            url:  colIndex.url  >= 0 ? (r[colIndex.url]   || "").trim() : "",
-            content: colIndex.content >= 0 ? (r[colIndex.content] || "").trim() : ""
-          }));
+          .map(r => {
+            const dateStr = colIndex.date >= 0 ? (r[colIndex.date] || "").trim() : "";
+            return {
+              type: colIndex.type >= 0 ? (r[colIndex.type] || "").trim() : "공지",
+              title: (r[colIndex.title] || "").trim(),
+              date: dateStr,
+              url:  colIndex.url  >= 0 ? (r[colIndex.url]   || "").trim() : "",
+              content: colIndex.content >= 0 ? (r[colIndex.content] || "").trim() : "",
+              images: colIndex.image >= 0 ? parseImages(r[colIndex.image]) : [],
+              time: parseDateToTime(dateStr)
+            };
+          });
+
+        // ✅ 날짜 기준 최신순 정렬
+        NOTICES.sort((a,b)=> (b.time || 0) - (a.time || 0));
 
         buildTypeFilter();
         applyNoticeFilter();
@@ -478,10 +606,10 @@ function markdownToHtml(src){
       select.value = "전체";
     }
 
-    // 필터 적용
+    // 검색/필터 적용 후 목록 계산
     function applyNoticeFilter(){
       const keyword = (currentKeyword || "").toLowerCase();
-      const list = NOTICES.filter(n => {
+      FILTERED_NOTICES = NOTICES.filter(n => {
         const typeOk = currentTypeFilter === "전체" || n.type === currentTypeFilter;
         if(!typeOk) return false;
 
@@ -491,28 +619,81 @@ function markdownToHtml(src){
         return target.includes(keyword);
       });
 
-      renderNoticeTable(list);
+      currentPage = 1; // 필터 바뀔 때는 1페이지로
+      renderNoticeTable();
     }
 
-    // 테이블 렌더링
-    function renderNoticeTable(list){
+    // 페이지네이션 렌더링
+    function renderPagination(totalPages){
+      const wrap = document.getElementById("notice-pagination");
+      if(!wrap) return;
+
+      if(totalPages <= 1){
+        wrap.style.display = "none";
+        wrap.innerHTML = "";
+        return;
+      }
+      wrap.style.display = "flex";
+
+      wrap.innerHTML = `
+        <button type="button" class="notice-page-btn" id="notice-prev">이전</button>
+        <span class="notice-page-info">${currentPage} / ${totalPages}</span>
+        <button type="button" class="notice-page-btn" id="notice-next">다음</button>
+      `;
+
+      const prevBtn = document.getElementById("notice-prev");
+      const nextBtn = document.getElementById("notice-next");
+
+      if(currentPage <= 1){
+        prevBtn.disabled = true;
+      }
+      if(currentPage >= totalPages){
+        nextBtn.disabled = true;
+      }
+
+      prevBtn.addEventListener("click", ()=>{
+        if(currentPage > 1){
+          currentPage--;
+          renderNoticeTable();
+        }
+      });
+      nextBtn.addEventListener("click", ()=>{
+        if(currentPage < totalPages){
+          currentPage++;
+          renderNoticeTable();
+        }
+      });
+    }
+
+    // 테이블 렌더링 (10개씩 페이지)
+    function renderNoticeTable(){
       const tbody = document.getElementById("notice-tbody");
       if(!tbody) return;
 
-      if(!list.length){
+      const total = FILTERED_NOTICES.length;
+      if(!total){
         tbody.innerHTML = `
           <tr><td colspan="3" class="notice-empty">
             검색 조건에 맞는 공지사항이 없습니다.
           </td></tr>
         `;
+        renderPagination(0);
         return;
       }
 
+      const totalPages = Math.ceil(total / PAGE_SIZE);
+      if(currentPage > totalPages) currentPage = totalPages;
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const pageItems = FILTERED_NOTICES.slice(start, end);
+
       tbody.innerHTML = "";
-      list.forEach((n, idx)=>{
+      pageItems.forEach((n, idx)=>{
+        const realIndex = start + idx; // FILTERED_NOTICES 상의 인덱스
         const tr = document.createElement("tr");
         tr.className = "notice-row";
-        tr.dataset.index = NOTICES.indexOf(n); // 원본 배열 인덱스 저장
+        tr.dataset.index = realIndex;
 
         tr.innerHTML = `
           <td class="notice-type">${n.type || "공지"}</td>
@@ -521,6 +702,8 @@ function markdownToHtml(src){
         `;
         tbody.appendChild(tr);
       });
+
+      renderPagination(totalPages);
     }
 
     // ====== 모달 관련 ======
@@ -532,8 +715,24 @@ function markdownToHtml(src){
     const modalLink = document.getElementById("modal-link");
     const modalCloseBtn = document.getElementById("modal-close-btn");
 
+    const modalImages = document.getElementById("modal-images");
+    const modalImg = document.getElementById("modal-img");
+    const modalImgIndicator = document.getElementById("modal-img-indicator");
+    const modalImgPrev = document.getElementById("modal-img-prev");
+    const modalImgNext = document.getElementById("modal-img-next");
+
+    function showCurrentImage(){
+      if(!currentImages || !currentImages.length){
+        modalImages.style.display = "none";
+        return;
+      }
+      modalImages.style.display = "flex";
+      modalImg.src = currentImages[currentImageIndex];
+      modalImgIndicator.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+    }
+
     function openModalByIndex(idx){
-      const n = NOTICES[idx];
+      const n = FILTERED_NOTICES[idx];
       if(!n) return;
 
       modalTitle.textContent = n.title || "";
@@ -543,12 +742,18 @@ function markdownToHtml(src){
       const html = markdownToHtml(n.content);
       modalContent.innerHTML = html || "상세 내용이 별도로 등록되어 있지 않습니다.";
 
+      // 링크 버튼
       if(n.url){
         modalLink.style.display = "inline-flex";
         modalLink.href = n.url;
       }else{
         modalLink.style.display = "none";
       }
+
+      // 이미지 슬라이더 세팅
+      currentImages = n.images || [];
+      currentImageIndex = 0;
+      showCurrentImage();
 
       modal.classList.add("is-open");
       document.body.style.overflow = "hidden";
@@ -566,11 +771,11 @@ function markdownToHtml(src){
       const searchInput = document.getElementById("notice-search-input");
       const typeSelect = document.getElementById("notice-type-filter");
 
-      // ✅ 이벤트 위임: tbody 하나에만 클릭 리스너
+      // 리스트 클릭 → 모달 열기
       tbody.addEventListener("click", (e)=>{
         const tr = e.target.closest(".notice-row");
         if(!tr) return;
-        const idx = tr.dataset.index;
+        const idx = Number(tr.dataset.index);
         openModalByIndex(idx);
       });
 
@@ -590,7 +795,7 @@ function markdownToHtml(src){
         });
       }
 
-      // 모달 닫기 이벤트
+      // 모달 닫기
       modalCloseBtn.addEventListener("click", closeModal);
       modal.querySelector(".modal-overlay").addEventListener("click", closeModal);
       document.addEventListener("keydown", (e)=>{
@@ -598,8 +803,23 @@ function markdownToHtml(src){
           closeModal();
         }
       });
+
+      // 이미지 슬라이더 버튼
+      if(modalImgPrev){
+        modalImgPrev.addEventListener("click", ()=>{
+          if(!currentImages.length) return;
+          currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+          showCurrentImage();
+        });
+      }
+      if(modalImgNext){
+        modalImgNext.addEventListener("click", ()=>{
+          if(!currentImages.length) return;
+          currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+          showCurrentImage();
+        });
+      }
     });
   </script>
 </body>
 </html>
-
