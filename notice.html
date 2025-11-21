@@ -1,95 +1,361 @@
-<!-- ... 기존 상단 header / 로그인 카드 등은 그대로 두고 ... -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>공지사항 | 양양군 농촌활성화지원센터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet"/>
 
-<section>
-  <div class="card">
-    <h2>공지사항 관리</h2>
-    <p style="font-size:0.85rem; color:#666; margin-bottom:8px;">
-      아래 목록은 공지사항 스프레드시트와 연동된 내용입니다.
-      실제 수정·추가는 오른쪽 상단 버튼으로 Google 스프레드시트를 열어 진행해 주세요.
-    </p>
-    <button
-      class="btn btn-primary"
-      style="margin-bottom:10px;"
-      onclick="window.open('https://docs.google.com/spreadsheets/d/1Qb3...여기에_편집용_URL...', '_blank');"
-    >
-      공지사항 시트 열기 (편집)
-    </button>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:"Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#f5f5f5;
+      color:#222;
+      line-height:1.6;
+    }
+    a{text-decoration:none;color:inherit;}
 
-    <ul class="list" id="admin-notice-list">
-      <li>불러오는 중입니다…</li>
-    </ul>
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:#ffffffcc;
+      border-bottom:1px solid #e5e5e5;
+      backdrop-filter:blur(8px);
+    }
+    .container{
+      width:100%;
+      max-width:1080px;
+      margin:0 auto;
+      padding:0 16px;
+    }
+    .nav{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+    }
+    .logo{
+      font-weight:700;
+      font-size:1.1rem;
+    }
+    .logo span{color:#0b7c5b;}
+
+    .nav-links{
+      display:flex;
+      gap:16px;
+      font-size:0.95rem;
+    }
+    .nav-links a{padding:4px 10px;border-radius:999px;}
+    .nav-links a:hover{background:#0b7c5b;color:#fff;}
+
+    main{padding:48px 0;}
+    .page-title{font-size:1.8rem;font-weight:700;margin-bottom:8px;}
+    .page-sub{margin-bottom:24px;color:#555;font-size:0.95rem;}
+
+    .notice-wrapper{
+      background:#fff;
+      padding:16px 18px;
+      border-radius:16px;
+      border:1px solid #e5e5e5;
+      box-shadow:0 6px 18px rgba(0,0,0,.03);
+    }
+
+    .notice-table{width:100%;border-collapse:collapse;font-size:0.9rem;}
+    .notice-table thead{background:#f5f7f6;}
+    .notice-table th,
+    .notice-table td{
+      padding:10px 8px;
+      border-bottom:1px solid #ececec;
+      text-align:left;
+    }
+    .notice-table tbody tr:hover{background:#f4fbf7;cursor:pointer;}
+
+    .notice-type{font-size:0.8rem;color:#0b7c5b;font-weight:600;}
+    .notice-title a:hover{text-decoration:underline;}
+    .notice-date{font-size:0.8rem;color:#777;text-align:right;}
+
+    .notice-empty{
+      text-align:center;
+      padding:18px;
+      color:#888;
+      font-size:.85rem;
+    }
+
+    footer{
+      background:#111;
+      padding:18px 0 24px;
+      color:#aaa;
+      font-size:0.8rem;
+      margin-top:50px;
+    }
+
+    /* ===== 공지 상세 모달 ===== */
+    .notice-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:2000;
+    }
+    .notice-modal.is-open{display:flex;}
+
+    .notice-modal-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.45);
+      backdrop-filter:blur(2px);
+    }
+    .notice-modal-dialog{
+      position:relative;
+      background:#fff;
+      padding:20px 22px;
+      border-radius:18px;
+      width:min(720px,92vw);
+      max-height:90vh;
+      display:flex;
+      flex-direction:column;
+      box-shadow:0 20px 45px rgba(0,0,0,0.25);
+    }
+
+    .notice-modal-title{
+      font-size:1.1rem;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+    .notice-modal-meta{
+      font-size:0.8rem;
+      color:#666;
+      margin-bottom:12px;
+    }
+    .notice-modal-body{
+      flex:1;
+      overflow-y:auto;
+      white-space:pre-wrap;
+      line-height:1.55;
+      font-size:0.92rem;
+      color:#333;
+    }
+
+    .notice-modal-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:32px;
+      height:32px;
+      border:none;
+      border-radius:50%;
+      background:#f2f2f2;
+      font-size:20px;
+      cursor:pointer;
+    }
+    .notice-modal-close:hover{
+      background:#e1e1e1;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">
+      양양군 <span>농촌활성화지원센터</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html#about">센터소개</a>
+      <a href="index.html#programs">주요사업</a>
+      <a href="index.html#teachers">강사진</a>
+      <a href="notice.html">공지사항</a>
+      <a href="index.html#gallery">활동사진</a>
+      <a href="index.html#contact">오시는길</a>
+      <a href="qna.html">Q&A</a>
+      <a href="admin.html">관리자</a>
+    </nav>
   </div>
-</section>
+</header>
+
+<main>
+  <div class="container">
+    <h1 class="page-title">공지사항</h1>
+    <p class="page-sub">
+      센터의 주요 공지, 모집 안내, 일정 변경 등을 확인하실 수 있습니다.  
+      제목을 클릭하면 블로그/문서 또는 상세 내용을 확인할 수 있습니다.
+    </p>
+
+    <div class="notice-wrapper">
+      <table class="notice-table">
+        <thead>
+          <tr>
+            <th style="width:80px;">구분</th>
+            <th>제목</th>
+            <th style="width:120px;">날짜</th>
+          </tr>
+        </thead>
+        <tbody id="notice-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    © <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.
+  </div>
+</footer>
+
+<!-- ===== 공지 상세 모달 ===== -->
+<div id="noticeModal" class="notice-modal">
+  <div class="notice-modal-overlay"></div>
+
+  <div class="notice-modal-dialog">
+    <button id="close-notice-modal" class="notice-modal-close">×</button>
+
+    <div id="notice-modal-title" class="notice-modal-title"></div>
+    <div id="notice-modal-meta" class="notice-modal-meta"></div>
+    <div id="notice-modal-body" class="notice-modal-body"></div>
+  </div>
+</div>
+
 
 <script>
-  // notice.html과 동일한 CSV URL 사용
-  const ADMIN_NOTICE_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv";
+document.getElementById("year").textContent = new Date().getFullYear();
 
-  function parseCSV(text){
-    const rows=[];let row=[];let field="";let insideQuotes=false;
-    for(let i=0;i<text.length;i++){
-      const c=text[i];
-      if(c === '"'){
-        if(insideQuotes && text[i+1]==='"'){field+='"';i++;}else{insideQuotes=!insideQuotes;}
-      }else if(c === "," && !insideQuotes){
-        row.push(field);field="";
-      }else if((c==="\n"||c==="\r") && !insideQuotes){
-        if(field!==""||row.length>0){row.push(field);rows.push(row);row=[];field="";}
-      }else{
-        field+=c;
-      }
-    }
-    if(field!==""||row.length>0){row.push(field);rows.push(row);}
-    return rows;
-  }
+/* 스프레드시트 CSV URL */
+const NOTICE_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv";
 
-  async function loadAdminNotices(){
-    const listEl = document.getElementById("admin-notice-list");
-    if(!listEl) return;
+let NOTICES = [];
 
-    try{
-      const res = await fetch(ADMIN_NOTICE_CSV_URL);
-      const text = await res.text();
-      const rows = parseCSV(text);
-      if(!rows.length){
-        listEl.innerHTML = "<li>등록된 공지사항이 없습니다.</li>";
-        return;
-      }
+/* CSV 파싱 함수 */
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = "", insideQuotes = false;
 
-      const headers = rows[0].map(h=>h.trim());
-      const dataRows = rows.slice(1);
-
-      const colIndex = {
-        type: headers.findIndex(h => h.includes("구분") || h.includes("분류") || h.toLowerCase().includes("type")),
-        title: headers.findIndex(h => h.includes("제목") || h.toLowerCase().includes("title")),
-        date: headers.findIndex(h => h.includes("날짜") || h.includes("등록일") || h.toLowerCase().includes("date"))
-      };
-
-      const notices = dataRows
-        .filter(r => r[colIndex.title] && r[colIndex.title].trim() !== "")
-        .map(r => ({
-          type: colIndex.type >= 0 ? (r[colIndex.type] || "").trim() : "공지",
-          title: (r[colIndex.title] || "").trim(),
-          date: colIndex.date >= 0 ? (r[colIndex.date] || "").trim() : ""
-        }));
-
-      if(!notices.length){
-        listEl.innerHTML = "<li>등록된 공지사항이 없습니다.</li>";
-        return;
-      }
-
-      listEl.innerHTML = "";
-      notices.forEach(n=>{
-        const li = document.createElement("li");
-        li.textContent = `[${n.type}] ${n.title} – ${n.date}`;
-        listEl.appendChild(li);
-      });
-    }catch(err){
-      console.error("관리자 공지 로딩 오류:", err);
-      listEl.innerHTML = "<li>공지사항을 불러오지 못했습니다.</li>";
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(c === '"'){
+      if(insideQuotes && text[i+1] === '"'){ field+='"'; i++; }
+      else insideQuotes = !insideQuotes;
+    }else if(c === "," && !insideQuotes){
+      row.push(field); field="";
+    }else if((c==="\n" || c==="\r") && !insideQuotes){
+      if(field!=="" || row.length>0){ row.push(field); rows.push(row); row=[]; field=""; }
+    }else{
+      field += c;
     }
   }
+  if(field!=="" || row.length>0){ row.push(field); rows.push(row); }
+  return rows;
+}
 
-  document.addEventListener("DOMContentLoaded", loadAdminNotices);
+/* 공지 로딩 */
+async function loadNotices(){
+  try{
+    const res = await fetch(NOTICE_CSV_URL);
+    const text = await res.text();
+    const rows = parseCSV(text);
+
+    if(!rows.length) return;
+
+    const headers = rows[0].map(h=>h.trim());
+    const dataRows = rows.slice(1);
+
+    const colIndex = {
+      type: headers.findIndex(h => h.includes("구분") || h.includes("분류") || h.toLowerCase().includes("type")),
+      title: headers.findIndex(h => h.includes("제목") || h.toLowerCase().includes("title")),
+      date: headers.findIndex(h => h.includes("날짜") || h.includes("등록일") || h.toLowerCase().includes("date")),
+      url: headers.findIndex(h => h.toLowerCase().includes("url") || h.includes("링크")),
+      content: headers.findIndex(h => h.includes("내용") || h.toLowerCase().includes("content"))
+    };
+
+    NOTICES = dataRows
+      .filter(r => r[colIndex.title] && r[colIndex.title].trim() !== "")
+      .map(r => ({
+        type: colIndex.type >= 0 ? (r[colIndex.type] || "").trim() : "공지",
+        title: (r[colIndex.title] || "").trim(),
+        date: colIndex.date >= 0 ? (r[colIndex.date] || "").trim() : "",
+        url: colIndex.url >= 0 ? (r[colIndex.url] || "").trim() : "",
+        content: colIndex.content >= 0 ? (r[colIndex.content] || "").trim() : ""
+      }));
+
+    renderNoticeTable(NOTICES);
+  }catch(err){
+    document.getElementById("notice-tbody").innerHTML = `
+      <tr><td colspan="3" class="notice-empty">
+        공지사항을 불러오지 못했습니다.
+      </td></tr>
+    `;
+  }
+}
+
+/* 테이블 렌더링 */
+function renderNoticeTable(list){
+  const tbody = document.getElementById("notice-tbody");
+  tbody.innerHTML = "";
+
+  list.forEach((n, idx)=>{
+    const tr = document.createElement("tr");
+    tr.dataset.idx = idx;
+
+    tr.innerHTML = `
+      <td class="notice-type">${n.type}</td>
+      <td class="notice-title">${n.title}</td>
+      <td class="notice-date">${n.date}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  tbody.addEventListener("click", e=>{
+    const tr = e.target.closest("tr");
+    if(!tr) return;
+
+    const n = NOTICES[tr.dataset.idx];
+
+    if(n.url){
+      window.open(n.url, "_blank");
+    }else if(n.content){
+      openNoticeModal(n);
+    }
+  });
+}
+
+/* 모달 컨트롤 */
+const modal = document.getElementById("noticeModal");
+const modalClose = document.getElementById("close-notice-modal");
+
+function openNoticeModal(n){
+  document.getElementById("notice-modal-title").textContent = n.title;
+  document.getElementById("notice-modal-meta").textContent = `${n.type} · ${n.date}`;
+  document.getElementById("notice-modal-body").textContent = n.content;
+
+  modal.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  modal.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+modalClose.onclick = closeModal;
+
+modal.onclick = e=>{
+  if(e.target.classList.contains("notice-modal-overlay")) closeModal();
+};
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+document.addEventListener("DOMContentLoaded", loadNotices);
 </script>
+
+</body>
+</html>
