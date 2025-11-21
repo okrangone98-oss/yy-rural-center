@@ -54,9 +54,42 @@
       background:#fff;
       border-radius:16px;
       border:1px solid #e5e5e5;
-      padding:16px 18px;
+      padding:16px 18px 20px;
       box-shadow:0 6px 18px rgba(0,0,0,0.03);
     }
+
+    /* 검색/필터 바 */
+    .notice-toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+      font-size:0.85rem;
+    }
+    .notice-toolbar-left,
+    .notice-toolbar-right{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+    .notice-search-input{
+      min-width:220px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #ddd;
+      font-size:0.85rem;
+    }
+    .notice-filter-select{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #ddd;
+      font-size:0.85rem;
+      background:#fff;
+    }
+
     .notice-table{width:100%;border-collapse:collapse;font-size:0.9rem;table-layout:fixed;}
     .notice-table thead{background:#f5f7f6;}
     .notice-table th,
@@ -156,8 +189,12 @@
       overflow-y:auto;
       padding-right:4px;
       font-size:0.88rem;
-      white-space:pre-wrap;
       line-height:1.6;
+      word-break:keep-all;
+    }
+    .modal-body a{
+      color:#0b7c5b;
+      text-decoration:underline;
     }
     .modal-close{
       position:absolute;
@@ -195,6 +232,29 @@
     @media (max-width:768px){
       .nav-links{display:none;}
       main{padding:32px 0;}
+      .page-title{font-size:1.4rem;}
+      .notice-table th,
+      .notice-table td{
+        padding:8px 4px;
+        font-size:0.82rem;
+      }
+      .notice-toolbar{
+        align-items:flex-start;
+      }
+      .notice-search-input{
+        flex:1;
+        min-width:0;
+      }
+    }
+
+    @media (max-width:480px){
+      .modal-dialog{
+        width:94vw;
+        padding:16px 14px 18px;
+        font-size:0.85rem;
+      }
+      .modal-title{font-size:1rem;}
+      .modal-body{font-size:0.82rem;}
     }
   </style>
 </head>
@@ -226,6 +286,23 @@
       </p>
 
       <div class="notice-wrapper">
+        <!-- 🔍 검색/필터 영역 -->
+        <div class="notice-toolbar">
+          <div class="notice-toolbar-left">
+            <input
+              type="text"
+              id="notice-search-input"
+              class="notice-search-input"
+              placeholder="제목·내용 검색"
+            />
+          </div>
+          <div class="notice-toolbar-right">
+            <select id="notice-type-filter" class="notice-filter-select">
+              <!-- JS에서 옵션 자동 생성 -->
+            </select>
+          </div>
+        </div>
+
         <table class="notice-table">
           <thead>
             <tr>
@@ -272,6 +349,8 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv";
 
     let NOTICES = [];
+    let currentTypeFilter = "전체";
+    let currentKeyword = "";
 
     // 공통 CSV 파서
     function parseCSV(text){
@@ -293,6 +372,34 @@
       return rows;
     }
 
+    // 간단 마크다운 → HTML (**굵게**, [링크](url), 줄바꿈)
+    function markdownToHtml(src){
+      if(!src) return "";
+
+      // 1) HTML escape (기본적으로는 XSS 막기)
+      let html = src
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
+
+      // 2) 링크: [텍스트](https://...)
+      html = html.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+      );
+
+      // 3) 굵게: **텍스트**
+      html = html.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+
+      // 4) 이탤릭: *텍스트*
+      html = html.replace(/\*([^*]+)\*/g,"<em>$1</em>");
+
+      // 5) 줄바꿈 → <br>
+      html = html.replace(/\r\n|\r|\n/g,"<br>");
+
+      return html;
+    }
+
     // 공지 불러오기
     async function loadNotices(){
       try{
@@ -309,7 +416,10 @@
           title: headers.findIndex(h => h.includes("제목") || h.toLowerCase().includes("title")),
           date: headers.findIndex(h => h.includes("날짜") || h.includes("등록일") || h.toLowerCase().includes("date")),
           url:  headers.findIndex(h => h.toLowerCase().includes("url") || h.includes("링크")),
-          content: headers.findIndex(h => h.includes("내용") || h.toLowerCase().includes("content") || h.toLowerCase().includes("body"))
+          content: headers.findIndex(h =>
+            h.includes("내용") || h.includes("상세") ||
+            h.toLowerCase().includes("content") || h.toLowerCase().includes("body")
+          )
         };
 
         NOTICES = dataRows
@@ -322,7 +432,8 @@
             content: colIndex.content >= 0 ? (r[colIndex.content] || "").trim() : ""
           }));
 
-        renderNoticeTable(NOTICES);
+        buildTypeFilter();
+        applyNoticeFilter();
       }catch(err){
         console.error("공지사항 로딩 오류:", err);
         const tbody = document.getElementById("notice-tbody");
@@ -334,6 +445,47 @@
       }
     }
 
+    // 타입 필터 옵션 구성
+    function buildTypeFilter(){
+      const select = document.getElementById("notice-type-filter");
+      if(!select) return;
+
+      const types = Array.from(new Set(
+        NOTICES.map(n => n.type && n.type.trim() ? n.type.trim() : "기타")
+      ));
+
+      select.innerHTML = "";
+      const allOpt = document.createElement("option");
+      allOpt.value = "전체";
+      allOpt.textContent = "구분 전체";
+      select.appendChild(allOpt);
+
+      types.forEach(t=>{
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        select.appendChild(opt);
+      });
+
+      select.value = "전체";
+    }
+
+    // 필터 적용
+    function applyNoticeFilter(){
+      const keyword = (currentKeyword || "").toLowerCase();
+      const list = NOTICES.filter(n => {
+        const typeOk = currentTypeFilter === "전체" || n.type === currentTypeFilter;
+        if(!typeOk) return false;
+
+        if(!keyword) return true;
+
+        const target = (n.title + " " + (n.content || "")).toLowerCase();
+        return target.includes(keyword);
+      });
+
+      renderNoticeTable(list);
+    }
+
     // 테이블 렌더링
     function renderNoticeTable(list){
       const tbody = document.getElementById("notice-tbody");
@@ -342,7 +494,7 @@
       if(!list.length){
         tbody.innerHTML = `
           <tr><td colspan="3" class="notice-empty">
-            등록된 공지사항이 없습니다.
+            검색 조건에 맞는 공지사항이 없습니다.
           </td></tr>
         `;
         return;
@@ -352,7 +504,7 @@
       list.forEach((n, idx)=>{
         const tr = document.createElement("tr");
         tr.className = "notice-row";
-        tr.dataset.index = idx;          // ✅ 나중에 모달에서 사용할 인덱스 저장
+        tr.dataset.index = NOTICES.indexOf(n); // 원본 배열 인덱스 저장
 
         tr.innerHTML = `
           <td class="notice-type">${n.type || "공지"}</td>
@@ -379,7 +531,9 @@
       modalTitle.textContent = n.title || "";
       modalType.textContent = n.type || "공지";
       modalDate.textContent = n.date || "";
-      modalContent.textContent = n.content || "상세 내용이 별도로 등록되어 있지 않습니다.";
+
+      const html = markdownToHtml(n.content);
+      modalContent.innerHTML = html || "상세 내용이 별도로 등록되어 있지 않습니다.";
 
       if(n.url){
         modalLink.style.display = "inline-flex";
@@ -397,17 +551,36 @@
       document.body.style.overflow = "";
     }
 
-    // ✅ 이벤트 위임: tbody에 한 번만 리스너 등록 (여러 번 클릭해도 잘 동작)
     document.addEventListener("DOMContentLoaded", ()=>{
       loadNotices();
 
       const tbody = document.getElementById("notice-tbody");
+      const searchInput = document.getElementById("notice-search-input");
+      const typeSelect = document.getElementById("notice-type-filter");
+
+      // ✅ 이벤트 위임: tbody 하나에만 클릭 리스너
       tbody.addEventListener("click", (e)=>{
         const tr = e.target.closest(".notice-row");
         if(!tr) return;
         const idx = tr.dataset.index;
         openModalByIndex(idx);
       });
+
+      // 검색
+      if(searchInput){
+        searchInput.addEventListener("input", (e)=>{
+          currentKeyword = e.target.value.trim();
+          applyNoticeFilter();
+        });
+      }
+
+      // 타입 필터
+      if(typeSelect){
+        typeSelect.addEventListener("change", (e)=>{
+          currentTypeFilter = e.target.value;
+          applyNoticeFilter();
+        });
+      }
 
       // 모달 닫기 이벤트
       modalCloseBtn.addEventListener("click", closeModal);
