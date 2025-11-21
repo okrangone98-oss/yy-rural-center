@@ -330,15 +330,23 @@ function renderNoticeTable(list){
 const modal = document.getElementById("noticeModal");
 const modalClose = document.getElementById("close-notice-modal");
 
-function openNoticeModal(n){
-  document.getElementById("notice-modal-title").textContent = n.title;
-  document.getElementById("notice-modal-meta").textContent = `${n.type} · ${n.date}`;
-  document.getElementById("notice-modal-body").textContent = n.content;
-
-  modal.classList.add("is-open");
+function openNoticeModal(notice){
+  noticeModalTitle.textContent = notice.title;
+  noticeModalMeta.textContent = `${notice.type || ""} · ${notice.date || ""}`;
+  noticeModalBody.textContent = notice.content || "";
+  noticeModal.classList.add("is-open");
   document.body.style.overflow = "hidden";
 }
 
+  // 내용 속 URL을 자동으로 링크로 바꿔주는 함수
+function linkify(text) {
+  if (!text) return "";
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+}
+  
 function closeModal(){
   modal.classList.remove("is-open");
   document.body.style.overflow = "";
@@ -359,3 +367,4 @@ document.addEventListener("DOMContentLoaded", loadNotices);
 
 </body>
 </html>
+
