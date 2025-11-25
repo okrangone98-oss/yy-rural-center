@@ -393,7 +393,73 @@
   font-size:.9rem;
   margin-top:16px;
 }
+/* extra-grid 안 카드들 정렬 (센터 채널 / 강사카드) */
+.extra-grid .full-card{
+  margin-top:0;                          /* 위 여백 제거해서 두 박스 맞추기 */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+}
 
+/* 강사카드 입력 폼 텍스트 */
+.teacher-form-title{
+  font-size:1.05rem;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.teacher-form-desc{
+  font-size:.85rem;
+  color:#555;
+  margin-bottom:6px;
+  line-height:1.6;
+}
+/* 강사카드 입력 버튼 */
+.teacher-form-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  margin-top:8px;
+
+  padding:10px 22px;
+  border-radius:999px;
+
+  background:#0b7c5b;          /* 센터 메인 초록색 */
+  color:#fff;
+  font-size:.9rem;
+  font-weight:600;
+  border:none;
+  text-decoration:none;
+
+  box-shadow:0 4px 10px rgba(11,124,91,.18);
+  cursor:pointer;
+  transition:
+    background .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.teacher-form-btn:hover{
+  background:#096149;
+  transform:translateY(-1px);
+  box-shadow:0 6px 16px rgba(11,124,91,.25);
+}
+
+.teacher-form-btn:active{
+  transform:translateY(0);
+  box-shadow:0 2px 6px rgba(11,124,91,.20);
+}
+
+/* 버튼 안 아이콘 */
+.teacher-form-btn-icon{
+  font-size:1.05rem;
+  line-height:1;
+}
+
+    
 /* 채널 박스 안 텍스트/버튼 정렬 */
 .channel-link-wrap{
   text-align:left;              /* 가운데 정렬 → 왼쪽 정렬 */
@@ -1388,6 +1454,7 @@
   
 </body>
 </html>
+
 
 
 
