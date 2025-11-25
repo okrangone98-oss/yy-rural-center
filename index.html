@@ -75,29 +75,56 @@
     }
 
     /* 버튼 공통 */
-    .btn{
-      padding:10px 18px;
-      border-radius:999px;
-      border:none;
-      cursor:pointer;
-      font-size:0.95rem;
-      font-weight:600;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-    }
-    .btn-primary{
-      background:#0b7c5b;
-      color:#fff;
-    }
-    .btn-primary:hover{background:#096149;}
-    .btn-outline{
-      background:#f3f3f3;
-      border:1px solid #ddd;
-      color:#333;
-    }
-    .btn-outline:hover{background:#e7e7e7;}
+   /* ====== 네이버 톤 버튼 공통 스타일 ====== */
+.btn-unified{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  width:240px;            /* 세 버튼 가로 길이 통일 */
+  height:46px;            /* 버튼 높이 통일 */
+  padding:0 18px;
+  border-radius:999px;
+
+  background:#03c75a;     /* 네이버 대표 그린 */
+  color:#fff;
+  font-size:.95rem;
+  font-weight:600;
+  border:none;
+  text-decoration:none;
+
+  box-shadow:0 2px 6px rgba(0,0,0,.16);
+  cursor:pointer;
+
+  transition:
+    background .16s ease,
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+
+.btn-unified:hover{
+  background:#02b653;                 /* 조금 더 진한 그린 */
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(0,0,0,.20);
+}
+
+.btn-unified:active{
+  transform:translateY(0);
+  box-shadow:0 2px 5px rgba(0,0,0,.18);
+}
+
+/* 아이콘 영역 */
+.btn-unified-icon{
+  font-size:1.15rem;
+  line-height:1;
+}
+
+/* extra-grid 안에서 버튼은 왼쪽 정렬 */
+.channel-link-wrap .btn-unified{
+  align-self:flex-start;
+}
+
 
     /* 히어로 */
  .hero{
@@ -972,13 +999,14 @@
           버튼을 클릭하시면 네이버 지도가 새 창(또는 탭)으로 열려 길찾기,
           주변 정류장 등을 자세히 확인하실 수 있습니다.
         </p>
-        <button type="button" id="open-map-modal" class="btn-map">
-          <span>📍</span> 찾아오는 길
-        </button>
+        <button type="button" id="open-map-modal" class="btn-unified">
+  <span class="btn-unified-icon">📍</span>
+  <span>찾아오는 길</span>
+</button>
+
       </div>
     </div>
 
-    <!-- 센터 채널 & 소식 모아보기 -->
     <!-- 센터 채널 & 강사카드 : 2열 박스 정렬 -->
     <div class="extra-grid">
       <!-- 센터 채널 & 소식 모아보기 -->
@@ -987,12 +1015,15 @@
           센터의 다양한 채널, 자료, 서식 다운로드는 아래 링크를 통해 확인하실 수 있습니다. <br>
           (블로그, 카페에서 자료 받기 가능)
         </p>
-        <a
-          href="https://litt.ly/yyfarmct"
-          class="btn btn-outline"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+     <a
+  href="https://litt.ly/yyfarmct"
+  class="btn-unified"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <span class="btn-unified-icon">🔗</span>
+  <span>센터 채널 & 소식</span>
+</a>
           센터 채널 & 소식 모아보기
         </a>
       </div>
@@ -1003,14 +1034,15 @@
   <p class="teacher-form-desc">
     처음으로 센터와 함께 프로그램을 운영하신 강사님은 <br> 아래 강사카드 양식을 작성해 주세요.
   </p>
-  <a
-    href="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform"
-    class="teacher-form-btn"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <span class="teacher-form-btn-icon">📝</span>
-    <span>강사카드 입력하기</span>
+<a
+  href="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform"
+  class="btn-unified"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <span class="btn-unified-icon">📝</span>
+  <span>강사카드 입력</span>
+</a>
   </a>
 </div>
     </div>
@@ -1454,6 +1486,7 @@
   
 </body>
 </html>
+
 
 
 
