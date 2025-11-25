@@ -325,6 +325,20 @@
       align-items:stretch;
       margin-bottom:24px;
     }
+
+/* 아래 두 박스(센터 채널 / 강사카드)용 그리드 */
+.extra-grid{
+  display:grid;
+  grid-template-columns:minmax(0,3fr) minmax(0,2fr);
+  gap:24px;
+  margin-top:24px;
+}
+
+/* 그리드 안에 들어갈 카드 기본 스타일 */
+.extra-grid .full-card{
+  margin-top:0;             /* 기존 full-card의 margin-top 제거 */
+}
+    
     .contact-card,
 .map-box{
   height:100%;
@@ -369,45 +383,35 @@
     .btn-map span{font-size:1.1rem;}
     .btn-map:hover{background:#096149;}
 
-    /* 센터 채널 / 강사카드 카드 공통 */
-    .full-card{
-      background:#fff;
-      border-radius:16px;
-      border:1px solid #e5e5e5;
-      padding:18px 20px;
-      box-shadow:0 6px 18px rgba(0,0,0,.03);
-      font-size:.9rem;
-      margin-top:16px;
-    }
+   /* 센터 채널 / 강사카드 카드 공통 */
+.full-card{
+  background:#fff;
+  border-radius:16px;
+  border:1px solid #e5e5e5;
+  padding:18px 20px;
+  box-shadow:0 6px 18px rgba(0,0,0,.03);
+  font-size:.9rem;
+  margin-top:16px;
+}
 
-    .channel-link-wrap{text-align:center;}
-    .channel-link-text{
-      margin-bottom:12px;
-      color:#555;
-    }
+/* 채널 박스 안 텍스트/버튼 정렬 */
+.channel-link-wrap{
+  text-align:left;              /* 가운데 정렬 → 왼쪽 정렬 */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:12px;
+}
 
-    .teacher-form-title{
-      font-size:1.05rem;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-    .teacher-form-desc{
-      font-size:.85rem;
-      color:#555;
-      margin-bottom:14px;
-    }
-    .teacher-form-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 22px;
-      border-radius:999px;
-      background:#0b7c5b;
-      color:#fff;
-      font-size:.9rem;
-      font-weight:600;
-    }
-    .teacher-form-btn:hover{background:#096149;}
+.channel-link-text{
+  margin-bottom:8px;
+  color:#555;
+}
+
+/* 버튼은 왼쪽 정렬 */
+.channel-link-wrap .btn{
+  align-self:flex-start;
+}
 
     /* 공지사항 프리뷰 */
     .notice-wrapper{
@@ -501,8 +505,11 @@
       .hero{min-height:65vh;}
       .hero-title{font-size:1.8rem;}
       .about-grid,
-      .contact-grid{grid-template-columns:1fr;}
-    }
+      .contact-grid,
+      .extra-grid{        /* ← 여기 추가 */
+    grid-template-columns:1fr;
+  }
+}
  /* ====== 주요 사업 가로 스크롤 카드 ====== */
 .section-title{
   font-size:1.6rem;
@@ -906,37 +913,41 @@
     </div>
 
     <!-- 센터 채널 & 소식 모아보기 -->
-    <div class="full-card channel-link-wrap">
-      <p class="channel-link-text">
-        센터의 다양한 채널, 자료, 서식 다운로드는 아래 링크를 통해 확인하실 수 있습니다.
-        (블로그, 카페에서 자료 받기 가능)
-      </p>
-      <a
-        href="https://litt.ly/yyfarmct"
-        class="btn btn-outline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        센터 채널 & 소식 모아보기
-      </a>
-    </div>
+    <!-- 센터 채널 & 강사카드 : 2열 박스 정렬 -->
+    <div class="extra-grid">
+      <!-- 센터 채널 & 소식 모아보기 -->
+      <div class="full-card channel-link-wrap">
+        <p class="channel-link-text">
+          센터의 다양한 채널, 자료, 서식 다운로드는 아래 링크를 통해 확인하실 수 있습니다.
+          (블로그, 카페에서 자료 받기 가능)
+        </p>
+        <a
+          href="https://litt.ly/yyfarmct"
+          class="btn btn-outline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          센터 채널 & 소식 모아보기
+        </a>
+      </div>
 
-    <!-- 강사카드 입력 폼 -->
-    <div class="full-card">
-      <h3 class="teacher-form-title">강사카드 입력 폼</h3>
-      <p class="teacher-form-desc">
-        처음으로 센터와 함께 프로그램을 운영하신 강사님은 아래 강사카드 양식을 작성해 주세요.
-      </p>
-      <a
-        href="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform"
-        class="teacher-form-btn"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        강사카드 입력하기
-      </a>
+      <!-- 강사카드 입력 폼 -->
+      <div class="full-card">
+        <h3 class="teacher-form-title">강사카드 입력 폼</h3>
+        <p class="teacher-form-desc">
+          처음으로 센터와 함께 프로그램을 운영하신 강사님은 아래 강사카드 양식을 작성해 주세요.
+        </p>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdzR8ZVqRn7f8GlrP6HsMebLgYrsInxgWxRjg1NxqFA7AMApw/viewform"
+          class="teacher-form-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          강사카드 입력하기
+        </a>
+      </div>
     </div>
-  </div>
+    
 </section>
 
 <footer>
@@ -1376,6 +1387,7 @@
   
 </body>
 </html>
+
 
 
 
