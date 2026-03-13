@@ -117,6 +117,8 @@ const MEMBER_TYPE_OPTIONS = ['일반회원', '기관회원', '주민', '담당�
 const INQUIRY_STATUS_PRESETS = ['운영확인중', '강사전달완료', '회원회신완료'];
 const INSTRUCTOR_STATUS_OPTIONS = ['대기', '승인', '삭제요청', '반려'];
 
+const PUBLIC_PAGE_SIZE = 20;
+
 function hasMeaningfulValue(value: unknown) {
   if (value === null || value === undefined) return false;
   return String(value).trim() !== '';
@@ -360,6 +362,8 @@ export default function AdminDashboardPage() {
   const [instructorsLoading, setInstructorsLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [localOnly, setLocalOnly] = useState(false);
+  const [fieldFilter, setFieldFilter] = useState('all');
+  const [publicPage, setPublicPage] = useState(1);
 
   const [sheetBundle, setSheetBundle] = useState<SheetBundle | null>(null);
   const [sheetLoading, setSheetLoading] = useState(false);
@@ -540,6 +544,7 @@ export default function AdminDashboardPage() {
     return instructors.filter((inst) => {
       if (!isMeaningfulInstructor(inst)) return false;
       if (localOnly && !isLocalInstructor(inst)) return false;
+      if (fieldFilter !== 'all' && getInstructorField(inst) !== fieldFilter) return false;
       if (!keyword) return true;
 
       const name = getInstructorName(inst).toLowerCase();
@@ -547,7 +552,7 @@ export default function AdminDashboardPage() {
       const area = getInstructorArea(inst).toLowerCase();
       return name.includes(keyword) || field.includes(keyword) || area.includes(keyword);
     });
-  }, [instructors, localOnly, search]);
+  }, [fieldFilter, instructors, localOnly, search]);
 
   const visibleInstructors = useMemo<InstructorProfile[]>(() => {
     if (effectiveRole === 'ADMIN') return filteredInstructors;
@@ -558,6 +563,49 @@ export default function AdminDashboardPage() {
       이메일: '*** (센터 문의)',
     }) as InstructorProfile);
   }, [effectiveRole, filteredInstructors]);
+
+  const publicFieldOptions = useMemo(() => {
+    const existingFields = Array.from(
+      new Set(
+        instructors
+          .map((inst) => getInstructorField(inst))
+          .filter((value) => value && value.trim()),
+      ),
+    );
+
+    const orderedKnownFields = INSTRUCTOR_FIELD_OPTIONS.filter((option) => existingFields.includes(option));
+    const extraFields = existingFields
+      .filter((value) => !INSTRUCTOR_FIELD_OPTIONS.includes(value as (typeof INSTRUCTOR_FIELD_OPTIONS)[number]))
+      .sort((left, right) => left.localeCompare(right, 'ko-KR'));
+
+    return ['all', ...orderedKnownFields, ...extraFields];
+  }, [instructors]);
+
+  const publicTotalPages = Math.max(1, Math.ceil(visibleInstructors.length / PUBLIC_PAGE_SIZE));
+
+  useEffect(() => {
+    setPublicPage(1);
+  }, [fieldFilter, localOnly, search]);
+
+  useEffect(() => {
+    if (publicPage > publicTotalPages) {
+      setPublicPage(publicTotalPages);
+    }
+  }, [publicPage, publicTotalPages]);
+
+  const paginatedVisibleInstructors = useMemo(() => {
+    const start = (publicPage - 1) * PUBLIC_PAGE_SIZE;
+    return visibleInstructors.slice(start, start + PUBLIC_PAGE_SIZE);
+  }, [publicPage, visibleInstructors]);
+
+  const publicPaginationItems = useMemo(() => {
+    if (publicTotalPages <= 1) return [1];
+
+    const pages = new Set<number>([1, publicTotalPages, publicPage - 1, publicPage, publicPage + 1]);
+    return Array.from(pages)
+      .filter((page) => page >= 1 && page <= publicTotalPages)
+      .sort((left, right) => left - right);
+  }, [publicPage, publicTotalPages]);
 
   const filteredSheetSources = useMemo(() => {
     if (!sheetBundle) return null;
@@ -1091,6 +1139,160 @@ export default function AdminDashboardPage() {
     };
   }, [adminInstructorItems, inquiryItems, memberItems, sheetBundle?.integrity.issueCount]);
 
+  const publicTabContent = (
+    <section className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800">강사 목록 조회</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          현재 모드: {effectiveRole} {isPreviewing ? '(미리보기)' : ''}
+        </p>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4">
+        <div className="flex flex-col gap-3 md:flex-row">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="이름, 전문분야, 활동지역 검색"
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <label className="flex items-center gap-2 text-sm text-gray-600">
+            <input type="checkbox" checked={localOnly} onChange={(event) => setLocalOnly(event.target.checked)} />
+            양양 로컬만 보기
+          </label>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setLocalOnly(false);
+              setFieldFilter('all');
+              setPublicPage(1);
+            }}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            필터 초기화
+          </button>
+          <button
+            type="button"
+            onClick={fetchAllInstructors}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            새로고침
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {publicFieldOptions.map((option) => {
+            const isActive = fieldFilter === option;
+            const label = option === 'all' ? '전체 분야' : option;
+
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setFieldFilter(option)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  isActive
+                    ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-col gap-1 text-xs text-gray-500 md:flex-row md:items-center md:justify-between">
+          <span>
+            전체 {visibleInstructors.length}명 중{' '}
+            {visibleInstructors.length === 0 ? 0 : (publicPage - 1) * PUBLIC_PAGE_SIZE + 1}-
+            {Math.min(publicPage * PUBLIC_PAGE_SIZE, visibleInstructors.length)}번째 표시 중
+          </span>
+          <span>페이지당 20명씩 표시</span>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        {instructorsLoading ? (
+          <div className="p-6 text-center text-sm text-gray-500">데이터를 불러오는 중입니다...</div>
+        ) : visibleInstructors.length === 0 ? (
+          <div className="p-6 text-center text-sm text-gray-500">표시할 강사 데이터가 없습니다.</div>
+        ) : (
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-xs text-gray-500">
+                  <tr>
+                    <th className="px-3 py-2 text-left">성명</th>
+                    <th className="px-3 py-2 text-left">전문분야</th>
+                    <th className="px-3 py-2 text-left">활동지역</th>
+                    <th className="px-3 py-2 text-left">연락처</th>
+                    <th className="px-3 py-2 text-left">상태</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedVisibleInstructors.map((inst, idx) => (
+                    <tr key={`${getInstructorName(inst)}-${publicPage}-${idx}`} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 font-medium text-gray-800">
+                        {getInstructorName(inst) || '-'}
+                        {isLocalInstructor(inst) && (
+                          <span className="ml-2 rounded bg-emerald-600 px-2 py-0.5 text-[10px] text-white">로컬</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-gray-600">{getInstructorField(inst) || '-'}</td>
+                      <td className="px-3 py-2 text-gray-600">{getInstructorArea(inst) || '-'}</td>
+                      <td className="px-3 py-2 text-gray-600">{getInstructorPhone(inst) || '-'}</td>
+                      <td className="px-3 py-2 text-gray-600">{getInstructorStatus(inst)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-gray-100 px-4 pb-4 md:flex-row md:items-center md:justify-between">
+              <div className="text-xs text-gray-500">
+                {publicPage} / {publicTotalPages} 페이지
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPublicPage((prev) => Math.max(1, prev - 1))}
+                  disabled={publicPage === 1}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  이전
+                </button>
+                {publicPaginationItems.map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setPublicPage(page)}
+                    className={`min-w-9 rounded-lg border px-3 py-2 text-xs font-medium ${
+                      page === publicPage
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-300 text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setPublicPage((prev) => Math.min(publicTotalPages, prev + 1))}
+                  disabled={publicPage === publicTotalPages}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  다음
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -1201,7 +1403,9 @@ export default function AdminDashboardPage() {
       </aside>
 
       <main className="mx-auto w-full max-w-7xl flex-1 p-4 md:p-8">
-        {activeTab === 'public' && (
+        {activeTab === 'public' && publicTabContent}
+
+        {false && activeTab === 'public' && (
           <section className="space-y-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">강사 목록 조회</h1>
@@ -1229,12 +1433,55 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
+            <div className="flex flex-wrap gap-2">
+              {publicFieldOptions.map((option) => {
+                const isActive = fieldFilter === option;
+                const label = option === 'all' ? '전체 분야' : option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setFieldFilter(option)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      isActive
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch('');
+                  setLocalOnly(false);
+                  setFieldFilter('all');
+                  setPublicPage(1);
+                }}
+                className="rounded-full border border-dashed border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-500 transition hover:border-gray-400 hover:bg-gray-50"
+              >
+                필터 초기화
+              </button>
+            </div>
+
             <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
               {instructorsLoading ? (
                 <div className="p-6 text-center text-sm text-gray-500">데이터를 불러오는 중입니다...</div>
               ) : visibleInstructors.length === 0 ? (
                 <div className="p-6 text-center text-sm text-gray-500">표시할 강사 데이터가 없습니다.</div>
               ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-1 px-4 pt-4 text-xs text-gray-500 md:flex-row md:items-center md:justify-between">
+                    <span>
+                      전체 {visibleInstructors.length}명 중{' '}
+                      {Math.min((publicPage - 1) * PUBLIC_PAGE_SIZE + 1, visibleInstructors.length || 1)}-
+                      {Math.min(publicPage * PUBLIC_PAGE_SIZE, visibleInstructors.length)}번째 표시 중
+                    </span>
+                    <span>페이지당 20명씩 표시</span>
+                  </div>
+
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-xs text-gray-500">
@@ -1247,8 +1494,8 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {visibleInstructors.map((inst, idx) => (
-                        <tr key={`${getInstructorName(inst)}-${idx}`} className="hover:bg-gray-50">
+                      {paginatedVisibleInstructors.map((inst, idx) => (
+                        <tr key={`${getInstructorName(inst)}-${publicPage}-${idx}`} className="hover:bg-gray-50">
                           <td className="px-3 py-2 font-medium text-gray-800">
                             {getInstructorName(inst) || '-'}
                             {isLocalInstructor(inst) && (
@@ -1264,10 +1511,11 @@ export default function AdminDashboardPage() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-          </section>
-        )}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
         {activeTab === 'member' && actualRole !== 'ADMIN' && effectiveRole === 'USER' && (
           <section className="space-y-4">
