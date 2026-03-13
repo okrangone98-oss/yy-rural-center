@@ -29,6 +29,8 @@ type InquiryItem = {
   receivedAt: string;
   teacherName: string;
   teacherEmail: string;
+  '운영 메모'?: string;
+  '운영메모'?: string;
   memberName: string;
   memberPhone: string;
   memberEmail: string;
@@ -2179,6 +2181,34 @@ export default function AdminDashboardPage() {
                                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                                 />
                               </div>
+                              <div className="md:col-span-2">
+                                <FieldLabel>반려 사유 (관리 담당자 작성용/필요시)</FieldLabel>
+                                <textarea
+                                  rows={3}
+                                  value={findField(adminInstructorForm, ['반려 사유', '반려사유'])}
+                                  onChange={(event) =>
+                                    setAdminInstructorForm((prev) =>
+                                      prev ? { ...prev, '반려 사유': event.target.value } : prev,
+                                    )
+                                  }
+                                  placeholder="승인 대기 중이거나 반려 시 사유를 입력하세요."
+                                  className="w-full rounded-lg border border-gray-300 bg-amber-50/30 px-3 py-2 text-sm"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <FieldLabel>관리자 전용 운영 메모 (비공개)</FieldLabel>
+                                <textarea
+                                  rows={3}
+                                  value={findField(adminInstructorForm, ['운영 메모', '운영메모', '관리자메모'])}
+                                  onChange={(event) =>
+                                    setAdminInstructorForm((prev) =>
+                                      prev ? { ...prev, '운영 메모': event.target.value } : prev,
+                                    )
+                                  }
+                                  placeholder="강사 관리에 필요한 비공개 메모를 입력하세요."
+                                  className="w-full rounded-lg border border-gray-300 bg-gray-50/50 px-3 py-2 text-sm"
+                                />
+                              </div>
                             </div>
                           </div>
 
@@ -2425,6 +2455,21 @@ export default function AdminDashboardPage() {
                                 <div className="text-xs text-gray-500">접수일시: {item.receivedAt || '-'}</div>
                                 <div className="whitespace-pre-wrap text-sm text-gray-600">{item.message || '상세 내용 없음'}</div>
                                 <div className="text-xs text-gray-500">강사 이메일: {item.teacherEmail || '강사DB에서 찾지 못함'}</div>
+                                
+                                <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
+                                  <FieldLabel className="!mb-1 text-[11px] text-gray-400">상담 메모 (관리자 내부용)</FieldLabel>
+                                  <textarea
+                                    rows={2}
+                                    defaultValue={item['운영 메모'] || item['운영메모'] || ''}
+                                    onBlur={(event) => {
+                                      if (event.target.value !== (item['운영 메모'] || '')) {
+                                        void handleManualInquiryStatus(item.inquiryId, item.status, event.target.value);
+                                      }
+                                    }}
+                                    placeholder="상담 이력이나 참고사항을 입력하세요."
+                                    className="w-full border-none bg-transparent p-0 text-xs text-gray-600 focus:ring-0"
+                                  />
+                                </div>
                               </div>
 
                               <div className="flex flex-col gap-2 xl:w-56">
@@ -2438,6 +2483,34 @@ export default function AdminDashboardPage() {
                                     {manualInquiryLoadingId === item.inquiryId ? '처리 중...' : preset}
                                   </button>
                                 ))}
+                                
+                                <div className="mt-1">
+                                  <select
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (!val) return;
+                                      // Apply template to drafts
+                                      setReplyDrafts(prev => ({
+                                        ...prev,
+                                        [item.inquiryId]: {
+                                          subject: `[양양이음터] '${item.purpose}' 문의에 대해 답변드립니다.`,
+                                          message: val
+                                        }
+                                      }));
+                                      if (inquiryActionTarget?.inquiryId !== item.inquiryId) {
+                                        openInquiryAction(item, 'reply');
+                                      }
+                                    }}
+                                    className="w-full rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-[11px] text-gray-500"
+                                  >
+                                    <option value="">회신 템플릿 선택</option>
+                                    <option value={`안녕하세요, ${item.memberName}님.\n양양이음터입니다. 문의하신 '${item.purpose}' 내용에 대해 강사님께 전달하였으며, 곧 답변을 드릴 예정입니다.`}>접수/전달 안내</option>
+                                    <option value={`안녕하세요, ${item.memberName}님.\n요청하신 강의 일정은 현재 강사님의 다른 일정과 겹쳐 조율이 필요합니다. 대안 일정으로 다시 안내드리겠습니다.`}>일정 조율 필요</option>
+                                    <option value={`안녕하세요, ${item.memberName}님.\n문의하신 내용은 관련 부서 확인 후 영업일 기준 2~3일 내로 상세 답변 드리겠습니다.`}>검토 중 안내</option>
+                                    <option value="문의하신 내용이 정상적으로 처리 완료되었습니다. 감사합니다.">완료 안내</option>
+                                  </select>
+                                </div>
+
                                 <button
                                   onClick={() => openInquiryAction(item, 'forward')}
                                   className="rounded-lg border border-sky-300 px-3 py-2 text-sm text-sky-700 hover:bg-sky-50"

@@ -41,7 +41,9 @@ const FIELD = {
     activityArea: ['Activity_Area'],
     finalStatus: ['승인상태(최종)'],
     updatedAt: ['Updated_At'],
-    portfolio: ['Portfolio_Link']
+    portfolio: ['Portfolio_Link'],
+    rejectionReason: ['반려 사유', '반려사유'],
+    adminMemo: ['운영 메모', '운영메모', '관리자메모']
   },
   member: {
     joinedAt: ['가입일'],
@@ -65,7 +67,8 @@ const FIELD = {
     purpose: ['문의 목적'],
     message: ['상세 내용'],
     inquirerEmail: ['연락받을 이메일'],
-    status: ['처리 상태']
+    status: ['처리 상태'],
+    adminMemo: ['운영 메모', '운영메모', '관리자메모']
   }
 };
 
@@ -403,7 +406,9 @@ function buildInstructorRecord_(payload, existingRecord) {
     'Activity_Area': pickFirst_([payload.area, payload.Activity_Area, payload['활동지역'], getRecordValue_(base, FIELD.instructor.activityArea)]),
     '승인상태(최종)': pickFirst_([payload.finalStatus, payload['승인상태(최종)'], getRecordValue_(base, FIELD.instructor.finalStatus), '대기']),
     'Updated_At': now,
-    'Portfolio_Link': pickFirst_([payload.portfolioLink, payload.Portfolio_Link, getRecordValue_(base, FIELD.instructor.portfolio)])
+    'Portfolio_Link': pickFirst_([payload.portfolioLink, payload.Portfolio_Link, getRecordValue_(base, FIELD.instructor.portfolio)]),
+    '반려 사유': pickFirst_([payload.rejectionReason, payload['반려 사유'], getRecordValue_(base, FIELD.instructor.rejectionReason)]),
+    '운영 메모': pickFirst_([payload.adminMemo, payload['운영 메모'], getRecordValue_(base, FIELD.instructor.adminMemo)])
   };
 }
 
@@ -505,7 +510,8 @@ function submitInquiry_(payload) {
     '문의 목적': payload.purpose || '',
     '상세 내용': payload.message || '',
     '연락받을 이메일': payload.inquirerEmail || '',
-    '처리 상태': payload.status || '접수대기'
+    '처리 상태': payload.status || '접수대기',
+    '운영 메모': payload.adminMemo || ''
   };
   return appendRecord_(sheet, record);
 }
