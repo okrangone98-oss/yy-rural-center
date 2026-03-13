@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 - 양양군 농촌활성화지원센터</title>
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/common.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --primary: #5b8a72;
+      --primary-dark: #3b5f4f;
+      --secondary: #ed5807;
+      --text: #333;
+      --bg: #f8faf9;
+      --radius: 12px;
+      --tracking-tight: -0.02em;
+      --tracking-wide: 0.01em;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 1.12rem;
+      letter-spacing: var(--tracking-tight);
+      white-space: nowrap;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .logo-prefix {
+      color: var(--text);
+    }
+
+    .logo-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      letter-spacing: var(--tracking-tight);
+      line-height: 1.1;
+    }
+
+    .logo-switch-viewport {
+      position: relative;
+      display: block;
+      height: 1.15em;
+      min-width: 1ch;
+      overflow: hidden;
+    }
+
+    .logo-switch-slot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-115%);
+      filter: blur(4px);
+      transition:
+        transform .58s cubic-bezier(.2, .8, .2, 1),
+        opacity .42s ease,
+        filter .42s ease;
+      will-change: transform, opacity, filter;
+    }
+
+    .logo-switch-slot.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .logo-switch-slot.is-entering {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .logo-switch-slot.is-leaving {
+      opacity: 0;
+      transform: translateY(115%);
+      filter: blur(4px);
+    }
+
+    .logo-switch-slot[data-tone="rural"] {
+      color: #5b8a72;
+    }
+
+    .logo-switch-slot[data-tone="agri"] {
+      color: #ed5807;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .logo-switch-slot {
+        transition: none;
+        transform: translateY(0);
+        filter: none;
+      }
+
+      .logo-switch-slot:not(.is-active) {
+        opacity: 0;
+      }
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.95rem;
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .nav-links a {
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      background: #5b8a72;
+      color: #fff;
+    }
+
+    .nav-community-link {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 4px;
+      color: #ed5807 !important;
+      font-weight: 600;
+      background: #fff5f0;
+      border: 1px solid #ffdecb;
+      padding: 4px 12px !important;
+      border-radius: var(--radius);
+    }
+
+    /* 드롭다운 UI (홈페이지와 동일하게 적용) */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-trigger {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      font-weight: 500;
+    }
+
+    .dropdown-trigger:hover {
+      background: #5b8a72;
+      color: #fff;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      min-width: 180px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 8px;
+      border: 1px solid #eaeaea;
+      z-index: 101;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content a {
+      display: block;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #444;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .dropdown-content a:hover {
+      background: #f5faf8;
+      color: #5b8a72;
+    }
+
+    /* 서브 드롭다운 */
+    .nested-dropdown {
+      position: relative;
+    }
+
+    .nested-dropdown-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    .nested-dropdown-trigger:hover {
+      background: #f5faf8;
+      color: #5b8a72;
+    }
+
+    .nested-content {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: 0;
+      background: #fff;
+      min-width: 140px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      padding: 6px;
+      border: 1px solid #eaeaea;
+      margin-left: 8px;
+    }
+
+    .nested-dropdown:hover .nested-content {
+      display: block;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        flex-direction: column;
+        padding: 16px;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-links.is-mobile-open {
+        display: flex;
+      }
+
+      .dropdown {
+        width: 100%;
+      }
+
+      .dropdown-content {
+        position: static;
+        transform: none;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+        padding: 0 0 0 16px;
+        display: none;
+      }
+
+      .dropdown.is-open .dropdown-content {
+        display: block;
+      }
+    }
+
+    /* 공지사항 특화 CSS */
+    main {
+      padding: 48px 0;
+      min-height: 80vh;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .page-sub {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 24px;
+      max-width: 800px;
+      word-break: keep-all;
+    }
+
+    .notice-wrapper {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e5e5e5;
+      padding: 20px 24px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+      margin-bottom: 40px;
+    }
+
+    .notice-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #5b8a72;
+      padding-bottom: 12px;
+    }
+
+    .notice-toolbar-left,
+    .notice-toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .notice-search-input {
+      min-width: 250px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .notice-search-input:focus {
+      border-color: #5b8a72;
+      box-shadow: 0 0 0 2px rgba(91, 138, 114, 0.2);
+    }
+
+    .notice-filter-select {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      background: #fff;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .notice-filter-select:focus {
+      border-color: #5b8a72;
+    }
+
+    .notice-table-wrap {
+      overflow-x: auto;
+    }
+
+    .notice-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .notice-table th {
+      padding: 12px 14px;
+      font-weight: 700;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+
+    .notice-table td {
+      padding: 14px 14px;
+      border-bottom: 1px solid #f9f9f9;
+      color: #444;
+      font-size: 0.95rem;
+    }
+
+    .notice-row {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .notice-row:hover {
+      background: #fcfcfc;
+    }
+
+    .notice-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #f0f7f4;
+      color: #3b5f4f;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .notice-title {
+      font-weight: 600;
+      color: #222;
+    }
+
+    .notice-date {
+      color: #888;
+      font-size: 0.88rem;
+    }
+
+    .notice-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+    }
+
+    .notice-pagination {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .notice-page-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .notice-page-btn:hover:not(:disabled) {
+      border-color: #5b8a72;
+      color: #5b8a72;
+    }
+
+    .notice-page-btn:disabled {
+      color: #ccc;
+      cursor: default;
+    }
+
+    .notice-page-info {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.is-open {
+      display: flex;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-dialog {
+      position: relative;
+      background: #fff;
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      padding: 40px 30px 40px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #111;
+      line-height: 1.4;
+    }
+
+    .modal-meta {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-images {
+      margin: 10px 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .modal-img-frame {
+      position: relative;
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-img-frame img {
+      max-width: 100%;
+      max-height: 400px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .modal-img-indicator {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .modal-img-nav {
+      border: none;
+      background: #e0e0e0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      color: #333;
+    }
+
+    .modal-img-nav:hover {
+      background: #d0d0d0;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #333;
+      word-break: keep-all;
+    }
+
+    .modal-body a {
+      color: #0b7c5b;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      border: none;
+      background: #f5f5f5;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #e0e0e0;
+    }
+
+    .modal-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: #5b8a72;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      align-self: flex-start;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(91, 138, 114, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .modal-link:hover {
+      background: #4a725e;
+      transform: translateY(-2px);
+    }
+
+    /* 푸터 스타일 */
+    footer {
+      background: #f6f7f5;
+      padding: 40px 0;
+      color: #555;
+      font-size: 0.9rem;
+      border-top: 1px solid #eaeaea;
+    }
+
+    .footer-logos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .footer-logos img {
+      max-width: 100%;
+      height: auto;
+      max-height: 50px;
+      object-fit: contain;
+    }
+
+    .is-large { max-height: 60px !important; }
+    .is-xlarge { max-height: 70px !important; }
+    .is-rural-center { max-height: 56px !important; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container nav">
+      <a href="index.html" class="logo" id="site-logo" aria-label="양양군 농촌활성화지원센터">
+        <span class="logo-prefix" aria-hidden="true">양양군</span>
+        <span class="logo-switch" aria-hidden="true">
+          <span class="logo-switch-viewport" id="logo-switch-viewport">
+            <span class="logo-switch-slot is-active" id="logo-switch-slot-a" data-tone="rural">농촌활성화지원센터</span>
+            <span class="logo-switch-slot" id="logo-switch-slot-b" data-tone="agri">농업기술센터</span>
+          </span>
+        </span>
+      </a>
+      <nav class="nav-links">
+        <div class="dropdown">
+          <span class="dropdown-trigger" onclick="location.href='index.html#about'">홈</span>
+          <div class="dropdown-content">
+            <a href="index.html#about"><span>🏢</span> 센터 소개</a>
+            <div class="nested-dropdown nested-dropdown-trigger">
+              <span style="display: flex; align-items: center; gap: 10px;"><span>💼</span> 주요사업</span>
+              <div class="nested-content">
+                <a href="index.html#programs">2026년</a>
+                <a href="index.html#programs">2025년</a>
+                <a href="index.html#programs">2024년</a>
+              </div>
+            </div>
+            <a href="index.html#pd-section"><span>🧑‍🏫</span> 양양 PD</a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <span class="dropdown-trigger" onclick="location.href='index.html#teachers'">강사 이음터</span>
+          <div class="dropdown-content">
+            <a href="iumteo/index.html"><span>✨</span> 양양 강사 이음터</a>
+            <a href="index.html#teachers"><span>🔍</span> 양양 강사 정보</a>
+          </div>
+        </div>
+        <a href="notice.html">공지사항</a>
+        <div class="dropdown">
+          <span class="dropdown-trigger">아카이브</span>
+          <div class="dropdown-content">
+            <a href="index.html#gallery"><span>🖼️</span> 활동사진</a>
+            <a href="index.html#video-preview"><span>🎬</span> 활동영상</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <span class="dropdown-trigger">안내 & 정보</span>
+          <div class="dropdown-content">
+            <a href="index.html#contact"><span>📍</span> 문의 및 오시는 길</a>
+            <a href="iumteo/qna.html"><span>❓</span> Q&A</a>
+          </div>
+        </div>
+        <a href="https://script.google.com/macros/s/AKfycbzBm19IfYNFk9DC130oP8jESqpZjal0bdMNd2DRh4y9BF3h-5T54MvnQv4Gp5B0xOcJQg/exec"
+          target="_blank" rel="noopener noreferrer" class="nav-community-link">
+          관리시스템
+        </a>
+      </nav>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="page-title">공지사항</h1>
+      <p class="page-sub">
+        센터의 주요 공지, 사업 및 교육 안내 등의 최신 소식을 확인해 보세요.
+      </p>
+
+      <div class="notice-wrapper">
+        <div class="notice-toolbar">
+          <div class="notice-toolbar-left">
+            <input type="text" id="notice-search-input" class="notice-search-input" placeholder="검색어 입력" />
+          </div>
+          <div class="notice-toolbar-right">
+            <select id="notice-type-filter" class="notice-filter-select">
+              <option value="전체">모든 카테고리</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="notice-table-wrap">
+          <table class="notice-table">
+            <thead>
+              <tr>
+                <th style="width:100px;">카테고리</th>
+                <th>제목</th>
+                <th style="width:120px;">작성일</th>
+              </tr>
+            </thead>
+            <tbody id="notice-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="notice-pagination" id="notice-pagination"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="noticeModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-dialog">
+      <button type="button" class="modal-close" id="modal-close-btn">&times;</button>
+      <div class="modal-title" id="modal-title">제목</div>
+      <div class="modal-meta">
+        <span id="modal-type" style="font-weight:700; color:#5b8a72;">공지</span> &nbsp;|&nbsp; <span id="modal-date">날짜</span>
+      </div>
+      <div id="modal-images" class="modal-images">
+        <button type="button" class="modal-img-nav" id="modal-img-prev">&larr;</button>
+        <div class="modal-img-frame">
+          <img id="modal-img" src="" alt="첨부 이미지" />
+          <div class="modal-img-indicator" id="modal-img-indicator">1/1</div>
+        </div>
+        <button type="button" class="modal-img-nav" id="modal-img-next">&rarr;</button>
+      </div>
+      <div class="modal-body" id="modal-content"></div>
+      <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer">자세히 보기 &rarr;</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-logos">
+        <img src="images/농림축산식품부_국_상하_embedded.svg" alt="농림축산식품부 로고" class="is-large" />
+        <img src="images/농업기술센터_로고.svg" alt="농업기술센터 로고" class="is-xlarge" />
+        <img src="images/양양군_embedded.svg" alt="양양군 로고" />
+        <img src="images/logo-rural-center-footer.png" alt="양양군 농촌활성화지원센터 로고" class="is-rural-center" />
+      </div>
+      <div>© <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script>
+    /* 로고 브랜드 스위칭 애니메이션 */
+    (function () {
+      const brand = document.getElementById("site-logo");
+      const viewport = document.getElementById("logo-switch-viewport");
+      const slots = [
+        document.getElementById("logo-switch-slot-a"),
+        document.getElementById("logo-switch-slot-b")
+      ];
+      if (!brand || !viewport || !slots[0]) return;
+
+      const labels = [
+        { text: "농촌활성화지원센터", tone: "rural" },
+        { text: "농업기술센터", tone: "agri" }
+      ];
+      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let activeSlotIndex = 0;
+      let activeLabelIndex = 0;
+      let isAnimating = false;
+
+      function applyLabel(slot, label, isActive) {
+        slot.textContent = label.text;
+        slot.dataset.tone = label.tone;
+        slot.className = isActive ? "logo-switch-slot is-active" : "logo-switch-slot";
+      }
+
+      function syncAriaLabel(label) {
+        brand.setAttribute("aria-label", `양양군 ${label.text}`);
+      }
+
+      function updateViewportWidth() {
+        const width = Math.max(...slots.map((slot) => slot.scrollWidth));
+        if (width > 0) {
+          viewport.style.width = `${Math.ceil(width)}px`;
+        }
+      }
+
+      function switchLogoText() {
+        if (isAnimating) return;
+
+        const nextLabelIndex = (activeLabelIndex + 1) % labels.length;
+        const activeSlot = slots[activeSlotIndex];
+        const nextSlotIndex = (activeSlotIndex + 1) % slots.length;
+        const nextSlot = slots[nextSlotIndex];
+        const nextLabel = labels[nextLabelIndex];
+
+        applyLabel(nextSlot, nextLabel, false);
+        updateViewportWidth();
+        syncAriaLabel(nextLabel);
+
+        if (reduceMotionQuery.matches) {
+          applyLabel(activeSlot, labels[activeLabelIndex], false);
+          applyLabel(nextSlot, nextLabel, true);
+          activeSlotIndex = nextSlotIndex;
+          activeLabelIndex = nextLabelIndex;
+          return;
+        }
+
+        isAnimating = true;
+
+        requestAnimationFrame(() => {
+          activeSlot.classList.add("is-leaving");
+          nextSlot.classList.add("is-entering");
+        });
+
+        window.setTimeout(() => {
+          applyLabel(activeSlot, labels[activeLabelIndex], false);
+          applyLabel(nextSlot, nextLabel, true);
+          activeSlotIndex = nextSlotIndex;
+          activeLabelIndex = nextLabelIndex;
+          isAnimating = false;
+        }, 620);
+      }
+
+      applyLabel(slots[0], labels[0], true);
+      applyLabel(slots[1], labels[1], false);
+      syncAriaLabel(labels[0]);
+      updateViewportWidth();
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(updateViewportWidth).catch(() => { });
+      }
+      window.addEventListener("resize", updateViewportWidth);
+      reduceMotionQuery.addEventListener?.("change", updateViewportWidth);
+
+      window.setInterval(switchLogoText, 5000);
+    })();
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      if (mobileBtn && navLinks) {
+        mobileBtn.addEventListener('click', () => {
+          navLinks.classList.toggle('is-mobile-open');
+        });
+      }
+
+      // Dropdown toggle on mobile
+      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
+      dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        if (trigger) {
+          trigger.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              dropdown.classList.toggle('is-open');
+            }
+          });
+        }
+      });
+
+      // Year for footer
+      const yearEl = document.getElementById("year");
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      loadNotices();
+    });
+
+    // Notice Board Logic
+    const NOTICE_CSV_URL = window.SHEET_CONFIG?.notices?.csvUrl || "";
+    let NOTICES = [];
+    let FILTERED_NOTICES = [];
+    let currentTypeFilter = "전체";
+    let currentKeyword = "";
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+
+    async function loadNotices() {
+      try {
+        if(!NOTICE_CSV_URL) return;
+        const rows = await window.CSVUtils.fetchCSV(NOTICE_CSV_URL);
+        if(!rows || rows.length < 2) return;
+
+        const headers = rows[0].map(h => window.CSVUtils.safeText(h).trim());
+        const norm = headers.map(window.CSVUtils.normalizeHeader);
+        const colIndex = {
+          type: norm.findIndex(h => h.includes("구분") || h.includes("카테고리")),
+          title: norm.findIndex(h => h.includes("제목") || h.includes("title")),
+          date: norm.findIndex(h => h.includes("날짜") || h.includes("date")),
+          content: norm.findIndex(h => h.includes("내용") || h.includes("본문")),
+          url: norm.findIndex(h => h.includes("링크") || h.includes("타겟")),
+          image: norm.findIndex(h => h.includes("사진") || h.includes("이미지"))
+        };
+
+        NOTICES = rows.slice(1).map(r => ({
+          type: r[colIndex.type] || "공지",
+          title: r[colIndex.title] || "",
+          date: r[colIndex.date] || "",
+          content: r[colIndex.content] || "",
+          url: r[colIndex.url] || "",
+          images: (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean)
+        })).filter(n => n.title);
+
+        buildTypeFilter();
+        applyNoticeFilter();
+      } catch (err) {
+        console.error("Notice error:", err);
+      }
+    }
+
+    function buildTypeFilter() {
+      const select = document.getElementById("notice-type-filter");
+      const types = Array.from(new Set(NOTICES.map(n => n.type)));
+      types.forEach(t => {
+        select.innerHTML += `<option value="${t}">${t}</option>`;
+      });
+    }
+
+    function applyNoticeFilter() {
+      FILTERED_NOTICES = NOTICES.filter(n => {
+        const typeMatch = currentTypeFilter === "전체" || n.type === currentTypeFilter;
+        const keywordMatch = !currentKeyword || n.title.includes(currentKeyword) || n.content.includes(currentKeyword);
+        return typeMatch && keywordMatch;
+      });
+      currentPage = 1;
+      renderNoticeTable();
+    }
+
+    function renderNoticeTable() {
+      const tbody = document.getElementById("notice-tbody");
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const paged = FILTERED_NOTICES.slice(start, end);
+
+      tbody.innerHTML = paged.length ? paged.map((n, i) => `
+        <tr class="notice-row" onclick="openModal(${start + i})">
+          <td><span class="notice-type">${n.type}</span></td>
+          <td class="notice-title">${n.title}</td>
+          <td class="notice-date">${n.date}</td>
+        </tr>
+      `).join("") : '<tr><td colspan="3" class="notice-empty">소식이 없습니다.</td></tr>';
+    }
+
+    const modal = document.getElementById("noticeModal");
+    function openModal(idx) {
+      const n = FILTERED_NOTICES[idx];
+      document.getElementById("modal-title").textContent = n.title;
+      document.getElementById("modal-type").textContent = n.type;
+      document.getElementById("modal-date").textContent = n.date;
+      document.getElementById("modal-content").innerHTML = n.content.replace(/\n/g, "<br>");
+      
+      const link = document.getElementById("modal-link");
+      if(n.url) { link.href = n.url; link.style.display = "inline-flex"; }
+      else link.style.display = "none";
+
+      modal.classList.add("is-open");
+    }
+
+    document.getElementById("modal-close-btn").onclick = () => modal.classList.remove("is-open");
+    document.getElementById("notice-search-input").oninput = (e) => { currentKeyword = e.target.value; applyNoticeFilter(); };
+    document.getElementById("notice-type-filter").onchange = (e) => { currentTypeFilter = e.target.value; applyNoticeFilter(); };
+  </script>
+</body>
+
+</html>

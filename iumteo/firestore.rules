@@ -1,0 +1,69 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 기본 차단: 정의되지 않은 컬렉션은 모든 접근 거부
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 사용자 인증 검증 보조 함수
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // 본인 여부 확인 함수
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 데이터베이스 조회로 관리자(ADMIN) 권한 확인
+    // actualRole 기준 검증 (previewRole 무관)
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.actualRole == 'ADMIN';
+    }
+
+    // [ Users 컬렉션 ]
+    match /users/{userId} {
+      
+      // ==========================================
+      // [안심 블라인드 정책(개인정보 경계) 관련 한계 및 구현 방향]
+      // ==========================================
+      // Firestore Rules는 필드 단위(연락처/이메일 제외 여부)로 클라이언트 Read 접근 제어가 불가능합니다.
+      // (즉, allow read 허용 시 문서 전체 필드가 내려감)
+      // 따라서 본 규칙 파일에서는 [본인]과 [관리자]만 users 원본 문서를 
+      // 직접 조회/수정할 수 있도록 원천 차단했습니다.
+      // 
+      // 타인의 프로필(블라인드 정보만 노출)은 클라이언트에서 직접 읽지 못하고,
+      // 백엔드(Next.js API 라우트)에서 `admin-sdk`로 조회 후 민감정보를 걸러 응답해야 합니다.
+      // ------------------------------------------
+
+      // 1. 읽기 (Read): 본인 정보이거나, 관리자일 때만 전체 문서 허용
+      allow read: if isOwner(userId) || isAdmin();
+
+      // 2. 가입 (Create): 로그인한 사용자가 자신의 ID로 문서를 처음 생성할 때 허용
+      allow create: if isOwner(userId);
+
+      // 3. 수정 (Update): 본인 정보 수정은 허용 (다만 권한 필드 등 조작 방지가 필요하다면 추가 조건 필요), 관리자는 무조건 허용
+      // => role/actualRole을 임의로 ADMIN으로 변경하지 못하도록 제약
+      allow update: if isAdmin() || (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'actualRole', 'isSample', 'isLocal']));
+
+      // 4. 삭제 (Delete): 관리자만 삭제 가능
+      allow delete: if isAdmin();
+
+      // [ Consent Log (동의 내역) 서브컬렉션 ]
+      match /consent_log/{logId} {
+        // 동의 내역 열람: 기록자 본인과 관리자만
+        allow read: if isOwner(userId) || isAdmin();
+        
+        // 동의 내역 쓰기: 기록자 본인만 (이벤트/플래그 수정 전 로그 남길 때)
+        allow create: if isOwner(userId);
+        
+        // 데이터 처리 불변성: 수정/삭제 원천 차단 (위/변조 불가)
+        allow update, delete: if false;
+      }
+    }
+  }
+}

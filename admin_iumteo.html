@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양양 강사 이음터 관리 시스템</title>
+    <link
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+        rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- 구글 시트 CSV URL 설정 및 CSV 파싱 유틸 -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <style>
+        :root {
+            --primary: #0b7c5b;
+            --primary-dark: #085e45;
+            --secondary: #ed5807;
+            --bg: #f7f9f8;
+            --text: #111;
+            --border: #e5e5e5;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Pretendard", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            font-size: 16px;
+            /* Base font size */
+            line-height: 1.6;
+        }
+
+        /* Login Overlay */
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .auth-card {
+            background: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #888;
+            transition: 0.2s;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .badge {
+            background: var(--secondary);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: calc(100vh - 61px);
+        }
+
+        aside.sidebar {
+            width: 260px;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item {
+            padding: 14px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: #f0f7f4;
+            color: var(--primary);
+            border-right: 4px solid var(--primary);
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 2.1rem;
+            /* Larger and bolder */
+            font-weight: 800;
+            margin-bottom: 35px;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            /* More distinct labels */
+            font-weight: 700;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            /* Slightly larger buttons */
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(11, 124, 91, 0.2);
+        }
+
+        .btn-danger {
+            color: #d9381e;
+            border-color: #d9381e;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #fafafa;
+            font-weight: 700;
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .status-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        #admin-panel,
+        #instructor-panel,
+        #guest-panel {
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: #fcfcfc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 5px;
+            background: #eee;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .filter-tab {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .filter-tab.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Detail Modal */
+        #detail-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+                height: auto;
+            }
+
+            aside.sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 10px 0;
+            }
+
+            #nav-items {
+                display: flex;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 0 10px;
+            }
+
+            .menu-item {
+                border-right: none;
+                border-bottom: 3px solid transparent;
+                padding: 10px 16px;
+                white-space: nowrap;
+            }
+
+            .menu-item.active,
+            .menu-item:hover {
+                border-right: none;
+                border-bottom: 3px solid var(--primary);
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-card {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-content {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 로그인/가입 드로어 모달 -->
+    <div id="auth-overlay"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9000; justify-content:flex-end; align-items:stretch;">
+        <div
+            style="background:#fff; width: min(420px, 100%); height:100%; overflow-y:auto; padding: 40px 32px; position:relative; box-shadow: -4px 0 20px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease;">
+            <button onclick="closeAuthDrawer()"
+                style="position:absolute; top:20px; right:20px; font-size:1.4rem; border:none; background:none; cursor:pointer; color:#888;">&times;</button>
+
+            <h2 style="color: var(--primary); margin-bottom: 6px; font-size: 1.4rem;">양양 이음터 플랫폼</h2>
+            <p style="color: #888; font-size: 0.88rem; margin-bottom: 28px;">강사, 이용자, 관리자를 위한 전용 공간입니다.</p>
+
+            <div class="auth-tabs" style="margin-bottom: 24px;">
+                <div class="auth-tab active" id="atab-login" onclick="switchAuthTab('login')">로그인</div>
+                <div class="auth-tab" id="atab-user" onclick="switchAuthTab('user')">일반회원</div>
+                <div class="auth-tab" id="atab-instructor" onclick="switchAuthTab('instructor')">지역강사</div>
+            </div>
+
+            <!-- 로그인 폼 -->
+            <div id="auth-login-form">
+                <div class="form-group">
+                    <label>휴대폰 번호</label>
+                    <input type="text" id="login-phone" placeholder="010-0000-0000">
+                </div>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="login-pw" placeholder="••••••••"
+                        onkeydown="if(event.key==='Enter') handleLogin()">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; padding: 13px; font-size: 1rem;"
+                    onclick="handleLogin()">접속하기</button>
+                <p
+                    style="margin-top: 12px; font-size: 0.82rem; color: #888; background:#f8f8f8; padding:10px 12px; border-radius:8px; line-height:1.6;">
+                    🔑 <strong>지역강사 초기 비밀번호</strong>는 <strong>휴대폰 뒷자리 4자리</strong>입니다.<br>
+                    로그인 후 내 프로필에서 비밀번호 변경·수정이 가능합니다.
+                </p>
+                <div id="login-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 8px;"></div>
+            </div>
+
+            <!-- 이용자 가입 폼 -->
+            <div id="auth-user-form" style="display:none;">
+                <p
+                    style="font-size:0.88rem; color:#555; background:#f0f9f4; padding:12px; border-radius:8px; line-height:1.6; margin-bottom: 20px;">
+                    📋 회원 가입 후 강사에게 <strong>활동 문의</strong>를 보낼 수 있습니다.
+                </p>
+                <!-- 회원 유형 선택 (강조) -->
+                <div class="form-group">
+                    <label>회원 유형 *</label>
+                    <select id="user-reg-type" onchange="updateUserJoinLabel()"
+                        style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.95rem; background:#fafafa;">
+                        <option value="이용자">👤 개인 이용자 (시민, 학부모, 주민 등)</option>
+                        <option value="기관">🏛️ 기관 / 단체 담당자 (시청, 학교, 단체 등)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="user-reg-name-label">이름 *</label>
+                    <input type="text" id="user-reg-name" placeholder="예: 홍길동" required>
+                </div>
+                <div class="form-group">
+                    <label>소속 / 기관명 (선택)</label>
+                    <input type="text" id="user-reg-org" placeholder="예: 양양군청, 개인">
+                </div>
+                <div class="form-group">
+                    <label>연락처 *</label>
+                    <input type="tel" id="user-reg-phone" placeholder="010-0000-0000" required>
+                </div>
+                <div class="form-group">
+                    <label>비밀번호 *</label>
+                    <input type="password" id="user-reg-pw" placeholder="로그인 시 사용할 비밀번호" required>
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:13px;" onclick="handleUserJoin()">회원
+                    가입하기</button>
+                <div id="user-reg-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 8px;"></div>
+            </div>
+
+            <!-- 강사 등록 안내 -->
+            <div id="auth-instructor-form" style="display:none;">
+                <div
+                    style="background:#f8f9fa; border-radius: 12px; padding: 20px; margin-bottom:20px; text-align:center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px;">👤</div>
+                    <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+                        <strong>양양 로컬 전문가</strong>이신가요?<br>
+                        강사 프로필 등록 후 센터 관리자 승인이 완료되면<br>이음터 홈페이지 강사 풀에 소개됩니다.
+                    </p>
+                </div>
+                <button class="btn btn-primary" style="width:100%; padding:13px;"
+                    onclick="closeAuthDrawer(); startJoin();">강사 등록 양식 작성하기 →</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
+
+    <!-- App Header -->
+    <header>
+        <div class="logo" onclick="location.href='index.html'">양양 강사 이음터</div>
+        <div class="user-info">
+            <!-- 비로그인(게스트) 상태 버튼 -->
+            <div id="guest-header-btns" style="display:none; gap:8px; align-items:center;">
+                <button class="btn"
+                    style="padding: 6px 14px; font-size: 0.82rem; background:#f0f4ff; border:1px solid #c5d0e6; color:#3a5199; font-weight:600; border-radius:8px;"
+                    onclick="openAuthDrawer('user')">👤 일반회원</button>
+                <button class="btn"
+                    style="padding: 6px 14px; font-size: 0.82rem; background:#e8f7f0; border:1px solid #a8d8be; color:#1a7a4a; font-weight:600; border-radius:8px;"
+                    onclick="openAuthDrawer('login')">🌿 지역강사</button>
+                <button class="btn btn-primary"
+                    style="padding: 6px 14px; font-size: 0.82rem; border-radius:8px; font-weight:600;"
+                    onclick="openAuthDrawer('login')">🔑 관리자</button>
+            </div>
+            <!-- 로그인 상태 버튼 -->
+            <div id="login-header-btns" style="display:none; align-items:center; gap:12px;">
+                <span id="user-badge" class="badge">게스트</span>
+                <span id="user-name" style="font-size:0.9rem; color:#555;">방문자</span>
+                <button class="btn"
+                    style="padding: 4px 12px; font-size: 0.85rem; background:var(--primary); color:#fff; border:none;"
+                    onclick="location.href='index.html'">🏠 메인 홈페이지</button>
+                <button class="btn" style="padding: 4px 12px; font-size: 0.85rem;"
+                    onclick="handleLogout()">로그아웃</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div id="nav-items">
+                <!-- Dynamic Items -->
+            </div>
+            <div style="margin-top: auto; padding: 20px; font-size: 0.8rem; color: #999; border-top: 1px solid #eee;">
+                양양군 농촌활성화지원센터<br>V2.0 RBAC Platform
+            </div>
+        </aside>
+
+        <main class="content">
+            <div id="public-teachers-panel" style="display: none;">
+                <!-- 강사 등록 안내 / 이음터 소개 통합 -->
+                <div style="margin-bottom: 40px; text-align: center;">
+                    <h1 class="page-title" style="margin-bottom: 16px; color: var(--primary-dark);">양양 강사 이음터</h1>
+                    <p
+                        style="font-size: 1.15rem; color: #333; margin-bottom: 10px; line-height: 1.7; word-break: keep-all; font-weight: 600;">
+                        양양의 내일을 잇는 인적 자원 플랫폼, <em style="color:var(--primary-dark); font-style:normal;">'양양 이음터'</em>와
+                        함께해 주세요
+                    </p>
+                    <p
+                        style="font-size:0.95rem; color:#555; max-width:700px; margin: 0 auto; line-height:1.8; word-break:keep-all;">
+                        '양양 이음터'는 지역 전문가에게는 성장의 기회를, 인적 자원이 필요한 기관에는 신뢰할 수 있는 데이터 풀을 제공하는 징검다리입니다.<br>
+                        다양한 분야에서 활동 중인 양양의 훌륭한 전문가들을 만나보세요.
+                    </p>
+                </div>
+
+                <!-- 강사 등록 안내 카드 -->
+                <div
+                    style="background:#fff; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.05); padding:28px 32px; margin-bottom:40px; border-left:4px solid var(--primary);">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                        <span style="font-size:1.3rem;">📋</span>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#1a3c28; margin:0;">이음터 안내</h3>
+                    </div>
+                    <ul
+                        style="list-style:none; padding:0; margin:0 0 20px 0; display:flex; flex-direction:column; gap:10px;">
+                        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.92rem; color:#444;">
+                            <span style="color:#2E7D32; font-weight:700; flex-shrink:0;">🔒</span>
+                            <span><strong>개인정보 보호:</strong> 개인 전화번호는 외부에 노출되지 않으며, 타 기관 문의 시 센터 확인 후 중계 절차를 거칩니다.</span>
+                        </li>
+                        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.92rem; color:#444;">
+                            <span style="color:#2E7D32; font-weight:700; flex-shrink:0;">✏️</span>
+                            <span><strong>자율적 정보 관리:</strong> 가입 후 언제든 본인 정보를 직접 수정할 수 있으며, SNS 노출 여부도 선택할 수
+                                있습니다.</span>
+                        </li>
+                        <li style="display:flex; gap:10px; align-items:flex-start; font-size:0.92rem; color:#444;">
+                            <span style="color:#2E7D32; font-weight:700; flex-shrink:0;">📸</span>
+                            <span><strong>프로필 사진:</strong> 본인을 잘 나타내는 사진 1장을 함께 업로드하시면 신뢰도 높은 프로필을 완성할 수 있습니다.</span>
+                        </li>
+                    </ul>
+
+                    <div
+                        style="background:#fffde7; border-radius:10px; padding:12px 16px; margin-bottom:16px; border-left:3px solid #f9a825; font-size:0.85rem; color:#6d4c00;">
+                        🏅 <strong>인증 마크 제도 (준비 중):</strong> 추후 증빙 서류 제출을 통한 '센터 인증 마크' 제도가 도입될 예정입니다.
+                    </div>
+
+                    <div style="background:#f0f9f4; border-radius:12px; padding:16px 20px; margin-bottom:15px;">
+                        <p
+                            style="font-size:0.8rem; color:#888; margin:0 0 10px 0; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">
+                            기관 의뢰 → 강사 연결 프로세스</p>
+                        <div
+                            style="display:flex; align-items:center; flex-wrap:nowrap; overflow-x:auto; gap:6px; padding-bottom:4px;">
+                            <div style="text-align:center; flex:1; min-width:80px;">
+                                <div
+                                    style="font-size:1.5rem; background:#fff; width:45px; height:45px; line-height:45px; border-radius:50%; margin:0 auto 4px; border:1px solid #e3efe9;">
+                                    🏢</div>
+                                <div style="font-size:0.78rem; color:#2E7D32; font-weight:600;">기관 문의</div>
+                            </div>
+                            <div style="color:#888; font-size:1.2rem; flex-shrink:0; font-weight:700;">→</div>
+                            <div style="text-align:center; flex:1; min-width:80px;">
+                                <div
+                                    style="font-size:1.5rem; background:#fff; width:45px; height:45px; line-height:45px; border-radius:50%; margin:0 auto 4px; border:1px solid #e3efe9;">
+                                    🔍</div>
+                                <div style="font-size:0.78rem; color:#2E7D32; font-weight:600;">센터 확인</div>
+                            </div>
+                            <div style="color:#888; font-size:1.2rem; flex-shrink:0; font-weight:700;">→</div>
+                            <div style="text-align:center; flex:1; min-width:80px;">
+                                <div
+                                    style="font-size:1.5rem; background:#fff; width:45px; height:45px; line-height:45px; border-radius:50%; margin:0 auto 4px; border:1px solid #e3efe9;">
+                                    💬</div>
+                                <div style="font-size:0.78rem; color:#2E7D32; font-weight:600;">의사 타진</div>
+                            </div>
+                            <div style="color:#888; font-size:1.2rem; flex-shrink:0; font-weight:700;">→</div>
+                            <div style="text-align:center; flex:1; min-width:80px;">
+                                <div
+                                    style="font-size:1.5rem; background:#fff; width:45px; height:45px; line-height:45px; border-radius:50%; margin:0 auto 4px; border:1px solid #e3efe9;">
+                                    🤝</div>
+                                <div style="font-size:0.78rem; color:#2E7D32; font-weight:600;">연결 완료</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-bar" style="background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    <div class="filter-group">
+                        <span style="font-size: 1.2rem; color: #aaa;">🔍</span>
+                        <input type="text" id="public-search" placeholder="이름, 분야, 전문 키워드로 강사 검색..."
+                            oninput="currentPublicPage=1; renderPublicTeachers()"
+                            style="border: none; background: transparent; flex: 1; outline: none; font-size: 0.95rem;">
+                    </div>
+                    <select id="public-cat-filter" onchange="currentPublicPage=1; renderPublicTeachers()"
+                        style="padding: 8px 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: #fafafa; outline: none;">
+                        <option value="전체">모든 분야</option>
+                        <option value="레크리에이션·진행">레크리에이션·진행</option>
+                        <option value="농촌·공동체·정책">농촌·공동체·정책</option>
+                        <option value="세무·회계">세무·회계</option>
+                        <option value="미술·공예·예술">미술·공예·예술</option>
+                        <option value="사진·아카이브·영상">사진·아카이브·영상</option>
+                        <option value="디지털·AI·문해">디지털·AI·문해</option>
+                        <option value="정리·실버·복지·치유">정리·실버·복지·치유</option>
+                        <option value="요리·식문화">요리·식문화</option>
+                        <option value="환경·생태">환경·생태</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+
+                <!-- 강사 카드 그리드 컨테이너 -->
+                <div id="public-teachers-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                    <!-- JS 렌더링 영역 -->
+                </div>
+            </div>
+
+            <!-- Guest Panel (Registration Form) -->
+            <div id="guest-panel" style="display: none;">
+                <h1 class="page-title">강사 프로필 등록 신청</h1>
+                <div class="card">
+                    <p style="color: #666; margin-bottom: 25px;">양양 로컬 전문가님의 소중한 활동 정보를 입력해 주세요. 작성해 주신 내용은 관리자 승인 완료 후
+                        '전문가 둘러보기' 페이지에 정식 등록됩니다.</p>
+                    <form id="join-instructor-form">
+                        <section style="margin-bottom: 30px;">
+                            <h3
+                                style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                                👤 기본 정보
+                            </h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>성명 *</label>
+                                    <input type="text" name="name" required placeholder="성명을 입력해 주세요">
+                                </div>
+                                <div class="form-group">
+                                    <label>소속</label>
+                                    <input type="text" name="org" placeholder="예: 양양문화원, 개인활동가 등">
+                                </div>
+                                <div class="form-group">
+                                    <label>핸드폰 번호 *</label>
+                                    <input type="text" name="phone" required placeholder="010-0000-0000">
+                                </div>
+                                <div class="form-group">
+                                    <label>이메일</label>
+                                    <input type="email" name="email" placeholder="example@mail.com">
+                                </div>
+                                <div class="form-group full">
+                                    <label>프로필 사진</label>
+                                    <div style="display: flex; gap: 20px; align-items: start;">
+                                        <div id="photo-preview"
+                                            style="width: 120px; height: 150px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; overflow: hidden;">
+                                            <span style="color: #999; font-size: 0.8rem;">미리보기</span>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <input type="file" id="photo-input" accept="image/*"
+                                                style="margin-bottom: 10px;">
+                                            <small style="color: #888; display: block;">* 증명사진 형태의 정면 사진을 권장합니다. (JPG,
+                                                PNG)</small>
+                                            <input type="hidden" name="profile_photo" id="profile-photo-url">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label>활동 지역 / 주소</label>
+                                    <input type="text" name="address" placeholder="예: 양양군 강현면, 또는 상세 주소">
+                                    <small style="color: #888; display: block; margin-top: 4px;">* 로컬 강사 확인 및 매칭을 위해 활동
+                                        중인 지역을 입력해 주세요.</small>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section style="margin-bottom: 30px;">
+                            <h3
+                                style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                                📖 활동 정보
+                            </h3>
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label>강의 분야 *</label>
+                    <select name="field" required>
+                        <option value="">강의 분야를 선택해 주세요</option>
+                        <option value="농촌,공동체,정책">농촌,공동체,정책</option>
+                        <option value="환경,생태">환경,생태</option>
+                        <option value="사진,아카이브,영상">사진,아카이브,영상</option>
+                        <option value="미술,공예,예술">미술,공예,예술</option>
+                        <option value="요리,식문화">요리,식문화</option>
+                        <option value="정리,실버,복지,치유">정리,실버,복지,치유</option>
+                        <option value="디지털,AI,문해">디지털,AI,문해</option>
+                        <option value="레크레이션,진행">레크레이션,진행</option>
+                        <option value="세무,회계">세무,회계</option>
+                        <option value="인문,철학">인문,철학</option>
+                        <option value="마케팅,로컬브랜딩">마케팅,로컬브랜딩</option>
+                        <option value="건강,스포츠">건강,스포츠</option>
+                        <option value="기타">기타</option>
+                    </select>
+                                </div>
+                                <div class="form-group full">
+                                    <label>주요경력 (최대 300자)</label>
+                                    <div
+                                        style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; color: #555;">
+                                        <strong>💡 작성 가이드</strong><br>
+                                        • 주요 자격증 및 취득 연도 (예: 바리스타 1급, 2023)<br>
+                                        • 관련 분야 강의 경력 (기관명, 기간)<br>
+                                        • 핵심 활동 분야 및 특기 사항
+                                    </div>
+                                    <textarea name="career" rows="4" maxlength="300"
+                                        placeholder="가이드를 참고하여 핵심 경력을 입력해 주세요"></textarea>
+                                    <div style="text-align: right; font-size: 0.8rem; color: #888;" id="career-count">0
+                                        / 300</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section style="margin-bottom: 30px;">
+                            <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 15px;">
+                                🔗 소셜 및 동의
+                            </h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>인스타그램 주소</label>
+                                    <input type="text" name="instagram" placeholder="@아이디 또는 링크(URL)">
+                                </div>
+                                <div class="form-group">
+                                    <label>인스타 공개 여부</label>
+                                    <select name="insta_open">
+                                        <option value="미공개">미공개</option>
+                                        <option value="공개">공개</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full">
+                                    <label>비밀번호 설정 *</label>
+                                    <input type="password" name="password" required placeholder="정보 수정 시 필요한 비밀번호">
+                                </div>
+                                <div class="form-group full">
+                                    <label>정보 공개 동의 *</label>
+                                    <select name="info_open_agree" required>
+                                        <option value="동의">동의</option>
+                                        <option value="미동의">미동의</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div style="background: #f1f3f1; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                            <h4 style="margin: 0 0 10px 0; font-size: 0.95rem;">🛡️ 개인정보 및 활동정보 수집·이용 동의 안내</h4>
+                            <div
+                                style="font-size: 0.8rem; color: #555; line-height: 1.5; height: 100px; overflow-y: auto; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                                1. 수집 및 이용 목적: 양양 강사 이음터 인적 자원망 등록, 마을 및 수요처 교육 프로그램 연계·매칭, 홍보(인포커스 등)<br>
+                                2. 수집 항목: 성명, 소속, 핸드폰 번호(연락처), 강의분야, 주요경력, 이메일 등<br>
+                                3. 제3자 제공 안내: 강사 섭외 및 교육 연계를 위해 요청 시 신청 단체(마을, 기관 등)에 성명 및 활동 정보가 제공될 수 있습니다.<br>
+                                4. 보유 및 이용 기간: 수집일로부터 3년 또는 정보 삭제 요청 시까지<br>
+                                5. 동의 거부 권리: 귀하는 동의를 거부할 권리가 있으나, 거부 시 강사 이음터 등록 및 마을 연계 서비스 이용이 제한될 수 있습니다.
+                            </div>
+                            <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="privacy-agree" required>
+                                <label for="privacy-agree" style="font-size: 0.9rem; cursor: pointer;">위의 내용을 확인했으며 이에
+                                    동의합니다</label>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <button type="submit" class="btn btn-primary" style="width: 200px; padding: 15px;">📝 강사 정보
+                                제출</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructor Panel -->
+            <div id="instructor-panel">
+                <h1 class="page-title">나의 활동 프로필 관리</h1>
+                <div id="my-profile-status" style="margin-bottom: 20px;"></div>
+                <div class="card">
+                    <div id="my-info-content">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="toggleEditInfo()">정보 수정하기</button>
+                        <button class="btn btn-danger" onclick="requestDelete()">정보 삭제 요청</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="admin-panel">
+                <h1 class="page-title">강사 데이터베이스(DB) 및 승인 관리</h1>
+                <div class="card">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h2 style="font-size: 1.1rem; margin: 0; font-weight: 800;">데이터베이스 통합 관리</h2>
+                        <button class="btn btn-primary" onclick="loadRealData(true)">🔄 데이터 새로고침</button>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+                        <input type="text" id="admin-search" placeholder="성명 또는 연락처 검색..." oninput="filterAdminTable()"
+                            style="padding: 10px 15px; font-size: 0.9rem; border: 1px solid var(--border); border-radius: 8px; flex: 1; min-width: 200px;">
+                        <select id="admin-cat-filter" onchange="filterAdminTable()"
+                            style="padding: 10px; font-size: 0.9rem; border: 1px solid var(--border); border-radius: 8px;">
+                            <option value="전체">모든 분야</option>
+                            <option value="레크리에이션·진행">레크리에이션·진행</option>
+                            <option value="농촌·공동체·정책">농촌·공동체·정책</option>
+                            <option value="세무·회계">세무·회계</option>
+                            <option value="미술·공예·예술">미술·공예·예술</option>
+                            <option value="사진·아카이브·영상">사진·아카이브·영상</option>
+                            <option value="디지털·AI·문해">디지털·AI·문해</option>
+                            <option value="정리·실버·복지·치유">정리·실버·복지·치유</option>
+                            <option value="요리·식문화">요리·식문화</option>
+                            <option value="환경·생태">환경·생태</option>
+                            <option value="기타">기타</option>
+                        </select>
+                        <div class="filter-tabs" style="display: flex; gap: 10px;">
+                            <div class="filter-tab active" onclick="setStatusFilter('전체', this)"
+                                style="padding: 8px 16px; border-radius: 20px; cursor: pointer; background: #eee; font-size: 0.85rem;">
+                                전체</div>
+                            <div class="filter-tab" onclick="setStatusFilter('대기', this)"
+                                style="padding: 8px 16px; border-radius: 20px; cursor: pointer; background: #eee; font-size: 0.85rem;">
+                                승인대기</div>
+                            <div class="filter-tab" onclick="setStatusFilter('승인', this)"
+                                style="padding: 8px 16px; border-radius: 20px; cursor: pointer; background: #eee; font-size: 0.85rem;">
+                                승인완료</div>
+                            <div class="filter-tab" onclick="setStatusFilter('보관', this)"
+                                style="padding: 8px 16px; border-radius: 20px; cursor: pointer; background: #eee; font-size: 0.85rem;">
+                                🗑️ 보관함</div>
+                        </div>
+                    </div>
+
+                    <!-- 일괄 처리 액션 바 -->
+                    <div id="bulk-action-bar"
+                        style="display:none; background:#f0f9f4; border: 1px solid #c3dfd4; border-radius: 10px; padding: 12px 20px; margin-bottom: 15px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <span id="bulk-count-label" style="font-size: 0.9rem; color: #0b7c5b; font-weight: 700;">0개
+                            선택됨</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-primary" onclick="bulkApprove()"
+                                style="padding: 7px 18px; font-size: 0.85rem;">✅ 선택 일괄 승인</button>
+                            <button class="btn btn-danger" onclick="bulkArchive()"
+                                style="padding: 7px 18px; font-size: 0.85rem;">🗑️ 선택 일괄 보관</button>
+                            <button class="btn" onclick="clearBulkSelect()"
+                                style="padding: 7px 18px; font-size: 0.85rem; background:#eee;">선택 해제</button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="select-all-chk"
+                                            onclick="toggleSelectAll(this)" title="전체 선택"></th>
+                                    <th>성명</th>
+                                    <th>소속</th>
+                                    <th>분야</th>
+                                    <th>상태</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding: 20px;">데이터를 불러오는 중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div id="global-spinner" class="loading-spinner"></div>
+    </main>
+    </div>
+
+    <!-- Detail Modal Structure -->
+    <div id="detail-modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDetailModal()">&times;</span>
+            <h2 id="modal-title" style="margin-bottom: 10px; color: var(--primary);">강사 상세 정보</h2>
+            <div id="modal-status-badge" style="margin-bottom: 25px;"></div>
+
+            <div class="form-grid">
+                <!-- Content handled by showTeacherDetails -->
+            </div>
+
+            <div style="margin-top: 30px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;"
+                id="modal-actions">
+                <!-- Dynamic Buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal Structure -->
+    <div id="edit-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+        <div class="modal-content" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            <h2 style="margin-bottom: 20px; color: var(--primary);">나의 정보 수정</h2>
+            <form id="edit-instructor-form" onsubmit="submitInstructorUpdate(event)">
+                <input type="hidden" name="rowIndex">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>성명</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>소속</label>
+                        <input type="text" name="org">
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="text" name="phone" required readonly style="background:#f0f0f0;">
+                    </div>
+                    <div class="form-group">
+                        <label>이메일</label>
+                        <input type="email" name="email">
+                    </div>
+                    <div class="form-group full">
+                        <label>강의 분야 (카테고리)</label>
+                        <select name="category" required>
+                            <option value="">분야 선택</option>
+                            <option value="레크리에이션·진행">레크리에이션·진행</option>
+                            <option value="농촌·공동체·정책">농촌·공동체·정책</option>
+                            <option value="세무·회계">세무·회계</option>
+                            <option value="미술·공예·예술">미술·공예·예술</option>
+                            <option value="사진·아카이브·영상">사진·아카이브·영상</option>
+                            <option value="디지털·AI·문해">디지털·AI·문해</option>
+                            <option value="정리·실버·복지·치유">정리·실버·복지·치유</option>
+                            <option value="요리·식문화">요리·식문화</option>
+                            <option value="환경·생태">환경·생태</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>상세 활동 분야</label>
+                        <input type="text" name="field">
+                    </div>
+                    <div class="form-group full">
+                        <label>활동 가능 지역 (주소)</label>
+                        <input type="text" name="address">
+                    </div>
+                    <div class="form-group">
+                        <label>인스타그램 아이디 (@제외)</label>
+                        <input type="text" name="instagram">
+                    </div>
+                    <div class="form-group">
+                        <label>연락처(인스타) 공개 여부</label>
+                        <select name="insta_open">
+                            <option value="공개">공개</option>
+                            <option value="미공개">미공개</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>비밀번호 (초기값: 핸드폰 뒷자리 4자리)</label>
+                        <input type="text" name="password" required>
+                    </div>
+                    <div class="form-group full">
+                        <label>정보공개 동의</label>
+                        <select name="info_open_agree">
+                            <option value="동의">동의</option>
+                            <option value="비동의">비동의</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>주요 경력</label>
+                        <textarea name="career" rows="5"></textarea>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; text-align: right;">
+                    <button type="submit" class="btn btn-primary" style="width: 150px;">💾 저장하기</button>
+                    <button type="button" class="btn" onclick="closeEditModal()" style="width: 100px;">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Inquiry Modal (숨고 커넥트 스타일) -->
+    <div id="inquiry-modal"
+        style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-content" style="max-width: 500px; padding: 35px; border-radius: 20px;">
+            <span class="modal-close" onclick="closeInquiryModal()">&times;</span>
+            <h2 style="margin-bottom: 5px; color: var(--text); font-size: 1.4rem;">📩 강사 문의하기</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 25px;">센터를 통해 안전하게 상담을 연결해 드립니다.</p>
+
+            <div
+                style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+                <div id="inq-photo-area"
+                    style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: #ddd;"></div>
+                <div>
+                    <div style="font-size: 0.8rem; color: #888; font-weight: 600;">문의 대상 강사</div>
+                    <div id="inq-target-name" style="font-size: 1.1rem; font-weight: 700; color: var(--primary);"></div>
+                </div>
+            </div>
+
+            <form id="inquiry-form" onsubmit="submitInquiry(event)">
+                <input type="hidden" id="inq-teacher-name" name="teacherName">
+
+                <div class="form-group">
+                    <label>신청자 / 단체명 <span style="color:var(--secondary)">*</span></label>
+                    <input type="text" id="inq-user-name" name="inquirerName" required placeholder="예: 양양마을회 홍길동 이장">
+                </div>
+
+                <div class="form-group">
+                    <label>연락받으실 번호 <span style="color:var(--secondary)">*</span></label>
+                    <input type="text" id="inq-user-phone" name="inquirerPhone" required placeholder="010-0000-0000">
+                </div>
+
+                <div class="form-group">
+                    <label>문의 목적 <span style="color:var(--secondary)">*</span></label>
+                    <select id="inq-purpose" name="purpose" required>
+                        <option value="">선택해주세요</option>
+                        <option value="강의/출강 의뢰">강의/출강 의뢰</option>
+                        <option value="프로그램·행사 협력">프로그램·행사 협력</option>
+                        <option value="기타 문의">기타 문의</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 30px;">
+                    <label>요청 내용 (선택)</label>
+                    <textarea id="inq-message" name="message" rows="3"
+                        placeholder="예정 날짜, 장소, 대상 등 간단한 내용을 알려주시면 더 빠른 연결이 가능합니다."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.05rem;">
+                    센터로 문의 전달하기
+                </button>
+                <div style="text-align: center; font-size: 0.75rem; color: #999; margin-top: 15px;">
+                    * 연락처는 해당 강사님과 매칭을 위해서만 사용됩니다.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- App Logic -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script>
+        let AUTH = { isLoggedIn: false, role: 'GUEST', token: null, data: null };
+        let DATA = { teachers: [], notices: [], schedules: [], statusFilter: '전체', lastFetch: 0, CACHE_DURATION: 10 * 60 * 1000 }; // 10 minutes
+        let currentPublicPage = 1;
+        const PUBLIC_PER_PAGE = 24; // 4 columns * 6 rows
+        const DEV_PUBLIC_LOCK = true;
+        const DEFAULT_AUTH_DESCRIPTION = '강사, 이용자, 관리자를 위한 전용 공간입니다.';
+        const DEFAULT_LOGIN_HELP_HTML = '🔑 <strong>지역강사 초기 비밀번호</strong>는 <strong>휴대폰 뒷자리 4자리</strong>입니다.<br>로그인 후 프로필에서 비밀번호 변경이 가능합니다.';
+        let adminShortcutActive = false;
+
+        function setupGuestHeaderNotice() {
+            const guestHeader = document.getElementById('guest-header-btns');
+            if (!guestHeader) return;
+            guestHeader.innerHTML = `
+                <div id="guest-maintenance-note"
+                    style="padding: 8px 14px; font-size: 0.88rem; background:#fff8e8; border:1px solid #f0d68a; color:#7a5a00; font-weight:700; border-radius:999px;">
+                    현재 준비중입니다.
+                </div>
+            `;
+        }
+
+        function getAuthDrawerElements() {
+            const overlay = document.getElementById('auth-overlay');
+            const loginForm = document.getElementById('auth-login-form');
+            return {
+                description: overlay?.querySelector('h2 + p'),
+                tabs: overlay?.querySelector('.auth-tabs'),
+                helpText: loginForm?.querySelector('p')
+            };
+        }
+
+        function setAuthDrawerMode(isAdminMode) {
+            const { description, tabs, helpText } = getAuthDrawerElements();
+            const phoneInput = document.getElementById('login-phone');
+            const passwordInput = document.getElementById('login-pw');
+            const errorEl = document.getElementById('login-error');
+
+            if (description) {
+                description.textContent = isAdminMode
+                    ? '관리자 전용 진입창입니다. Ctrl+5로만 열 수 있습니다.'
+                    : DEFAULT_AUTH_DESCRIPTION;
+            }
+
+            if (tabs) tabs.style.display = isAdminMode ? 'none' : 'flex';
+
+            if (helpText) {
+                helpText.innerHTML = isAdminMode
+                    ? '관리자 계정으로만 접속할 수 있습니다.'
+                    : DEFAULT_LOGIN_HELP_HTML;
+            }
+
+            if (phoneInput) {
+                phoneInput.placeholder = isAdminMode ? 'admin' : '010-0000-0000';
+                if (!isAdminMode) phoneInput.value = '';
+            }
+
+            if (passwordInput && !isAdminMode) passwordInput.value = '';
+            if (errorEl) errorEl.textContent = '';
+        }
+
+        function showPreparingNotice() {
+            const note = document.getElementById('guest-maintenance-note');
+            if (!note) return;
+            note.textContent = '현재 준비중입니다.';
+            if (typeof note.animate === 'function') {
+                note.animate(
+                    [
+                        { transform: 'translateY(0)', boxShadow: '0 0 0 rgba(122, 90, 0, 0)' },
+                        { transform: 'translateY(-2px)', boxShadow: '0 10px 20px rgba(122, 90, 0, 0.18)' },
+                        { transform: 'translateY(0)', boxShadow: '0 0 0 rgba(122, 90, 0, 0)' }
+                    ],
+                    { duration: 450, easing: 'ease-out' }
+                );
+            }
+        }
+
+        function handleAdminShortcut(event) {
+            const isShortcut = event.ctrlKey && !event.altKey && !event.metaKey && (event.code === 'Digit5' || event.code === 'Numpad5' || event.key === '5');
+            if (!isShortcut) return;
+            event.preventDefault();
+            adminShortcutActive = true;
+            setAuthDrawerMode(true);
+            openAuthDrawer('login', { allowAdminShortcut: true });
+            document.getElementById('login-phone')?.focus();
+        }
+
+        // --- Instructor Storage Configuration ---
+        const instructorStorageConfig = window.IUMTEO_STORAGE_CONFIG?.instructorRegister || {
+            storageBucket: 'instructor-register.firebasestorage.app',
+            legacyProfilePhotoFolder: 'profile_photos',
+            uploadApiCandidates: ['http://localhost:3000/api/uploads/profile-photo']
+        };
+
+        async function uploadProfilePhotoViaApi(file, name, identifier) {
+            const endpoints = instructorStorageConfig.uploadApiCandidates || [];
+            const errors = [];
+
+            for (const endpoint of endpoints) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file, file.name || 'profile.jpg');
+                    formData.append('name', name || 'instructor');
+                    formData.append('identifier', identifier || 'unknown');
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const payload = await response.json().catch(() => ({}));
+                    if (response.ok && payload?.success && payload?.data?.url) {
+                        return payload.data.url;
+                    }
+                    errors.push(`${endpoint}: ${payload?.message || response.statusText}`);
+                } catch (err) {
+                    errors.push(`${endpoint}: ${err.message || err}`);
+                }
+            }
+
+            throw new Error(errors[0] || '프로필 사진 업로드 API에 연결할 수 없습니다.');
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", async () => {
+            setupGuestHeaderNotice();
+            setAuthDrawerMode(false);
+            checkSession();
+            renderNav();
+            document.addEventListener('keydown', handleAdminShortcut);
+
+            // Handle rowIndex from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const rowIndex = urlParams.get('rowIndex');
+            if (rowIndex) {
+                prefillLoginFromRow(rowIndex);
+            }
+
+            // Form Submit Event
+            document.getElementById('join-instructor-form')?.addEventListener('submit', handleJoinSubmit);
+
+            // Career character counter
+            const careerTextarea = document.querySelector('textarea[name="career"]');
+            const careerCount = document.getElementById('career-count');
+            if (careerTextarea && careerCount) {
+                careerTextarea.addEventListener('input', () => {
+                    careerCount.textContent = `${careerTextarea.value.length} / 300`;
+                });
+            }
+
+            // Photo Input Handler
+            document.getElementById('photo-input')?.addEventListener('change', handlePhotoChange);
+        });
+
+        async function handlePhotoChange(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const preview = document.getElementById('photo-preview');
+                preview.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Image Compression Utility ---
+        function compressImage(file, maxWidth = 800, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error('이미지 압축에 실패했습니다.'));
+                                return;
+                            }
+                            const compressedFile = new File([blob], file.name, {
+                                type: blob.type || 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, 'image/jpeg', quality);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
+        }
+
+        async function uploadPhotoToFirebase(file, name, phone) {
+            if (!file) return "";
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+
+            try {
+                // 1. 이미지 리사이징 및 용량 압축 (최대 너비 800px, 품질 70%)
+                const compressedFile = await compressImage(file, 800, 0.7);
+
+                // 2. Next 업로드 API를 통해 instructor-register 버킷에 저장
+                return await uploadProfilePhotoViaApi(compressedFile, name, phone);
+            } catch (err) {
+                console.error("Profile photo upload failed:", err);
+                alert("사진 업로드 실패 상세 원인:\n" + err.message);
+                throw new Error("사진 업로드 중 오류가 발생했습니다.");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        async function prefillLoginFromRow(rowIndex) {
+            try {
+                const teachers = await loadTeachers();
+                const found = teachers.find(t => t.rowIndex == rowIndex);
+                if (found && found.phone && !AUTH.isLoggedIn) {
+                    document.getElementById('login-phone').value = found.phone;
+                    document.getElementById('login-pw').focus();
+                }
+            } catch (err) {
+                console.error("Prefill failed:", err);
+            }
+        }
+
+        function switchAuthTab(tab) {
+            if (adminShortcutActive && tab !== 'login') return;
+            // 모든 탭 비활성화
+            ['atab-login', 'atab-user', 'atab-instructor'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
+            });
+            ['auth-login-form', 'auth-user-form', 'auth-instructor-form'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+            // 선택한 탭 활성화
+            const tabMap = { login: 'atab-login', user: 'atab-user', instructor: 'atab-instructor' };
+            const formMap = { login: 'auth-login-form', user: 'auth-user-form', instructor: 'auth-instructor-form' };
+            if (tabMap[tab]) document.getElementById(tabMap[tab])?.classList.add('active');
+            if (formMap[tab]) document.getElementById(formMap[tab]).style.display = 'block';
+        }
+
+        function openAuthDrawer(tab = 'login', options = {}) {
+            if (DEV_PUBLIC_LOCK && !options.allowAdminShortcut) {
+                showPreparingNotice();
+                return;
+            }
+            const overlay = document.getElementById('auth-overlay');
+            overlay.style.display = 'flex';
+            switchAuthTab(adminShortcutActive ? 'login' : tab);
+        }
+
+        function closeAuthDrawer() {
+            document.getElementById('auth-overlay').style.display = 'none';
+            adminShortcutActive = false;
+            setAuthDrawerMode(false);
+        }
+
+        function checkSession() {
+            const saved = sessionStorage.getItem('iumteo_auth');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    AUTH.role = data.role;
+                    AUTH.user = data.user;
+                    AUTH.isLoggedIn = true;
+                    applyAuth();
+                } catch (e) {
+                    sessionStorage.removeItem('iumteo_auth');
+                    startGuest();
+                }
+            } else {
+                // 세션 없으면 즉시 GUEST로 강사 풀 보여주기
+                startGuest();
+            }
+        }
+
+        // 이용자 DB 로드 함수
+        async function loadUsers() {
+            const res = await fetch(window.SHEET_CONFIG.users.csvUrl + '&t=' + Date.now());
+            const text = await res.text();
+            const rows = text.trim().split('\n').slice(1); // 헤더 제외
+            return rows.map(row => {
+                const cols = row.split(',');
+                return {
+                    memberType: (cols[0] || '').trim().replace(/^"|"$/g, ''),
+                    name: (cols[1] || '').trim().replace(/^"|"$/g, ''),
+                    org: (cols[2] || '').trim().replace(/^"|"$/g, ''),
+                    phone: (cols[3] || '').trim().replace(/^"|"$/g, ''),
+                    password: (cols[4] || '').trim().replace(/^"|"$/g, '')
+                };
+            }).filter(u => u.phone);
+        }
+
+        async function handleLogin() {
+            const phone = document.getElementById('login-phone').value.trim();
+            const pw = document.getElementById('login-pw').value.trim();
+            const errorEl = document.getElementById('login-error');
+
+            if (!phone || !pw) {
+                errorEl.textContent = "정보를 모두 입력해 주세요.";
+                return;
+            }
+
+            // Admin Hardcoded Check
+            if (phone === 'admin' && pw === '1234') {
+                proceedLogin('ADMIN', { name: '관리자' });
+                return;
+            }
+
+            if (DEV_PUBLIC_LOCK) {
+                errorEl.textContent = "현재는 관리자 모드만 접속할 수 있습니다.";
+                return;
+            }
+
+            errorEl.textContent = "확인 중...";
+
+            try {
+                // 1차: 강사(로컬전문가) DB 확인
+                const teachers = await loadTeachers();
+                const normalInputPhone = phone.replace(/-/g, '');
+                const foundTeacher = teachers.find(t => {
+                    const tPhone = (t.phone || '').replace(/-/g, '');
+                    if (tPhone !== normalInputPhone) return false;
+                    // 저장된 비밀번호가 있으면 비교, 없으면 핸드폰 뒷자리 4자리와 비교
+                    const storedPw = t.password || tPhone.slice(-4);
+                    return pw === storedPw;
+                });
+                if (foundTeacher) {
+                    proceedLogin('INSTRUCTOR', foundTeacher);
+                    return;
+                }
+
+                // 2차: 일반 이용자 DB 확인
+                const users = await loadUsers();
+                const normalPhone = phone.replace(/-/g, '');
+                const foundUser = users.find(u => u.phone.replace(/-/g, '') === normalPhone && u.password === pw);
+                if (foundUser) {
+                    proceedLogin('USER', foundUser);
+                    return;
+                }
+
+                errorEl.textContent = "번호 또는 비밀번호가 일치하지 않습니다.";
+            } catch (err) {
+                errorEl.textContent = "데이터 로딩 중 오류가 발생했습니다.";
+                console.error(err);
+            }
+        }
+
+        function proceedLogin(role, user) {
+            AUTH.role = role;
+            AUTH.user = user;
+            AUTH.isLoggedIn = true;
+            sessionStorage.setItem('iumteo_auth', JSON.stringify(AUTH));
+            closeAuthDrawer(); // 로그인 성공 시 드로어 닫기
+            applyAuth();
+        }
+
+        function startGuest() {
+            AUTH.role = 'GUEST';
+            AUTH.user = null;
+            AUTH.isLoggedIn = false;
+            sessionStorage.removeItem('iumteo_auth');
+            applyAuth();
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('iumteo_auth');
+            location.reload();
+        }
+
+        function applyAuth() {
+            closeAuthDrawer();
+
+            // --- 헤더 버튼 상태 전환 ---
+            const isLoggedIn = AUTH.isLoggedIn;
+            const guestBtns = document.getElementById('guest-header-btns');
+            const loginBtns = document.getElementById('login-header-btns');
+            if (guestBtns) guestBtns.style.display = isLoggedIn ? 'none' : 'flex';
+            if (loginBtns) loginBtns.style.display = isLoggedIn ? 'flex' : 'none';
+
+            const badgeEl = document.getElementById('user-badge');
+            const nameEl = document.getElementById('user-name');
+            if (badgeEl) badgeEl.textContent = AUTH.role === 'ADMIN' ? '관리자' : (AUTH.role === 'INSTRUCTOR' ? '강사' : (AUTH.role === 'USER' ? '이용자' : '게스트'));
+            if (nameEl) nameEl.textContent = AUTH.user?.name || '방문자';
+
+            // --- 패널 표시 ---
+            document.getElementById('admin-panel').style.display = AUTH.role === 'ADMIN' ? 'block' : 'none';
+            document.getElementById('instructor-panel').style.display = AUTH.role === 'INSTRUCTOR' ? 'block' : 'none';
+            document.getElementById('public-teachers-panel').style.display =
+                (AUTH.role === 'GUEST' || AUTH.role === 'INSTRUCTOR' || AUTH.role === 'USER') ? 'block' : 'none';
+            document.getElementById('guest-panel').style.display = 'none';
+
+            if (AUTH.role === 'ADMIN') {
+                document.getElementById('public-teachers-panel').style.display = 'none';
+                loadAdminDashboard();
+            }
+            if (AUTH.role === 'INSTRUCTOR' || AUTH.role === 'GUEST' || AUTH.role === 'USER') renderPublicTeachers();
+            if (AUTH.role === 'INSTRUCTOR') setTimeout(renderMyProfile, 100);
+            renderNav();
+        }
+
+        // --- Caching Logic ---
+        function getCachedData() {
+            const cached = localStorage.getItem('iumteo_teachers_cache');
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                if (Date.now() - timestamp < DATA.CACHE_DURATION) {
+                    return data;
+                }
+            }
+            return null;
+        }
+
+        function setCachedData(data) {
+            localStorage.setItem('iumteo_teachers_cache', JSON.stringify({
+                data: data,
+                timestamp: Date.now()
+            }));
+            DATA.teachers = data;
+        }
+
+        function normalizeTeacherPhoto(value) {
+            const trimmed = String(value || '').trim();
+            if (!trimmed) return '';
+            if (/^(https?:|data:|images\/|\.\/|\/)/i.test(trimmed)) return trimmed;
+            const objectPath = trimmed.includes('/')
+                ? trimmed
+                : `${instructorStorageConfig.legacyProfilePhotoFolder}/${trimmed}`;
+            return `https://firebasestorage.googleapis.com/v0/b/${instructorStorageConfig.storageBucket}/o/${encodeURIComponent(objectPath)}?alt=media`;
+        }
+
+        function normalizeLocalFlag(value) {
+            if (value === true) return true;
+            const normalized = String(value || '').trim().toUpperCase();
+            return ['Y', 'YES', 'TRUE', '1'].includes(normalized);
+        }
+
+        function normalizeTeacherRecord(raw = {}, index = 0) {
+            const statusValue = String(raw.status ?? raw['상태'] ?? raw['승인여부'] ?? raw['승인'] ?? '').trim();
+            return {
+                rowIndex: Number(raw.rowIndex || index + 2),
+                name: String(raw.name ?? raw['성명'] ?? '').trim(),
+                org: String(raw.org ?? raw['소속'] ?? '').trim(),
+                field: String(raw.field ?? raw['상세내용'] ?? '').trim(),
+                career: String(raw.career ?? raw['주요경력'] ?? '').trim(),
+                email: String(raw.email ?? raw['이메일'] ?? '').trim(),
+                instagram: String(raw.instagram ?? raw['인스타그램주소'] ?? '').trim(),
+                insta_open: String(raw.insta_open ?? raw['인스타그램공개여부'] ?? '').trim(),
+                category: String(raw.category ?? raw['강의분야'] ?? '').trim(),
+                info_open_agree: String(raw.info_open_agree ?? raw['동의여부'] ?? '').trim(),
+                isLocal: normalizeLocalFlag(raw.isLocal ?? raw['로컬'] ?? raw['로컬여부']),
+                phone: String(raw.phone ?? raw['연락처'] ?? '').trim(),
+                address: String(raw.address ?? raw['주소'] ?? '').trim(),
+                password: String(raw.password ?? raw['사용자비번'] ?? '').trim(),
+                profile_photo: normalizeTeacherPhoto(raw.profile_photo ?? raw['프로필사진'] ?? ''),
+                status: statusValue || (raw.source === 'sample' ? '승인' : '대기'),
+                source: raw.source || 'google-sheets'
+            };
+        }
+
+        async function loadTeachersFromSheet() {
+            if (!window.CSVUtils) throw new Error('CSVUtils 로드 실패');
+            if (!window.SHEET_CONFIG?.teachers?.csvUrl) throw new Error('구글 스프레드시트 URL이 없습니다.');
+
+            const rows = await window.CSVUtils.fetchCSV(window.SHEET_CONFIG.teachers.csvUrl);
+            if (!rows || rows.length < 2) return [];
+
+            const headers = (rows[0] || []).map((header) => String(header || '').trim());
+            return rows.slice(1).map((row, index) => {
+                const raw = { rowIndex: index + 2, source: 'google-sheets' };
+                headers.forEach((header, headerIndex) => {
+                    raw[header] = String(row[headerIndex] || '').trim();
+                });
+                return normalizeTeacherRecord(raw, index);
+            }).filter((teacher) => teacher.name || teacher.phone);
+        }
+
+        function getSampleTeachers() {
+            const sampleTeachers = window.IUMTEO_SAMPLE_DATA?.teachers;
+            if (!Array.isArray(sampleTeachers)) return [];
+            return sampleTeachers.map((teacher, index) => normalizeTeacherRecord({ ...teacher, source: 'sample' }, index));
+        }
+
+        async function loadTeachers(bypassCache = false) {
+            if (!bypassCache) {
+                const cached = getCachedData();
+                if (cached) {
+                    DATA.teachers = cached;
+                    return cached;
+                }
+            }
+
+            try {
+                const sheetTeachers = await loadTeachersFromSheet();
+                if (sheetTeachers.length > 0) {
+                    setCachedData(sheetTeachers);
+                    return sheetTeachers;
+                }
+            } catch (fetchErr) {
+                console.warn('[loadTeachers] Google Sheets fetch failed:', fetchErr);
+            }
+
+            const sampleTeachers = getSampleTeachers();
+            if (sampleTeachers.length > 0) {
+                setCachedData(sampleTeachers);
+                return sampleTeachers;
+            }
+
+            setCachedData([]);
+            return [];
+        }
+
+        // --- GAS 통신 공통 함수 (JSON body POST로 통일) ---
+        async function gasPost(payload) {
+            // NOTE: no-cors 모드에서는 응답 본문을 읽을 수 없습니다.
+            // GAS가 수신 가능한 JSON body로 전송합니다.
+            return fetch(window.SHEET_CONFIG.teachers.submitUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' }, // no-cors에서는 application/json 불가 → text/plain 사용
+                body: JSON.stringify(payload)
+            });
+        }
+
+        function renderNav() {
+            const nav = document.getElementById('nav-items');
+            nav.innerHTML = '';
+
+            const items = [];
+            if (AUTH.role === 'ADMIN') {
+                items.push({ text: '📊 대시보드 홈', active: true });
+                items.push({ text: '📝 전문가 승인 대기열' });
+                items.push({ text: '👥 전체 전문가 관리' });
+            } else if (AUTH.role === 'INSTRUCTOR') {
+                items.push({ text: '👤 내 활동 프로필', active: true });
+                items.push({ text: '✉️ 센터 공지' });
+            } else {
+                items.push({ text: '🏠 홈으로 돌아가기', active: true, href: 'index.html' });
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `menu-item ${item.active ? 'active' : ''}`;
+                div.innerHTML = item.text;
+                if (item.href) {
+                    div.style.cursor = 'pointer';
+                    div.addEventListener('click', () => location.href = item.href);
+                }
+                nav.appendChild(div);
+            });
+        }
+
+        async function loadTeachersOld() {
+            // Deprecated, using the one above
+            return loadTeachers();
+        }
+
+        // --- JOIN Logic ---
+        async function handleJoinSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // Validation
+            if (!data.name || !data.phone || !data.password) {
+                alert("필수 항목(*)을 입력해 주세요.");
+                return;
+            }
+
+            if (!document.getElementById('privacy-agree').checked) {
+                alert("개인정보 수집 및 이용에 동의해 주세요.");
+                return;
+            }
+
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+
+            try {
+                // 1. Upload Photo to Firebase if exists
+                const photoFile = document.getElementById('photo-input').files[0];
+                let photoUrl = "";
+                if (photoFile) {
+                    photoUrl = await uploadPhotoToFirebase(photoFile, data.name, data.phone);
+                }
+
+                // 2. Prepare Payload with Photo URL
+                const payload = {
+                    action: 'join',
+                    ...data,
+                    profile_photo: photoUrl,
+                    date: new Date().toISOString().split('T')[0],
+                    status: '대기'
+                };
+
+                await gasPost(payload); // URLSearchParams 대신 JSON 보내기
+
+                alert("등록이 성공적으로 완료되었습니다!\n센터 담당자 확인 후 연락드립니다. [확인]을 누르시면 강사 목록 페이지로 이동합니다.");
+                location.href = `index.html#teachers`;
+            } catch (err) {
+                console.error("Submit error:", err);
+                alert(err.message || "등록 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        // --- 이용자(USER) 가입 ---
+        function updateUserJoinLabel() {
+            const type = document.getElementById('user-reg-type')?.value;
+            const nameLabel = document.getElementById('user-reg-name-label');
+            const nameInput = document.getElementById('user-reg-name');
+            if (type === '기관') {
+                if (nameLabel) nameLabel.textContent = '기관 / 단체명 *';
+                if (nameInput) nameInput.placeholder = '예: 양양문화원, 양양군청';
+            } else {
+                if (nameLabel) nameLabel.textContent = '이름 *';
+                if (nameInput) nameInput.placeholder = '예: 홍길동';
+            }
+        }
+
+        async function handleUserJoin() {
+            const memberType = document.getElementById('user-reg-type')?.value || '이용자';
+            const name = document.getElementById('user-reg-name')?.value.trim();
+            const org = document.getElementById('user-reg-org')?.value.trim();
+            const phone = document.getElementById('user-reg-phone')?.value.trim();
+            const pw = document.getElementById('user-reg-pw')?.value.trim();
+            const errEl = document.getElementById('user-reg-error');
+
+            if (!name || !phone || !pw) {
+                if (errEl) errEl.textContent = '이름, 연락처, 비밀번호는 필수입니다.';
+                return;
+            }
+
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                await gasPost({ action: 'joinUser', name, org, phone, password: pw, memberType });
+                alert(`가입이 완료되었습니다, ${name}님!\n이제 이음터에서 강사에게 문의를 보낼 수 있습니다.`);
+                // 이용자로 로그인
+                proceedLogin('USER', { name, phone, memberType });
+            } catch (err) {
+                if (errEl) errEl.textContent = '가입 중 오류가 발생했습니다. 다시 시도해 주세요.';
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        // --- Admin Functions ---
+        function setStatusFilter(status, el) {
+            DATA.statusFilter = status;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            filterAdminTable();
+        }
+
+        async function loadAdminDashboard(bypassCache = false) {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">관리 데이터를 불러오는 중...</td></tr>';
+
+            try {
+                const data = await loadTeachers(bypassCache);
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#e67e22; padding:20px;">\u26a0\ufe0f 데이터가 없거나 뻤 열은 구전변예스프레드시트 CSV URL을 확인하세요.</td></tr>';
+                    return;
+                }
+                filterAdminTable();
+            } catch (err) {
+                console.error('[loadAdminDashboard] 오류:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center; padding:20px;">⚠️ 강사 데이터 로드 실패<br><small style="color:#666">${err.message}</small><br><button class="btn btn-primary" style="margin-top:10px;" onclick="loadAdminDashboard(true)">폴시 다시 시도</button></td></tr>`;
+            }
+        }
+
+        function filterAdminTable() {
+            const search = document.getElementById('admin-search').value.toLowerCase();
+            const cat = document.getElementById('admin-cat-filter').value;
+            const status = DATA.statusFilter;
+
+            const filtered = DATA.teachers.filter(t => {
+                const matchSearch =
+                    (t.name || '').toLowerCase().includes(search) ||
+                    (t.phone || '').includes(search) ||
+                    (t.field || '').toLowerCase().includes(search); // 상세내용도 검색
+                const matchCat = cat === '전체' || (t.category || '').includes(cat) || cat.includes(t.category || '');
+
+                const s = t.status || '대기'; // 기본상태 대기
+                let matchStatus = false;
+
+                if (status === '전체') {
+                    matchStatus = s !== '보관'; // 전체에서는 보관(휴지통) 내역은 숨김
+                } else if (status === '보관') {
+                    matchStatus = s === '보관';
+                } else if (status === '승인') {
+                    matchStatus = s === '승인';
+                } else if (status === '대기') {
+                    matchStatus = (s !== '승인' && s !== '보관');
+                }
+
+                return matchSearch && matchCat && matchStatus;
+            });
+
+            renderAdminTable(filtered);
+        }
+
+        function renderAdminTable(data) {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 40px; color: #999;">조건에 맞는 강사가 없습니다.</td></tr>';
+                return;
+            }
+
+            data.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.dataset.rowIndex = t.rowIndex;
+                const s = t.status || '대기';
+                const statusClass = s === '승인' ? 'status-approved' : (s === '보관' ? 'status-archived' : 'status-pending');
+
+                let btnHtml = '';
+                if (s === '보관') {
+                    btnHtml = `<button class="btn btn-primary" onclick="restoreInstructor(${t.rowIndex})" style="padding: 4px 10px; font-size: 0.75rem;">복구</button>`;
+                } else {
+                    btnHtml = `
+                        ${s !== '승인' ? `<button class="btn btn-primary" onclick="approveInstructor(${t.rowIndex})" style="padding: 4px 10px; font-size: 0.75rem;">승인</button>` : ''}
+                        <button class="btn" onclick="showTeacherDetails(${t.rowIndex})" style="padding: 4px 10px; font-size: 0.75rem; background:#f0f0f0;">상세/수정</button>
+                        <button class="btn btn-danger" onclick="deleteInstructor(${t.rowIndex})" style="padding: 4px 10px; font-size: 0.75rem;">보관(삭제)</button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                        <td style="text-align:center; width:40px;">
+                            <input type="checkbox" class="row-chk" data-row="${t.rowIndex}" onchange="onRowCheckChange()">
+                        </td>
+                        <td><strong>${t.name}</strong></td>
+                        <td style="font-size: 0.9rem; color: #666;">${t.org || '-'}</td>
+                        <td style="font-size: 0.9rem; color: #666;">${t.category || t.field || '-'}</td>
+                        <td><span class="status-badge ${statusClass}" ${s === '보관' ? 'style="background:#eee; color:#888;"' : ''}>${s}</span></td>
+                        <td>
+                            <div style="display:flex; gap:5px;">
+                                ${btnHtml}
+                            </div>
+                        </td>
+                    `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- 체크박스 일괄처리 함수 ---
+        function toggleSelectAll(chk) {
+            document.querySelectorAll('.row-chk').forEach(c => c.checked = chk.checked);
+            onRowCheckChange();
+        }
+
+        function onRowCheckChange() {
+            const all = document.querySelectorAll('.row-chk');
+            const checked = document.querySelectorAll('.row-chk:checked');
+            const selAll = document.getElementById('select-all-chk');
+            if (selAll) {
+                selAll.indeterminate = (checked.length > 0 && checked.length < all.length);
+                selAll.checked = (checked.length === all.length && all.length > 0);
+            }
+            const bar = document.getElementById('bulk-action-bar');
+            if (bar) bar.style.display = checked.length > 0 ? 'flex' : 'none';
+            const lbl = document.getElementById('bulk-count-label');
+            if (lbl) lbl.textContent = `${checked.length}개 선택됨`;
+        }
+
+        function getSelectedRowIndexes() {
+            return [...document.querySelectorAll('.row-chk:checked')].map(c => parseInt(c.dataset.row));
+        }
+
+        function clearBulkSelect() {
+            document.querySelectorAll('.row-chk').forEach(c => c.checked = false);
+            const selAll = document.getElementById('select-all-chk');
+            if (selAll) selAll.checked = false;
+            onRowCheckChange();
+        }
+
+        // 필터 탭 자동 전환 헬퍼
+        function switchToFilterTab(status) {
+            DATA.statusFilter = status;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            const targetTab = [...document.querySelectorAll('.filter-tab')].find(
+                t => t.getAttribute('onclick')?.includes(`'${status}'`)
+            );
+            if (targetTab) targetTab.classList.add('active');
+            filterAdminTable();
+        }
+
+        async function bulkApprove() {
+            const rows = getSelectedRowIndexes();
+            if (rows.length === 0) return;
+            if (!confirm(`선택한 ${rows.length}명의 강사를 일괄 승인하시겠습니까?`)) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                for (const rowIndex of rows) {
+                    await gasPost({ action: 'update_status', rowIndex, status: '승인' });
+                    // 로컈 DATA 즉시 업데이트 (탭 전환 즉시 반영)
+                    const idx = DATA.teachers.findIndex(t => t.rowIndex === rowIndex);
+                    if (idx !== -1) DATA.teachers[idx].status = '승인';
+                }
+                localStorage.removeItem('iumteo_teachers_cache');
+                alert(`${rows.length}명 승인 완료!`);
+                switchToFilterTab('승인'); // ← 즉시 '승인완료' 탭으로 자동 이동
+            } catch (e) { alert('처리 중 오류가 발생했습니다.'); }
+            finally { spinner.style.display = 'none'; clearBulkSelect(); }
+        }
+
+        async function bulkArchive() {
+            const rows = getSelectedRowIndexes();
+            if (rows.length === 0) return;
+            if (!confirm(`선택한 ${rows.length}명의 데이터를 보관함으로 이동하시겠습니까?`)) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                for (const rowIndex of rows) {
+                    await gasPost({ action: 'update_status', rowIndex, status: '보관' });
+                    const idx = DATA.teachers.findIndex(t => t.rowIndex === rowIndex);
+                    if (idx !== -1) DATA.teachers[idx].status = '보관';
+                }
+                localStorage.removeItem('iumteo_teachers_cache');
+                alert(`${rows.length}명 보관 처리 완료!`);
+                switchToFilterTab('보관'); // ← 즉시 '보관함' 탭으로 자동 이동
+            } catch (e) { alert('처리 중 오류가 발생했습니다.'); }
+            finally { spinner.style.display = 'none'; clearBulkSelect(); }
+        }
+
+
+        // --- Details Modal Logic ---
+        function showTeacherDetails(rowIndex) {
+            const t = DATA.teachers.find(item => item.rowIndex === rowIndex);
+            if (!t) return;
+
+            const isOwner = AUTH.user && AUTH.user.rowIndex === rowIndex;
+            const isAdmin = AUTH.role === 'ADMIN';
+
+            modalBody.innerHTML = `
+                <div class="form-group full" style="text-align: center; margin-bottom: 20px;">
+                    <div style="width: 150px; height: 180px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #f9f9f9;">
+                        ${t.profile_photo
+                    ? `<img src="${t.profile_photo}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentNode.innerHTML='<div style=\\'padding-top:60px;color:#ccc;text-align:center;\\'>사진<br>없음</div>'">`
+                    : `<div style="padding-top:60px; text-align:center; color:#aaa; font-size:2rem;">${(t.name || '?')[0]}</div>`
+                }
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn" onclick="promptProfilePhotoUpdate(${t.rowIndex}, '${t.name || ''}', '${t.phone || ''}')" style="padding: 6px 14px; font-size: 0.8rem; background: #e0e0e0; color: #333; border-radius: 8px;">📷 사진 변경</button>
+                    </div>
+                    ${t.isLocal ? `<div style="margin-top: 8px;"><span style="display:inline-block; background:#0b7c5b; color:#fff; font-size:0.72rem; padding:2px 10px; border-radius:999px; font-weight:700;">🏡 양양 로컬</span></div>` : ''}
+                </div>
+                <div class="form-group">
+                    <label>성명</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.name}</div>
+                </div>
+                ${isAdmin ? `
+                <div class="form-group">
+                    <label>연락처 (관리자 전용)</label>
+                    <div style="padding: 10px; background: #fffde7; border-radius: 8px; font-weight:700;">${t.phone}</div>
+                </div>
+                <div class="form-group">
+                    <label>이메일 (관리자 전용)</label>
+                    <div style="padding: 10px; background: #fffde7; border-radius: 8px;">${t.email || '-'}</div>
+                </div>
+                ` : ''}
+                <div class="form-group">
+                    <label>소속</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.org || '-'}</div>
+                </div>
+                <div class="form-group full">
+                    <label>강의 분야 (카테고리)</label>
+                    <div style="padding: 10px; background: #e8f5e9; border-radius: 8px; font-weight: 600; color: #0b7c5b;">${t.category || '-'}</div>
+                </div>
+                <div class="form-group full">
+                    <label>상세 내용</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.field || '-'}</div>
+                </div>
+                <div class="form-group full">
+                    <label>활동 주소</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.address || '-'}</div>
+                </div>
+                <div class="form-group">
+                    <label>인스타그램</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.instagram || '-'} (${t.insta_open || '미공개'})</div>
+                </div>
+                <div class="form-group">
+                    <label>정보공개 동의</label>
+                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px;">${t.info_open_agree || '-'}</div>
+                </div>
+                <div class="form-group full">
+                    <label>주요 경력</label>
+                    <div style="padding: 15px; background: #f9f9f9; border-radius: 8px; min-height: 100px; white-space: pre-wrap; line-height: 1.6;">${t.career || '등록된 정보 없음'}</div>
+                </div>
+            `;
+
+            const badge = document.getElementById('modal-status-badge');
+            const s = t.status || '대기';
+            badge.innerHTML = `<span class="status-badge ${s === '승인' ? 'status-approved' : 'status-pending'}">${s === '승인' ? '승인됨 (홈페이지 노출 중)' : '승인 대기 중'}</span>`;
+
+            const actions = document.getElementById('modal-actions');
+            actions.innerHTML = '';
+
+            if (isAdmin && s !== '승인') {
+                const appBtn = document.createElement('button');
+                appBtn.className = 'btn btn-primary';
+                appBtn.textContent = '강사 최종 승인';
+                appBtn.onclick = () => { approveInstructor(rowIndex); closeDetailModal(); };
+                actions.appendChild(appBtn);
+            }
+
+            if (isAdmin || isOwner) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn';
+                editBtn.style.background = '#f0f0f0';
+                editBtn.textContent = '📝 정보 수정';
+                editBtn.onclick = () => { closeDetailModal(); openEditModal(rowIndex); };
+                actions.appendChild(editBtn);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn btn-danger';
+                delBtn.textContent = isOwner ? '✋ 삭제 요청' : '데이터 삭제';
+                delBtn.onclick = () => {
+                    if (isOwner) requestDelete();
+                    else deleteInstructor(rowIndex);
+                    closeDetailModal();
+                };
+                actions.appendChild(delBtn);
+            }
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'btn';
+            closeBtn.textContent = '닫기';
+            closeBtn.onclick = closeDetailModal;
+            actions.appendChild(closeBtn);
+
+            document.getElementById('detail-modal').style.display = 'flex';
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').style.display = 'none';
+        }
+
+        async function promptProfilePhotoUpdate(rowIndex, name, phone) {
+            if (!confirm('새 프로필 사진을 저장하시겠습니까?')) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    // Firebase 스토리지에 업로드
+                    const newUrl = await uploadPhotoToFirebase(file, name, phone);
+                    if (!newUrl) return;
+
+                    const spinner = document.getElementById('global-spinner');
+                    spinner.style.display = 'block';
+                    try {
+                        // GAS 백엔드에 반영 (update_photo 액션)
+                        await gasPost({ action: 'update_photo', rowIndex: rowIndex, photoUrl: newUrl });
+
+                        // 클라이언트의 데이터 상태 갱신
+                        const t = DATA.teachers.find(item => item.rowIndex === rowIndex);
+                        if (t) t.profile_photo = newUrl;
+                        localStorage.removeItem('iumteo_teachers_cache');
+
+                        alert('사진이 성공적으로 변경되어 DB에 저장되었습니다!');
+                        filterAdminTable(); // 테이블 다시 그리기
+                        showTeacherDetails(rowIndex); // 모달 화면 갱신
+                    } catch (err) {
+                        alert('데이터베이스에 사진 주소를 업데이트하는 중 오류가 발생했습니다.');
+                    } finally {
+                        spinner.style.display = 'none';
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            input.click();
+        }
+
+        async function deleteInstructor(rowIndex) {
+            if (!confirm('이 데이터를 삭제하여 보관함으로 이동하시겠습니까?\n(DB에서 완전히 지워지지는 않습니다)')) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                await gasPost({ action: 'update_status', rowIndex, status: '보관' });
+                const idx = DATA.teachers.findIndex(t => t.rowIndex === rowIndex);
+                if (idx !== -1) DATA.teachers[idx].status = '보관';
+                localStorage.removeItem('iumteo_teachers_cache');
+                filterAdminTable();
+            } catch (err) {
+                alert('삭제 처리 중 오류가 발생했습니다.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        async function restoreInstructor(rowIndex) {
+            if (!confirm('이 강사의 데이터를 복구하여 다시 승인 대기 상태로 변경하시겠습니까?')) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                await gasPost({ action: 'update_status', rowIndex, status: '대기' });
+                const idx = DATA.teachers.findIndex(t => t.rowIndex === rowIndex);
+                if (idx !== -1) DATA.teachers[idx].status = '대기';
+                localStorage.removeItem('iumteo_teachers_cache');
+                filterAdminTable();
+            } catch (err) {
+                alert('복구 처리 중 오류가 발생했습니다.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        async function approveInstructor(rowIndex) {
+            if (!confirm('해당 강사를 승인하여 홈페이지에 노출하시겠습니까?')) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                await gasPost({ action: 'update_status', rowIndex, status: '승인' });
+                // DATA 즉시 업데이트 → 승인대기 탭에서 승인완료 탭으로 즉시 이동
+                const idx = DATA.teachers.findIndex(t => t.rowIndex === rowIndex);
+                if (idx !== -1) DATA.teachers[idx].status = '승인';
+                localStorage.removeItem('iumteo_teachers_cache');
+                filterAdminTable();
+                alert('✅ 승인 완료! 강사가 홈페이지에 노출됩니다.');
+            } catch (err) {
+                alert('승인 처리 중 오류가 발생했습니다.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        // --- Instructor Functions ---
+        function renderMyProfile() {
+            const content = document.getElementById('my-info-content');
+            const u = AUTH.user;
+            content.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items: start;">
+                    <div>
+                        <h2 style="margin:0;">${u.name} 강사님 반갑습니다.</h2>
+                        <span class="status-badge ${u.status === '승인' ? 'status-approved' : 'status-pending'}" style="margin-top: 10px; display: inline-block;">
+                            ${u.status === '승인' ? '활동 중 (승인완료)' : '심사 대기 중'}
+                        </span>
+                    </div>
+                    <div style="width: 100px; height: 120px; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+                        ${u.profile_photo ? `<img src="${u.profile_photo}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="background:#f9f9f9; width:100%; height:100%;"></div>`}
+                    </div>
+                </div>
+                <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
+                <div class="form-grid">
+                    <div><strong>연락처:</strong> ${u.phone}</div>
+                    <div><strong>소속:</strong> ${u.org || '-'}</div>
+                    <div class="form-group full"><strong>활동 분야:</strong> ${u.field || '-'}</div>
+                    <div class="form-group full"><strong>활동 지역:</strong> ${u.address || '-'}</div>
+                </div>
+            `;
+        }
+        function toggleEditInfo() {
+            if (AUTH.user && AUTH.user.rowIndex) {
+                openEditModal(AUTH.user.rowIndex);
+            }
+        }
+
+        async function requestDelete() {
+            if (!confirm('정말로 자신의 프로필을 삭제(보관 처리)하시겠습니까?\n이 작업은 즉시 홈페이지에서 프로필을 숨깁니다.')) return;
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+            try {
+                await gasPost({ action: 'update_status', rowIndex: AUTH.user.rowIndex, status: '보관' });
+                alert('삭제(보관) 요청이 완료되었습니다.');
+                handleLogout();
+            } catch (err) {
+                alert('처리 중 오류가 발생했습니다.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function openEditModal(rowIndex) {
+            const t = DATA.teachers.find(item => item.rowIndex === rowIndex);
+            if (!t) return;
+
+            const form = document.getElementById('edit-instructor-form');
+            form.rowIndex.value = t.rowIndex;
+            form.name.value = t.name || '';
+            form.org.value = t.org || '';
+            form.phone.value = t.phone || '';
+            form.email.value = t.email || '';
+            form.category.value = t.category || '';
+            form.field.value = t.field || '';
+            form.address.value = t.address || '';
+            form.instagram.value = t.instagram || '';
+            form.insta_open.value = t.insta_open || '미공개';
+            form.career.value = t.career || '';
+            form.password.value = t.password || '';
+            form.info_open_agree.value = t.info_open_agree || '동의';
+
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        async function submitInstructorUpdate(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            data.action = 'update_instructor';
+            data.isLocal = DATA.teachers.find(t => t.rowIndex == data.rowIndex)?.isLocal || false;
+
+            if (!confirm('입력하신 정보로 프로필을 수정하시겠습니까?')) return;
+
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+
+            try {
+                await gasPost(data);
+                alert('정보가 성공적으로 수정되었습니다.');
+                closeEditModal();
+                localStorage.removeItem('iumteo_teachers_cache');
+
+                // 만약 본인이라면 세션 데이터도 일부 갱신 (선택사항, 리로드 권장)
+                if (AUTH.user && AUTH.user.rowIndex == data.rowIndex) {
+                    location.reload();
+                } else {
+                    loadAdminDashboard(true);
+                }
+            } catch (err) {
+                alert('수정 중 오류가 발생했습니다.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function startJoin() {
+            AUTH.role = 'GUEST';
+            applyAuth();
+        }
+
+        async function loadRealData(bypass = false) {
+            if (AUTH.role === 'ADMIN') loadAdminDashboard(bypass);
+        }
+
+        // --- Public Teachers Logic (숨고 스타일) ---
+        async function renderPublicTeachers() {
+            const grid = document.getElementById('public-teachers-grid');
+            if (!grid) return;
+
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #aaa;"><div style="font-size:2rem;">⏳</div><p>강사 목록을 불러오는 중...</p></div>';
+
+            try {
+                const teachers = await loadTeachers();
+
+                // 승인된 강사만 노웍:
+                // 1) status='승인' → 헤더에 '상태' 콜럼 있는 경우
+                // 2) status='대기' && info_open_agree='동의' → '상태' 콜럼 추가되기 전(임시 호환)
+                const hasStatusCol = teachers.some(t => t.status === '승인' || t.status === '보관');
+                let approved;
+                if (hasStatusCol) {
+                    approved = teachers.filter(t => t.status === '승인');
+                } else {
+                    // '상태' 콜럼 없음 → 동의 여부로 표시
+                    approved = teachers.filter(t => t.info_open_agree === '동의');
+                }
+
+                // 검색 및 분야 필터
+                const search = (document.getElementById('public-search')?.value || '').toLowerCase().trim();
+                const cat = document.getElementById('public-cat-filter')?.value || '전체';
+
+                if (search || cat !== '전체') {
+                    approved = approved.filter(t => {
+                        const matchSearch = !search ||
+                            (t.name || '').toLowerCase().includes(search) ||
+                            (t.field || '').toLowerCase().includes(search) ||
+                            (t.career || '').toLowerCase().includes(search);
+                        const matchCat = cat === '전체' || (t.category || '').includes(cat) || cat.includes(t.category || '');
+                        return matchSearch && matchCat;
+                    });
+                    // 필터 시 페이지 1로 초기화 (검색어가 입력되었거나 카테고리가 변경된 경우 이 함수를 호출하기 전/후에 처리 필요)
+                }
+
+                const totalItems = approved.length;
+                const totalPages = Math.ceil(totalItems / PUBLIC_PER_PAGE);
+
+                // 페이지 범위 확인
+                if (currentPublicPage < 1) currentPublicPage = 1;
+                if (currentPublicPage > totalPages && totalPages > 0) currentPublicPage = totalPages;
+
+                const startIdx = (currentPublicPage - 1) * PUBLIC_PER_PAGE;
+                const pagedTeachers = approved.slice(startIdx, startIdx + PUBLIC_PER_PAGE);
+
+                grid.innerHTML = '';
+                if (pagedTeachers.length === 0) {
+                    const isEmpty = teachers.length === 0;
+                    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 60px 40px; background: #fafafa; border-radius: 12px; border: 1px solid #eee; color: #888;">
+                ${isEmpty
+                            ? '<div style="font-size:2rem;">📭</div><p>아직 등록된 강사가 없습니다.</p>'
+                            : '<div style="font-size:2rem;">🔍</div><p>조건에 맞는 강사님이 없습니다.</p>'
+                        }
+                    </div>`;
+                    renderPublicPagination(0);
+                    return;
+                }
+
+                pagedTeachers.forEach(t => {
+                    const card = document.createElement('div');
+                    card.style.cssText = `
+            background: #fff; border-radius: 16px; border: 1px solid #eaeaea;
+            padding: 25px; display: flex; flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            `;
+                    card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 10px 25px rgba(0,0,0,0.08)'; };
+                    card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.02)'; };
+
+                    const isGuest = AUTH.role === 'GUEST';
+                    // 비회원이면 프로필 사진 무조건 숨김 처리
+                    const pto = (!isGuest && t.profile_photo) ? t.profile_photo : null;
+                    const char = (t.name || '?')[0];
+                    const photoHtml = pto
+                        ? `<img src="${pto}" style="width:100%; height:100%; object-fit:cover;" onerror="this.outerHTML='<div style=\\'width:100%;height:100%;background:#f0f4f8;display:flex;align-items:center;justify-content:center;color:#2d6a4f;font-weight:bold;font-size:1.5rem;\\'>${char}</div>'">`
+                        : `<div style="width:100%;height:100%;background:#f0f4f8;display:flex;align-items:center;justify-content:center;color:#2d6a4f;font-weight:bold;font-size:1.5rem;">${isGuest ? '🔒' : char}</div>`;
+
+                    card.innerHTML = `
+                <div style="display:flex; gap: 15px; margin-bottom: 20px;">
+                            <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; background: #f0f0f0; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 2px solid #fff;">
+                                ${photoHtml}
+                            </div>
+                            <div style="flex: 1; padding-top: 5px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #222;">${t.name}</h3>
+                                    ${t.isLocal ? '<span style="background:var(--primary); color:#fff; font-size:0.65rem; padding:2px 8px; border-radius:12px; font-weight:700;">로컬</span>' : ''}
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-top: 5px;">
+                                    ${t.category || '기타'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="flex: 1; margin-bottom: 20px;">
+                            <div style="font-size: 0.95rem; color: #444; margin-bottom: 8px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                ${t.field || '강의 분야 상세 정보 없음'}
+                            </div>
+                            <div style="font-size: 0.85rem; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
+                                ${t.org ? t.org + ' · ' : ''}${t.career ? t.career.split('\\n')[0] : ''}
+                            </div>
+                        </div>
+
+                        <!-- 액션 버튼 영역 -->
+                        <div style="display: flex; gap: 8px; margin-top: auto;">
+                            <button class="btn" style="flex: 1; padding: 10px; font-size: 0.9rem; background: #f8f9fa; border: 1px solid #ebebeb; color: #555;" onclick="event.stopPropagation(); showTeacherDetails(${t.rowIndex}, true)">
+                                📄 약력 보기
+                            </button>
+                            <button class="btn btn-primary" style="flex: 1; padding: 10px; font-size: 0.9rem;" onclick="event.stopPropagation(); ${isGuest ? "showPreparingNotice(); " : `openInquiryModal('${t.name}', '${t.profile_photo || ''}')`}" >
+                                ${isGuest ? '🔒 활동 문의' : '📩 활동 문의'}
+                            </button>
+                        </div>
+                `;
+                    grid.appendChild(card);
+                });
+
+                renderPublicPagination(totalPages);
+
+            } catch (err) {
+                console.error('[renderPublicTeachers] error:', err);
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #e74c3c;">
+                    ⚠️ 강사 목록을 불러오지 못했습니다.<br>
+                    <small style="color:#888; display:block; margin-top:8px;">${err.message}</small>
+                    <button class="btn btn-primary" style="margin-top:16px;" onclick="renderPublicTeachers()">다시 시도</button>
+                </div>`;
+            }
+        }
+
+        function renderPublicPagination(totalPages) {
+            let container = document.getElementById('public-pagination');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'public-pagination';
+                container.style.cssText = 'display: flex; justify-content: center; gap: 8px; margin-top: 40px; margin-bottom: 20px;';
+                const grid = document.getElementById('public-teachers-grid');
+                if (grid) grid.insertAdjacentElement('afterend', container);
+            }
+
+            container.innerHTML = '';
+            if (totalPages <= 1) {
+                container.style.display = 'none';
+                return;
+            }
+            container.style.display = 'flex';
+
+            const createBtn = (label, page, disabled = false, isCurrent = false) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style.padding = '8px 16px';
+                btn.style.minWidth = '45px';
+                btn.innerHTML = label;
+                btn.disabled = disabled;
+                if (isCurrent) {
+                    btn.style.background = 'var(--primary)';
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = 'var(--primary)';
+                }
+                btn.onclick = () => {
+                    currentPublicPage = page;
+                    renderPublicTeachers();
+                    const target = document.getElementById('public-teachers-grid');
+                    if (target) window.scrollTo({ top: target.offsetTop - 120, behavior: 'smooth' });
+                };
+                return btn;
+            };
+
+            // Prev
+            container.appendChild(createBtn('‹', currentPublicPage - 1, currentPublicPage === 1));
+
+            // Numbers
+            let start = Math.max(1, currentPublicPage - 2);
+            let end = Math.min(totalPages, start + 4);
+            if (end === totalPages) start = Math.max(1, end - 4);
+
+            if (start > 1) {
+                container.appendChild(createBtn('1', 1));
+                if (start > 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.alignSelf = 'center';
+                    container.appendChild(dots);
+                }
+            }
+
+            for (let i = start; i <= end; i++) {
+                container.appendChild(createBtn(i, i, false, i === currentPublicPage));
+            }
+
+            if (end < totalPages) {
+                if (end < totalPages - 1) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.alignSelf = 'center';
+                    container.appendChild(dots);
+                }
+                container.appendChild(createBtn(totalPages, totalPages));
+            }
+
+            // Next
+            container.appendChild(createBtn('›', currentPublicPage + 1, currentPublicPage === totalPages));
+        }
+
+
+
+        // 오버로딩: isGuest 파라미터가 true면 관리자 액션버튼 미출력
+        const __admin_showTeacherDetails = showTeacherDetails;
+        window.showTeacherDetails = function (rowIndex, isGuest = false) {
+            __admin_showTeacherDetails(rowIndex);
+            // 만약 GUEST거나 INSTRUCTOR가 퍼블릭뷰에서 연거라면, 관리자용 버튼 숨기기
+            if (isGuest || AUTH.role !== 'ADMIN') {
+                const actions = document.getElementById('modal-actions');
+                actions.innerHTML = '';
+
+                const clsBtn = document.createElement('button');
+                clsBtn.className = 'btn';
+                clsBtn.textContent = '닫기';
+                clsBtn.onclick = closeDetailModal;
+                actions.appendChild(clsBtn);
+
+                const t = DATA.teachers.find(item => item.rowIndex === rowIndex);
+                if (t) {
+                    const inqBtn = document.createElement('button');
+                    inqBtn.className = 'btn btn-primary';
+                    inqBtn.textContent = '📩 이 강사님께 문의하기';
+                    inqBtn.onclick = () => { closeDetailModal(); openInquiryModal(t.name, t.profile_photo); };
+                    actions.appendChild(inqBtn);
+                }
+            }
+        }
+
+        // --- Inquiry Modal Logic ---
+        function openInquiryModal(teacherName, photoUrl) {
+            // GUEST인 경우 → 로그인/이용자가입 유도
+            if (!AUTH.isLoggedIn) {
+                if (DEV_PUBLIC_LOCK) {
+                    showPreparingNotice();
+                    return;
+                }
+                if (confirm('문의를 보내려면 \ub85c그인\n또는 \uc774용자 가입\uc774 필요합니다.\n\n기본적으로 이용자 가입을 진행하시겠습니까?')) {
+                    openAuthDrawer('user'); // 이용자 가입 탭으로 드로어 열기
+                }
+                return;
+            }
+
+            document.getElementById('inq-target-name').textContent = teacherName;
+            document.getElementById('inq-teacher-name').value = teacherName;
+
+            const photoArea = document.getElementById('inq-photo-area');
+            if (photoUrl) {
+                photoArea.innerHTML = `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                photoArea.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#999; font-weight:700;">${teacherName[0]}</div>`;
+            }
+
+            document.getElementById('inquiry-modal').style.display = 'flex';
+        }
+
+        function closeInquiryModal() {
+            document.getElementById('inquiry-modal').style.display = 'none';
+            document.getElementById('inquiry-form').reset();
+        }
+
+        async function submitInquiry(e) {
+            e.preventDefault();
+
+            if (!confirm('작성하신 내용으로 활동 문의를 접수하시겠습니까?')) return;
+
+            const form = e.target;
+            const payload = {
+                action: 'inquiry',
+                teacherName: form.teacherName.value,
+                inquirerName: form.inquirerName.value,
+                inquirerPhone: form.inquirerPhone.value,
+                purpose: form.purpose.value,
+                message: form.message.value
+            };
+
+            const spinner = document.getElementById('global-spinner');
+            spinner.style.display = 'block';
+
+            try {
+                await gasPost(payload); // URLSearchParams 대신 JSON으로 전송
+                alert(`성공적으로 접수되었습니다.\n센터에서 내용 확인 후 ${payload.inquirerPhone} 번호로 회신드리겠습니다.`);
+                closeInquiryModal();
+            } catch (err) {
+                alert('문의 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+    </script>
+</body>
+
+</html>
+

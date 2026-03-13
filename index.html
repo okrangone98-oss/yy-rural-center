@@ -1,0 +1,3071 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>양양군 농촌활성화지원센터</title>
+
+  <!-- SEO 및 기본 메타 태그 -->
+  <meta name="keywords" content="양양, 양양군, 농촌활성화, 농촌활성화지원센터, 귀농, 귀촌, 농촌체험, 마을만들기, 두레동아리, 시군역량강화사업, 양양 강사, 양양 체험" />
+  <meta name="description"
+    content="양양군 농촌활성화지원센터 홈페이지입니다. 농촌지역의 주민 자립형 공동체 구축, 귀농·귀촌 정보, 시군역량강화사업, 마을만들기 지원 등을 제공합니다." />
+
+  <!-- SNS / 카카오톡 공유 대표 이미지 설정 -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="양양군 농촌활성화지원센터" />
+  <meta property="og:description" content="양양군 농촌활성화지원센터 공식 홈페이지입니다. 농촌 자립형 공동체 구축 및 두레동아리 아카데미 안내." />
+  <meta property="og:url" content="https://okrangone98-oss.github.io/yy-rural-center/" />
+  <meta property="og:image" content="https://okrangone98-oss.github.io/yy-rural-center/images/PD사진/logo-main.png" />
+
+  <!-- 트위터/X 공유용 -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="양양군 농촌활성화지원센터" />
+  <meta name="twitter:description" content="양양군 농촌활성화지원센터 공식 홈페이지입니다." />
+  <meta name="twitter:image" content="https://okrangone98-oss.github.io/yy-rural-center/images/PD사진/logo-main.png" />
+
+  <!-- 파비콘(옵션) -->
+  <link rel="icon" href="https://okrangone98-oss.github.io/yy-rural-center/images/PD사진/logo-main.png" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- 웹폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #4f7e66;
+      --primary-dark: #3e6452;
+      --text: #1f2a26;
+      --muted: #55615b;
+      --card: #ffffff;
+      --line: #e6e6e6;
+      --bg: #f6fbf8;
+      --h1: 2.8rem;
+      --h2: 2rem;
+      --body: .98rem;
+      --small: .88rem;
+      --tracking-tight: -0.02em;
+      --tracking-normal: -0.008em;
+      --tracking-wide: 0.025em;
+      --radius: 12px;
+      --shadow-soft: 0 12px 28px rgba(0, 0, 0, .08);
+      --hero-video-x: 75.6%;
+      --hero-video-y: 28.7%;
+    }
+
+    body {
+      font-family: "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: var(--body);
+      line-height: 1.75;
+      letter-spacing: var(--tracking-normal);
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* 헤더 */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ffffffcc;
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 1.12rem;
+      letter-spacing: var(--tracking-tight);
+      white-space: nowrap;
+    }
+
+    .logo-prefix {
+      color: var(--text);
+    }
+
+    .logo-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      letter-spacing: var(--tracking-tight);
+      line-height: 1.1;
+    }
+
+    .logo-switch-viewport {
+      position: relative;
+      display: block;
+      height: 1.15em;
+      min-width: 1ch;
+      overflow: hidden;
+    }
+
+    .logo-switch-slot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-115%);
+      filter: blur(4px);
+      transition:
+        transform .58s cubic-bezier(.2, .8, .2, 1),
+        opacity .42s ease,
+        filter .42s ease;
+      will-change: transform, opacity, filter;
+    }
+
+    .logo-switch-slot.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .logo-switch-slot.is-entering {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .logo-switch-slot.is-leaving {
+      opacity: 0;
+      transform: translateY(115%);
+      filter: blur(4px);
+    }
+
+    .logo-switch-slot[data-tone="rural"] {
+      color: #5b8a72;
+    }
+
+    .logo-switch-slot[data-tone="agri"] {
+      color: #ed5807;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .logo-switch-slot {
+        transition: none;
+        transform: translateY(0);
+        filter: none;
+      }
+
+      .logo-switch-slot:not(.is-active) {
+        opacity: 0;
+      }
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.95rem;
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .nav-links a {
+      padding: 4px 8px;
+      border-radius: var(--radius);
+    }
+
+    .nav-links a:hover {
+      background: #5b8a72;
+      color: #fff;
+    }
+
+    .nav-community-link {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 4px;
+      color: #ed5807 !important;
+      font-weight: 600;
+      background: #fff5f0;
+      border: 1px solid #ffdecb;
+      padding: 4px 12px !important;
+      border-radius: var(--radius);
+    }
+
+    .nav-community-link:hover {
+      background: #ed5807 !important;
+      color: #fff !important;
+      border-color: #ed5807;
+    }
+
+    /* ====== 네이버 톤 버튼 공통 스타일 ====== */
+    .btn-unified {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 240px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      font-size: .95rem;
+      font-weight: 600;
+      letter-spacing: var(--tracking-tight);
+      border: none;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .16);
+      cursor: pointer;
+      transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    .btn-unified:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, .20);
+    }
+
+    .btn-unified:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+    }
+
+    .btn-unified-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    /* 히어로 */
+    .hero-top {
+      background: #fff;
+      padding: 0;
+    }
+
+    .hero-top .container {
+      max-width: none;
+      padding: 0;
+    }
+
+    .hero-top-frame {
+      background: #fff;
+      border-radius: 0;
+      border: 1px solid #e5e5e5;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      aspect-ratio: 1080 / 473;
+      min-height: 240px;
+    }
+
+    .hero-top-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-top-image {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+
+    .hero-hotspot {
+      position: absolute;
+      display: block;
+      z-index: 2;
+      border-radius: 999px;
+      outline: 2px solid transparent;
+      transition: box-shadow .16s ease, outline-color .16s ease, background .16s ease;
+    }
+
+    .hero-hotspot:focus-visible,
+    .hero-hotspot:hover {
+      outline-color: rgba(79, 126, 102, .6);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .15);
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .hero-hotspot-programs {
+      left: 21.9%;
+      top: 71.8%;
+      width: 11.0%;
+      height: 5.35%;
+    }
+
+    .hero-hotspot-contact {
+      left: 21.9%;
+      top: 78.9%;
+      width: 11.0%;
+      height: 5.35%;
+    }
+
+    .hero-video-thumb {
+      position: absolute;
+      left: var(--hero-video-x);
+      top: var(--hero-video-y);
+      width: 8.5%;
+      height: 10.5%;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      overflow: hidden;
+      background: #1f2a26;
+      border: none;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-video-thumb-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-video-thumb::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .25));
+      pointer-events: none;
+    }
+
+    .hero-top+section {
+      padding-top: 48px;
+    }
+
+    .hero {
+      min-height: 72vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000 url("images/hero-home.jpg?v=20260205f") center/cover no-repeat;
+      color: #fff;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .18));
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      padding: 80px 16px;
+      max-width: 880px;
+    }
+
+    .hero-title {
+      font-size: var(--h1);
+      line-height: 1.18;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .hero-subtitle {
+      font-size: 1.06rem;
+      line-height: 1.78;
+      max-width: 520px;
+      margin-bottom: 20px;
+      opacity: .95;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, .7);
+      background: rgba(0, 0, 0, .18);
+      font-size: .78rem;
+      letter-spacing: var(--tracking-wide);
+      opacity: .85;
+    }
+
+    /* 공통 섹션 */
+    section {
+      padding: 64px 0;
+    }
+
+    section:nth-of-type(even) {
+      background: transparent;
+    }
+
+    section:nth-of-type(odd) {
+      background: transparent;
+    }
+
+    .section-header {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: var(--h2);
+      line-height: 1.25;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .section-subtitle {
+      font-size: 1rem;
+      color: #555;
+      max-width: 720px;
+      line-height: 1.78;
+      word-break: keep-all;
+      white-space: normal;
+    }
+
+    /* 소개 */
+    .about-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 32px;
+      align-items: start;
+    }
+
+    .about-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid #eaeaea;
+    }
+
+    .about-card h3 {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+
+    .about-list {
+      list-style: none;
+      font-size: .95rem;
+      line-height: 1.7;
+    }
+
+    .about-list li {
+      margin-bottom: 6px;
+    }
+
+    /* ====== 주요 사업 가로 스크롤 카드 ====== */
+    .section-sub {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 18px;
+    }
+
+    .program-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .program-tab-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid #d0e4dd;
+      background: #f5faf8;
+      font-size: 0.85rem;
+      color: #5b8a72;
+      cursor: pointer;
+    }
+
+    .program-tab-btn.is-active {
+      background: #5b8a72;
+      color: #fff;
+      border-color: #5b8a72;
+    }
+
+    .program-scroll {
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .program-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .program-scroll::-webkit-scrollbar-thumb {
+      background: #d1d1d1;
+      border-radius: 999px;
+    }
+
+    .program-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .program-list {
+      display: flex;
+      gap: 16px;
+      padding: 2px 2px 10px;
+    }
+
+    .program-card {
+      flex: 0 0 auto;
+      min-width: 260px;
+      max-width: 280px;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 14px 16px 16px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e5f0ea;
+    }
+
+    .program-tag {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: #e6f5ef;
+      color: #5b8a72;
+      margin-bottom: 6px;
+    }
+
+    .program-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #222;
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .program-desc {
+      font-size: .92rem;
+      color: #555;
+      margin-bottom: 6px;
+      line-height: 1.7;
+    }
+
+    .program-meta {
+      font-size: .82rem;
+      color: #777;
+    }
+
+    /* 강사 - 가로 스크롤 */
+    .teacher-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .filter-btn {
+      font-size: .85rem;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid #eaeaea;
+      background: #fff;
+      color: #555;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    }
+
+    .filter-btn:hover {
+      border-color: #cddbcf;
+      color: var(--primary-dark);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(79, 126, 102, 0.2);
+    }
+
+    .teacher-grid {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 280px;
+      gap: 20px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 30px;
+      background: transparent;
+      border-radius: 20px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+    }
+
+    /* Invisible Scrollbar Effect */
+    .teacher-grid::-webkit-scrollbar {
+      height: 4px;
+      width: 0px;
+      transition: all 0.3s;
+    }
+
+    .teacher-grid:hover::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .teacher-grid::-webkit-scrollbar-thumb {
+      background: rgba(11, 124, 91, 0.2);
+      border-radius: 999px;
+    }
+
+    .teacher-grid:hover::-webkit-scrollbar-thumb {
+      background: rgba(11, 124, 91, 0.5);
+    }
+
+    .teacher-grid::-webkit-scrollbar-track {
+      background: rgba(241, 245, 249, 0.5);
+      border-radius: 999px;
+    }
+
+    .teacher-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: left;
+      border: 1px solid #eaeaea;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      scroll-snap-align: start;
+      position: relative;
+    }
+
+    .teacher-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+      box-shadow: 0 15px 35px rgba(79, 126, 102, 0.15), 0 0 20px rgba(79, 126, 102, 0.05);
+    }
+
+    .teacher-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid #5b8a7233;
+    }
+
+    .teacher-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .teacher-role {
+      font-size: .82rem;
+      color: #5b8a72;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    /* ===== 양양 로컬 뱃지 + 툴팁 ===== */
+    .local-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #0b7c5b;
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 1px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      box-shadow: 0 2px 5px rgba(11, 124, 91, 0.2);
+      position: relative;
+      /* 툴팁 기준점 */
+      cursor: default;
+    }
+
+    /* 말풍선 꼬리 (삼각형) */
+    .local-badge::before {
+      content: "";
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #0b7c5b;
+      border-bottom: none;
+      opacity: 0;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(4px);
+      z-index: 200;
+    }
+
+    /* 말풍선 본체 */
+    .local-badge::after {
+      content: "양양에 거주하며 활동하는 로컬 파트너입니다.";
+      position: absolute;
+      bottom: calc(100% + 9px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #0b7c5b;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 500;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(11, 124, 91, 0.28);
+      opacity: 0;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      pointer-events: none;
+      letter-spacing: 0;
+      z-index: 200;
+    }
+
+    /* PC: 호버 시 노출 */
+    @media (hover: hover) {
+
+      .local-badge:hover::before,
+      .local-badge:hover::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    /* 모바일: .is-tooltip-open 클래스로 표시 제어 */
+    .local-badge.is-tooltip-open::before,
+    .local-badge.is-tooltip-open::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .teacher-field {
+      font-size: .9rem;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .teacher-org {
+      font-size: .82rem;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .teacher-note {
+      font-size: .82rem;
+      color: #777;
+    }
+
+    .teacher-email {
+      font-size: .82rem;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    .teacher-email a {
+      color: #5b8a72;
+    }
+
+    .teacher-submit-card {
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin: 18px 0 22px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .03);
+    }
+
+    .teacher-submit-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .teacher-submit-cta .btn-unified {
+      width: auto;
+      min-width: 200px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: 90vh;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+      border: 1px solid #e5e5e5;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: all .18s ease;
+    }
+
+    .modal-backdrop.is-open .modal-card {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #f5faf8;
+      border-bottom: 1px solid #e3efe9;
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.2rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 16px 18px 18px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .teacher-submit-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .teacher-submit-desc {
+      font-size: .9rem;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .teacher-submit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+    }
+
+    .teacher-submit-grid label {
+      font-size: .78rem;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .char-counter {
+      font-size: 0.7rem;
+      color: #999;
+      font-weight: normal;
+    }
+
+    .career-guide-box {
+      background: #f8fcfb;
+      border: 1px solid #e3efe9;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: #5b8a72;
+      line-height: 1.6;
+    }
+
+    .career-guide-box strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #0b7c5b;
+    }
+
+    /* 관리자용 미니 버튼 */
+    .teacher-admin-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-edit-mini,
+    .btn-delete-mini {
+      padding: 3px 8px;
+      font-size: 0.65rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .btn-edit-mini:hover {
+      background: #eef7f2;
+      color: #0b7c5b;
+      border-color: #0b7c5b;
+    }
+
+    .btn-delete-mini:hover {
+      background: #fdf2f2;
+      color: #e74c3c;
+      border-color: #e74c3c;
+    }
+
+    .teacher-submit-grid input,
+    .teacher-submit-grid select,
+    .teacher-submit-grid textarea {
+      width: 100%;
+      border: 1px solid #dcdcdc;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: .85rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .teacher-submit-grid textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .teacher-submit-full {
+      grid-column: 1 / -1;
+    }
+
+    .teacher-submit-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .teacher-submit-status {
+      font-size: .82rem;
+      color: #666;
+    }
+
+    /* 강사진 정보 토글 UI */
+    .info-toggle {
+      background: transparent;
+      margin-bottom: 20px;
+    }
+
+    .info-toggle summary {
+      cursor: pointer;
+      padding: 8px 12px;
+      background: #f5faf8;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #3b5f4f;
+      list-style: none;
+      /* remove default arrow */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .info-toggle summary:hover {
+      background: #eef7f2;
+    }
+
+    .info-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .info-toggle summary::after {
+      content: "▼";
+      font-size: 0.75rem;
+      color: #999;
+      transition: transform 0.2s;
+    }
+
+    .info-toggle[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    .info-toggle .info-text {
+      padding: 16px 20px;
+      margin-top: 10px;
+      background: #fff;
+      border: 1px solid #eaeaea;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      line-height: 1.7;
+    }
+
+    /* 강사 카드 */
+    .teacher-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    /* 갤러리 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .gallery-item {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e5e5e5;
+      background: #000;
+    }
+
+    .gallery-item img {
+      display: block;
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      transition: transform .25s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* 활동사진 라이트박스 */
+    .gallery-lightbox {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .gallery-lightbox.is-open {
+      display: flex;
+    }
+
+    .gallery-lightbox-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+    }
+
+    .gallery-lightbox-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(1100px, 92vw);
+      max-height: 86vh;
+      background: #111;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gallery-lightbox-img {
+      width: 100%;
+      height: 100%;
+      max-height: 72vh;
+      object-fit: contain;
+      background: #000;
+      border-radius: 12px;
+    }
+
+    .gallery-lightbox-caption {
+      color: #ddd;
+      font-size: .85rem;
+      text-align: center;
+    }
+
+    .gallery-lightbox-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: none;
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-lightbox-close:hover {
+      background: rgba(255, 255, 255, .2);
+    }
+
+    /* 연락처 / 오시는 길 */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .contact-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid #e5e5e5;
+      font-size: .95rem;
+      height: 100%;
+    }
+
+    .contact-card h3 {
+      margin-bottom: 8px;
+    }
+
+    .contact-row {
+      margin-bottom: 6px;
+    }
+
+    .contact-label {
+      display: inline-block;
+      width: 70px;
+      font-weight: 600;
+    }
+
+    .map-box {
+      background: #f0faf5;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border: 1px solid #d4ebe0;
+      font-size: .95rem;
+      height: 100%;
+    }
+
+    .map-box-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .map-box-desc {
+      font-size: .9rem;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    /* 아래 두 박스(센터 채널 / 강사카드)용 그리드 */
+    .extra-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .full-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid #e5e5e5;
+      padding: 18px 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .03);
+      font-size: .95rem;
+    }
+
+    .channel-link-wrap {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .channel-link-text {
+      color: #555;
+    }
+
+    .teacher-form-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .teacher-form-desc {
+      font-size: .9rem;
+      color: #555;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    /* 공지사항 프리뷰 */
+    .notice-wrapper {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid #e5e5e5;
+      padding: 20px 22px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .03);
+    }
+
+    .notice-preview-body {
+      max-height: 230px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .notice-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+      table-layout: fixed;
+    }
+
+    .notice-table thead {
+      background: #f5f7f6;
+    }
+
+    .notice-table th,
+    .notice-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #ececec;
+      text-align: left;
+    }
+
+    .notice-table th:nth-child(2),
+    .notice-table td:nth-child(2) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .notice-table th:nth-child(3),
+    .notice-table td:nth-child(3) {
+      text-align: right;
+    }
+
+    .notice-type {
+      font-size: .8rem;
+      color: #5b8a72;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .notice-title a {
+      color: #222;
+    }
+
+    .notice-title a:hover {
+      text-decoration: underline;
+    }
+
+    .notice-date {
+      font-size: .8rem;
+      color: #777;
+      white-space: nowrap;
+    }
+
+    .notice-empty {
+      text-align: center;
+      color: #888;
+      padding: 18px 0;
+      font-size: .85rem;
+    }
+
+    .notice-preview-footer {
+      margin-top: 14px;
+      text-align: right;
+    }
+
+    .notice-more-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #5b8a72;
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .notice-more-btn:hover {
+      background: #4a735f;
+    }
+
+    /* 활동영상 프리뷰 */
+    .video-wrapper {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid #e5e5e5;
+      padding: 20px 22px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .03);
+    }
+
+    .video-preview-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+      align-items: stretch;
+    }
+
+    .video-preview-media {
+      position: relative;
+      display: block;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #edf2ef;
+      border: 1px solid #e2e9e5;
+      min-height: 180px;
+    }
+
+    .video-preview-media video,
+    .video-preview-media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-preview-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .video-preview-play {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3b5f4f;
+      font-size: 20px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+    }
+
+    .video-preview-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .video-preview-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1f2a26;
+      line-height: 1.4;
+    }
+
+    .video-preview-title:hover {
+      text-decoration: underline;
+    }
+
+    .video-preview-meta {
+      font-size: .82rem;
+      color: #6b7a73;
+    }
+
+    .video-preview-desc {
+      font-size: .92rem;
+      color: #4b5852;
+      line-height: 1.6;
+    }
+
+    .video-preview-body {
+      max-height: 230px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .video-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+      table-layout: fixed;
+    }
+
+    .video-table thead {
+      background: #f5f7f6;
+    }
+
+    .video-table th,
+    .video-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #ececec;
+      text-align: left;
+    }
+
+    .video-table th:nth-child(1),
+    .video-table td:nth-child(1) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .video-table th:nth-child(2),
+    .video-table td:nth-child(2) {
+      text-align: right;
+    }
+
+    .video-type {
+      font-size: .8rem;
+      color: #5b8a72;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .video-title a {
+      color: #222;
+    }
+
+    .video-title a:hover {
+      text-decoration: underline;
+    }
+
+    .video-date {
+      font-size: .8rem;
+      color: #777;
+      white-space: nowrap;
+    }
+
+    .video-empty {
+      text-align: center;
+      color: #888;
+      padding: 18px 0;
+      font-size: .85rem;
+    }
+
+    .video-preview-footer {
+      margin-top: 14px;
+      text-align: right;
+    }
+
+    .video-more-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #5b8a72;
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .video-more-btn:hover {
+      background: #4a735f;
+    }
+
+    /* 지역 누리집 링크 */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .link-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid #e5e5e5;
+      padding: 0;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .03);
+    }
+
+    .link-card[open] {
+      box-shadow: 0 10px 22px rgba(0, 0, 0, .06);
+    }
+
+    .link-card summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .link-card summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .link-card summary::after {
+      content: "+";
+      font-size: 1.1rem;
+      color: #5b8a72;
+    }
+
+    .link-card[open] summary::after {
+      content: "–";
+    }
+
+    .link-card-body {
+      padding: 0 18px 16px;
+      border-top: 1px solid #edf1ee;
+    }
+
+    .link-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: .9rem;
+    }
+
+    .link-list a {
+      color: #2b4a3a;
+    }
+
+    .link-list a:hover {
+      text-decoration: underline;
+    }
+
+    /* 푸터 */
+    footer {
+      padding: 16px 0 24px;
+      background: #f6f7f5;
+      color: #555;
+      font-size: .85rem;
+      letter-spacing: var(--tracking-wide);
+    }
+
+    footer .container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-logos {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+      align-items: center;
+      justify-items: center;
+    }
+
+    .footer-logos img {
+      height: 40px;
+      max-width: 180px;
+      width: auto;
+      filter: none;
+      opacity: 1;
+    }
+
+    .footer-logos img.is-large {
+      height: 80px;
+      max-width: 260px;
+    }
+
+    .footer-logos img.is-xlarge {
+      height: 100px;
+      max-width: 300px;
+    }
+
+    .footer-logos img.is-rural-center {
+      height: 56px;
+      max-width: 260px;
+      filter: drop-shadow(0 4px 10px rgba(19, 67, 53, .08));
+    }
+
+    footer a {
+      color: #2f5f4b;
+    }
+
+    /* 아카이브 서브 메뉴(드롭다운) UI */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* 드롭다운과 메뉴 간 마우스 이동 시 연결 다리 역할 */
+    .dropdown::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 15px;
+    }
+
+    .dropdown-trigger {
+      cursor: pointer;
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .dropdown:hover .dropdown-trigger {
+      background: #5b8a72;
+      color: #fff;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      min-width: 200px;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+      z-index: 100;
+      border-radius: 14px;
+      overflow: visible;
+      /* 서브 드롭다운이 잘리지 않도록 변경 */
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 12px;
+      padding: 6px 0;
+      border: 1px solid #f0f0f0;
+    }
+
+    .dropdown-content a,
+    .dropdown-content .nested-dropdown-trigger {
+      color: #333;
+      padding: 10px 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      text-align: left;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      /* 자식 서브메뉴 기준점 */
+    }
+
+    .dropdown-content a:hover,
+    .dropdown-content .nested-dropdown-trigger:hover {
+      background-color: #f7f9f8;
+      color: #0b7c5b;
+      padding-left: 24px;
+    }
+
+    .dropdown:hover>.dropdown-content {
+      display: block;
+    }
+
+    /* 🔥 2단계 서브 드롭다운(Nested Dropdown) 스타일 🔥 */
+    .nested-dropdown {
+      position: relative;
+    }
+
+    .nested-dropdown::after {
+      content: '▶';
+      /* 화살표 아이콘 */
+      position: absolute;
+      right: 15px;
+      font-size: 0.7rem;
+      color: #999;
+      transition: color 0.2s;
+    }
+
+    .nested-dropdown:hover::after {
+      color: #0b7c5b;
+    }
+
+    .nested-content {
+      display: none;
+      position: absolute;
+      top: -6px;
+      /* 부모 아이템과 상단 정렬 (padding 6px 감안) */
+      left: 100%;
+      /* 부모 메뉴 우측에 딱 붙게 */
+      background-color: #fff;
+      min-width: 140px;
+      box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 6px 0;
+      border: 1px solid #f0f0f0;
+      z-index: 101;
+      margin-left: 2px;
+      /* 살짝 띄우기 (옵션) */
+    }
+
+    /* 연결 다리 (오른쪽으로 갈 때 마우스가 빠지지 않게 빈 공간 채움) */
+    .nested-dropdown::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -10px;
+      width: 10px;
+      height: 100%;
+    }
+
+    /* PC에서 마우스 호버 시 2뎁스 메뉴 노출 */
+    @media (min-width: 769px) {
+      .nested-dropdown:hover .nested-content {
+        display: block;
+      }
+    }
+
+    /* 타이틀 말풍선 툴팁 */
+    .title-tooltip {
+      position: relative;
+    }
+
+    .title-tooltip::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background-color: #333;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      letter-spacing: 0;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 10;
+      font-weight: 500;
+      pointer-events: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .title-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .title-tooltip:hover::before,
+    .title-tooltip:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-5px);
+    }
+
+    /* 반응형 */
+    @media (max-width:768px) {
+      .mobile-menu-btn {
+        display: none !important;
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 14px;
+        padding-bottom: 14px;
+      }
+
+      .nav-links {
+        display: flex !important;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px 10px;
+        margin-top: 12px;
+        justify-content: flex-start;
+      }
+
+      .nav-links a:not(.nav-community-link),
+      .dropdown-trigger {
+        font-size: 0.95rem;
+        padding: 6px 12px;
+        background: #f4f6f3;
+        border-radius: 999px;
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .nav-links a:hover,
+      .dropdown-trigger:hover,
+      .dropdown.is-open .dropdown-trigger {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      .dropdown-content {
+        position: absolute;
+        display: none;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+        z-index: 100;
+        border-radius: 12px;
+        top: 100%;
+        left: 0;
+        transform: none;
+        margin-top: 6px;
+        padding: 6px 0;
+        border: 1px solid #f0f0f0;
+      }
+
+      .dropdown.is-open>.dropdown-content {
+        display: block;
+      }
+
+      /* 모바일 Nested 드롭다운 (가로로 터져서 나가므로, 세로로 펼쳐지도록 재정의) */
+      .nested-dropdown::after {
+        content: '▼';
+        top: 50%;
+        transform: translateY(-50%);
+        right: 15px;
+      }
+
+      .nested-dropdown.is-open::after {
+        content: '▲';
+      }
+
+      .nested-content {
+        position: relative;
+        /* 모바일에서는 절대위치가 아닌 상대위치로 아래쪽으로 펼쳐짐 */
+        top: auto;
+        left: auto;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        min-width: auto;
+        padding: 0;
+        margin-left: 0;
+        background-color: #fcfcfc;
+      }
+
+      .nested-dropdown.is-open .nested-content {
+        display: block;
+      }
+
+      .nested-content a {
+        padding-left: 35px;
+        /* 서브뎁스 인덴트 효과 */
+      }
+
+      .nested-content a:hover {
+        padding-left: 45px;
+      }
+
+      .nav-community-link {
+        font-size: 0 !important;
+        padding: 8px !important;
+        background: #f4f6f3;
+        color: var(--text);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .nav-community-link svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
+
+      .hero-top {
+        padding: 0;
+      }
+
+      .hero-top-frame {
+        border-radius: 0;
+        overflow-x: hidden;
+        overflow-y: visible;
+        aspect-ratio: auto;
+        height: auto;
+        min-height: 0;
+      }
+
+      .hero-top-inner {
+        width: 100%;
+        height: auto;
+      }
+
+      .hero-top-image {
+        width: 100%;
+        max-width: none;
+        height: auto;
+      }
+
+      .hero-top+section {
+        padding-top: 32px;
+      }
+
+      .hero {
+        min-height: 65vh;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .about-grid,
+      .contact-grid,
+      .extra-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .teacher-submit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .video-preview-hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width:640px) {
+      .footer-logos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+    }
+
+    @media (min-width:1200px) {
+      :root {
+        --h1: 3.1rem;
+        --h2: 2.2rem;
+        --body: 1.02rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.12rem;
+      }
+
+      .hero-top {
+        padding: 0;
+      }
+
+      .hero-top .container {
+        max-width: none;
+      }
+
+      .hero-top-frame {
+        max-width: none;
+      }
+    }
+  </style>
+
+  <!-- Google tag (gtag.js) GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+</head>
+
+<body>
+  <!-- 첫화면 이벤트/공지 팝업 -->
+  <div id="home-popup"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s;">
+    <div
+      style="background: #fff; width: 100%; max-width: 380px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.25);">
+      <div style="padding: 24px; text-align: center;">
+        <h3 style="margin-bottom: 12px; color: #ed5807; font-size: 1.15rem;">홈페이지 공동체 종합시스템 사용안내</h3>
+        <p style="font-size: 0.95rem; line-height: 1.6; color: #444; margin-bottom: 24px; word-break: keep-all;">
+          상단에 위치한 <b>[공동체 관리시스템]</b>은 의기양양 두레동아리 팀의 서류작성 및 서류제출의 편이를 위하여 새롭게 개설되었습니다.<br>향후 두레동아리 사업에 참여하는 팀들은 본 시스템을 적극
+          이용 바랍니다. 감사합니다.
+        </p>
+        <button onclick="closePopupToday()"
+          style="background: #4f7e66; color: #fff; border: none; padding: 12px 32px; border-radius: 999px; font-weight: bold; cursor: pointer; transition: background 0.2s;"
+          onmouseover="this.style.background='#3e6452'" onmouseout="this.style.background='#4f7e66'">확인 (닫기)</button>
+      </div>
+      <div
+        style="background: #f7f7f7; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border-top: 1px solid #eee;">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; color: #666;"><input
+            type="checkbox" id="popup-dont-show-today" />오늘 하루 보지 않기</label>
+        <button onclick="closePopupToday()"
+          style="background: none; border: none; color: #666; cursor: pointer; text-decoration: underline;">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 오늘 하루 보지 않기 (로컬 스토리지) 닫기 함수
+    function closePopupToday() {
+      if (document.getElementById('popup-dont-show-today').checked) {
+        localStorage.setItem('hideHomePopupUntil', new Date().getTime() + 24 * 60 * 60 * 1000);
+      }
+      document.getElementById('home-popup').style.display = 'none';
+    }
+
+    // 팝업 내용 렌더링 함수
+    function renderPopup(title, content, linkUrl) {
+      const popupEl = document.getElementById('home-popup');
+      const titleEl = popupEl.querySelector('h3');
+      const contentEl = popupEl.querySelector('p');
+      const confirmBtn = popupEl.querySelector('button'); // 첫번째 버튼(확인)
+
+      if (title) titleEl.textContent = title;
+      if (content) contentEl.innerHTML = content.replace(/\n/g, '<br>'); // 줄바꿈 반영
+
+      // 링크가 있으면 [확인] 대신 [바로가기] 처리 (또는 유지)
+      if (linkUrl && linkUrl.trim() !== '') {
+        confirmBtn.textContent = '자세히 보기';
+        confirmBtn.onclick = function () {
+          window.open(linkUrl, '_blank');
+          closePopupToday();
+        };
+      }
+
+      const hideUntil = localStorage.getItem('hideHomePopupUntil');
+      if (!hideUntil || new Date().getTime() > parseInt(hideUntil)) {
+        popupEl.style.display = 'flex';
+      }
+    }
+
+    // 시트에서 팝업 데이터 로딩
+    async function loadPopupData() {
+      // url은 config.js 안에 있음 (window.SHEET_CONFIG.popup.csvUrl)
+      try {
+        if (!window.SHEET_CONFIG || !window.SHEET_CONFIG.popup) return;
+        const url = window.SHEET_CONFIG.popup.csvUrl;
+        if (!url || url.trim() === '') return; // 설정 안됨 -> 하드코딩된 내용으로 띄울지 말지 결정
+
+        const rows = await window.CSVUtils.fetchCSV(url);
+        if (!rows || rows.length < 2) return;
+
+        // 컬럼명 추출 및 정리
+        const headers = rows[0].map(h => window.CSVUtils.safeText(h).trim());
+        const dataRow = rows[1]; // 첫 번째 데이터만 팝업으로 사용
+
+        // 컬럼명 매핑 (유연하게)
+        const getCol = (names) => {
+          const idx = headers.findIndex(h => names.some(n => h.includes(n)));
+          return idx >= 0 ? window.CSVUtils.safeText(dataRow[idx]).trim() : '';
+        };
+
+        const showFlag = getCol(['노출', '상태', '표시', '여부', 'show']);
+        const title = getCol(['제목', 'title']);
+        let content = getCol(['내용', '본문', 'content']);
+        const link = getCol(['링크', 'url', 'link', '타겟']);
+
+        // O, Y, 공개, 표시 등일때만 띄움 (한글 ㅇ, 영대소문자 o, 숫자 0 까지 모두 인식)
+        if (/^(o|0|ㅇ|y|yes|공개|표시|노출|true)$/i.test(showFlag)) {
+          // 굳이 내용컬럼이 없으면 제목만으로도 팝업 표시할 수 있도록
+          if (!content && title) content = title;
+          renderPopup(title, content, link);
+        } else {
+          // 숨김 처리 시 아예 표시 안함
+          document.getElementById('home-popup').style.display = 'none';
+        }
+      } catch (err) {
+        console.error("팝업 데이터 로딩 오류:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // config.js 로드가 끝난 후 데이터를 받아오기 위해 지연 호출 가능성 대비
+      if (window.CSVUtils) {
+        loadPopupData();
+      } else {
+        // 기존 하드코딩 노출 방식 임시 유지 (설정 전)
+        const hideUntil = localStorage.getItem('hideHomePopupUntil');
+        if (!hideUntil || new Date().getTime() > parseInt(hideUntil)) {
+          document.getElementById('home-popup').style.display = 'flex';
+        }
+      }
+    });
+  </script>
+
+  <header>
+    <div class="container nav">
+      <div class="logo" id="site-logo" aria-label="양양군 농촌활성화지원센터">
+        <span class="logo-prefix" aria-hidden="true">양양군</span>
+        <span class="logo-switch" aria-hidden="true">
+          <span class="logo-switch-viewport" id="logo-switch-viewport">
+            <span class="logo-switch-slot is-active" id="logo-switch-slot-a" data-tone="rural">농촌활성화지원센터</span>
+            <span class="logo-switch-slot" id="logo-switch-slot-b" data-tone="agri">농업기술센터</span>
+          </span>
+        </span>
+      </div>
+      <nav class="nav-links">
+        <div class="dropdown">
+          <span class="dropdown-trigger" onclick="location.href='#about'">홈</span>
+          <div class="dropdown-content">
+            <a href="#about"><span>🏢</span> 센터 소개</a>
+            <div class="nested-dropdown nested-dropdown-trigger">
+              <span style="display: flex; align-items: center; gap: 10px;"><span>💼</span> 주요사업</span>
+              <div class="nested-content">
+                <a href="#programs"
+                  onclick="if(window.innerWidth > 768) { Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2026'))?.click(); }">2026년</a>
+                <a href="#programs"
+                  onclick="if(window.innerWidth > 768) { Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2025'))?.click(); }">2025년</a>
+                <a href="#programs"
+                  onclick="if(window.innerWidth > 768) { Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2024'))?.click(); }">2024년</a>
+              </div>
+            </div>
+            <a href="#pd-section"><span>🧑‍🏫</span> 양양 PD</a>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <span class="dropdown-trigger" onclick="location.href='#teachers'">강사 이음터</span>
+          <div class="dropdown-content">
+            <a href="iumteo/index.html"><span>✨</span> 양양 강사 이음터</a>
+            <a href="#teachers"
+              onclick="setTimeout(()=>Array.from(document.querySelectorAll('.filter-btn')).find(e=>e.textContent === '전체')?.click(),100);"><span>🔍</span>
+              양양 강사 정보</a>
+          </div>
+        </div>
+        <a href="notice.html">공지사항</a>
+        <div class="dropdown">
+          <span class="dropdown-trigger">아카이브</span>
+          <div class="dropdown-content">
+            <a href="#gallery"><span>🖼️</span> 활동사진</a>
+            <a href="#video-preview"><span>🎬</span> 활동영상</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <span class="dropdown-trigger">안내 & 정보</span>
+          <div class="dropdown-content">
+            <a href="#contact"><span>📍</span> 문의 및 오시는 길</a>
+            <a href="#site-links"><span>🔗</span> 유관기관 및 지역정보</a>
+            <a href="iumteo/qna.html"><span>❓</span> Q&A</a>
+            <a href="#" onclick="openBoardModal(); return false;"><span>📋</span> 게시판</a>
+          </div>
+        </div>
+        <a href="https://script.google.com/macros/s/AKfycbzBm19IfYNFk9DC130oP8jESqpZjal0bdMNd2DRh4y9BF3h-5T54MvnQv4Gp5B0xOcJQg/exec"
+          target="_blank" rel="noopener noreferrer" class="nav-community-link" title="참여자 및 직원 전용 관리시스템">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          공동체 관리시스템
+        </a>
+      </nav>
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      if (mobileBtn && navLinks) {
+        mobileBtn.addEventListener('click', () => {
+          navLinks.classList.toggle('is-mobile-open');
+        });
+      }
+
+      // 모바일 드롭다운 메뉴 토글
+      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
+      dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        if (trigger) {
+          trigger.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+              e.preventDefault();
+              dropdown.classList.toggle('is-open');
+            }
+          });
+        }
+      });
+      // 모바일 메뉴에서 링크 클릭 시 메뉴 닫기
+      const links = document.querySelectorAll('.nav-links a:not(.dropdown-trigger)');
+      links.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            navLinks.classList.remove('is-mobile-open');
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- 새 히어로 배경 이미지 (센터소개 영역) -->
+  <section id="about" class="hero-top" aria-label="메인 배경 이미지">
+    <div class="container">
+      <div class="hero-top-frame">
+        <div class="hero-top-inner">
+          <img class="hero-top-image" src="images/hero-home.svg" alt="양양군 농촌활성화지원센터 메인 배경 이미지" />
+          <a class="hero-hotspot hero-hotspot-programs" href="#programs" aria-label="2025 주요사업 보기"></a>
+          <a class="hero-hotspot hero-hotspot-contact" href="#contact" aria-label="문의 및 상담"></a>
+          <a class="hero-video-thumb" href="#video-preview" aria-label="활동영상 섹션으로 이동">
+            <video class="hero-video-thumb-media" muted playsinline preload="metadata"></video>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 센터 소개 -->
+  <section id="about">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">센터 소개</h2>
+        <p class="section-subtitle">
+          양양군 농촌지역의 주민이 스스로 기획하고 실행하는 구조를 만들기 위해
+          교육·컨설팅·네트워크를 지원합니다.
+        </p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <h3>미션 & 비전</h3>
+          <ul class="about-list">
+            <li>· 주민의 역량을 기반으로 한 자립형 공동체 구축</li>
+            <li>· 지역 자원을 활용한 공동체 활성화</li>
+            <li>· 주민이 주도하는 지속가능한 농촌</li>
+            <li>· 생활과 문화, 돌봄이 함께 있는 농촌 만들기</li>
+          </ul>
+        </div>
+
+        <div class="about-card">
+          <h3>핵심 역할</h3>
+          <ul class="about-list">
+            <li>· 시군역량강화사업 총괄 기획 및 운영</li>
+            <li>· 의기양양 두레&동아리 발굴·지원</li>
+            <li>· 활동가 양성 아카데미 기획·운영</li>
+            <li>· 컨설팅, 교육, 네트워크 구축 지원</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 주요 사업 -->
+  <section id="programs">
+    <div class="container">
+      <h2 class="section-title">주요 사업</h2>
+      <p class="section-sub">
+        양양군 농촌활성화지원센터의 핵심 사업을 한눈에 볼 수 있습니다.
+        카테고리를 선택하고 왼쪽·오른쪽으로 스크롤하며 살펴보세요.
+      </p>
+
+      <!-- 연도 탭 (2026 / 2025 아카이브) -->
+      <div class="program-tabs" id="program-year-tabs" style="margin-top:10px;"></div>
+      <p id="program-year-subtitle" class="section-sub" style="margin-top:10px;"></p>
+
+
+      <div class="program-tabs" id="program-tabs"></div>
+
+      <div class="program-scroll">
+        <div class="program-list" id="program-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 강사 이음터 (인트로 및 목록) -->
+  <section id="teachers"
+    style="padding: 100px 0; background: linear-gradient(180deg, #f5faf8 0%, #ffffff 100%); position: relative; overflow: hidden;">
+    <!-- 장식용 배경 요소 -->
+    <div
+      style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(11, 124, 91, 0.05) 0%, transparent 70%); z-index: 0;">
+    </div>
+
+    <div class="container" style="position: relative; z-index: 1;">
+      <div class="section-header" style="margin-bottom: 60px; text-align: center;">
+        <h2 class="section-title" style="margin-bottom: 24px;">
+          <a href="iumteo/index.html" class="title-tooltip" data-tooltip="클릭하면 양양 이음터 플랫폼으로 이동합니다"
+            style="color: var(--primary-dark); text-decoration: none; display: inline-flex; align-items: center; gap: 12px; font-weight: 800; font-size: 2.2rem;">
+            🔗 양양 강사 이음터
+          </a>
+        </h2>
+        <div style="max-width: 850px; margin: 0 auto;">
+          <p
+            style="font-size: 1.3rem; color: #1a3c28; margin-bottom: 20px; line-height: 1.6; font-weight: 700; word-break: keep-all;">
+            양양의 어제와 오늘을 잇고, 내일을 일구는 사람들의 네트워크
+          </p>
+          <p style="font-size: 1.05rem; color: #555; line-height: 1.8; word-break: keep-all; margin-bottom: 40px;">
+            '양양 이음터'는 지역의 숨은 전문가를 발굴하고, 인적 자원이 필요한 기관에는 신뢰할 수 있는 인력 데이터 풀을 제공하는 <strong
+              style="color:var(--primary);">징검다리
+            </strong>입니다.
+            다양한 분야에서 활동 중인 양양의 전문가들을 만나보세요. 서로의 경험을 나누고 함께 성장하는 단단한 공동체를 지향합니다.
+          </p>
+        </div>
+
+        <!-- 핵심 가치 3요소 (카드형) -->
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 50px;">
+          <div
+            style="background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); padding:35px 25px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.04); border:1px solid rgba(11,124,91,0.1); transition: transform 0.3s ease;">
+            <div style="font-size:3rem; margin-bottom:20px;">🤝</div>
+            <h4 style="font-size:1.15rem; font-weight:800; color:#1a3c28; margin-bottom:12px;">가치 있는 연결</h4>
+            <p style="font-size:0.92rem; color:#666; line-height:1.6; margin:0;">필요한 곳에 검증된 인력을 매칭<br> 지역 사업의 질을 높입니다.
+            </p>
+          </div>
+          <div
+            style="background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); padding:35px 25px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.04); border:1px solid rgba(11,124,91,0.1); transition: transform 0.3s ease;">
+            <div style="font-size:3rem; margin-bottom:20px;">🌱</div>
+            <h4 style="font-size:1.15rem; font-weight:800; color:#1a3c28; margin-bottom:12px;">지속 가능한 성장</h4>
+            <p style="font-size:0.92rem; color:#666; line-height:1.6; margin:0;">지역을 잘 아는 로컬 강사가 주민과 함께하며, 지역이
+              성장하는 내생적 선순환 체계를 구축
+            </p>
+          </div>
+          <div
+            style="background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); padding:35px 25px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.04); border:1px solid rgba(11,124,91,0.1); transition: transform 0.3s ease;">
+            <div style="font-size:3rem; margin-bottom:20px;">🛡️</div>
+            <h4 style="font-size:1.15rem; font-weight:800; color:#1a3c28; margin-bottom:12px;">신뢰받는 데이터</h4>
+            <p style="font-size:0.92rem; color:#666; line-height:1.6; margin:0;">센터의 인증과 관리를 통해 안전하고 투명한<br> 중계를 보장합니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- 가입 및 안내 영역 -->
+        <div
+          style="background: var(--primary-dark); border-radius: 24px; padding: 40px 44px; color: #fff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 28px; text-align: left; box-shadow: 0 20px 40px rgba(11,124,91,0.2);">
+          <div style="flex: 1; min-width: 260px;">
+            <h3
+              style="font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; word-break: keep-all;">
+              <span>🚀</span> 양양의 미래에 함께하세요
+            </h3>
+            <p style="font-size: 0.95rem; opacity: 0.9; line-height: 1.7; margin: 0; word-break: keep-all;">
+              사람을 잇고, 재능을 나누며, 지역의 성장을 만듭니다
+            </p>
+          </div>
+          <div style="flex-shrink: 0;">
+            <a href="iumteo/index.html"
+              style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; padding: 16px 28px; background: #fff; color: var(--primary-dark); font-weight: 800; font-size: 1rem; border-radius: 14px; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.12); transition: transform 0.2s ease, box-shadow 0.2s ease;"
+              onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)';">
+              <span style="font-size: 1.1rem;">🔗</span>
+              양양 강사 이음터 방문하기
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="teachers-info" style="margin-bottom: 20px;">
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: #222; margin: 0;">
+            양양 강사 정보
+          </h3>
+          <div style="display: flex; gap: 8px;">
+            <span id="teacher-count-badge"
+              style="display: none; background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; border: 1px solid #c8e6c9;">
+              전문가 로딩 중...
+            </span>
+            <span id="user-count-badge"
+              style="display: none; background: #fff3e0; color: #ef6c00; padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; border: 1px solid #ffe0b2;">
+              이용회원 로딩 중...
+            </span>
+          </div>
+        </div>
+        <p
+          style="font-size: 0.9rem; color: #555; margin-bottom: 16px; word-break: keep-all; background: #fdfdfd; padding: 14px 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+          <span style="display:inline-block; margin-right:5px;">💡</span>
+          <strong>카드 클릭 시 상세 약력을 확인</strong>할 수 있습니다. 상단 카테고리를 눌러 분야별로 필터링해 보세요. 강사 연결은 센터를 통해 요청 가능합니다.
+        </p>
+      </div>
+
+      <style>
+        /* 모바일 반응형 강사 그리드 보강 */
+        @media (max-width: 768px) {
+          .teacher-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+            gap: 12px !important;
+            padding: 0 5px;
+          }
+
+          .teacher-card {
+            padding: 15px 10px !important;
+          }
+
+          .teacher-name {
+            font-size: 1rem !important;
+          }
+
+          .teacher-photo {
+            width: 80px !important;
+            height: 95px !important;
+          }
+        }
+
+        /* 상세 모달 애니메이션 */
+        #tm-overlay {
+          animation: tm-fadein 0.3s ease;
+        }
+
+        #tm-box {
+          animation: tm-slideup 0.3s ease;
+        }
+
+        @keyframes tm-fadein {
+          from {
+            opacity: 0;
+          }
+
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes tm-slideup {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      </style>
+
+      <!-- 강사 검색 기능 (좌측 배치 및 디자인 개선) -->
+      <div class="teacher-search-intro" style="margin-bottom: 12px; font-size: 0.9rem; color: #666; font-weight: 500;">
+        우리 지역 활동가부터 분야별 전문 강사까지, 최적의 파트너를 검색해보세요.
+      </div>
+      <div class="teacher-search-wrap"
+        style="margin-bottom: 25px; text-align: left; display: flex; justify-content: flex-start; background: transparent; padding: 0 0 10px 0;">
+        <div style="position: relative; width: 100%; max-width: 500px;">
+          <input type="text" id="teacher-search-input" placeholder="🔍 강사명, 분야, 소속 검색..."
+            style="padding: 16px 24px; width: 100%; border: 2px solid #e0e0e0; border-radius: 999px; font-size: 1.05rem; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; background: #fff;"
+            onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 6px 20px rgba(79,126,102,0.15)';"
+            onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';" />
+        </div>
+      </div>
+
+      <!-- 카테고리 필터 (복원) -->
+      <div class="teacher-filter" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 10px;">
+        <button class="filter-btn" data-filter="북마크" style="background:#fff0f3; color:#e0115f; border-color:#ffccd5;">❤️
+          찜한 강사</button>
+        <button class="filter-btn active" data-filter="전체">🏠 전체</button>
+        <button class="filter-btn" data-filter="농촌·공동체·정책">🌱 농촌·공동체</button>
+        <button class="filter-btn" data-filter="환경·생태">🌳 환경·생태</button>
+        <button class="filter-btn" data-filter="사진·아카이브·영상">📸 사진·영상</button>
+        <button class="filter-btn" data-filter="요리·식문화">🍳 요리·식문화</button>
+        <button class="filter-btn" data-filter="디지털·AI·문해">🤖 디지털·AI</button>
+        <button class="filter-btn" data-filter="정리·실버·복지·치유">🧘 정리·치유</button>
+        <button class="filter-btn" data-filter="미술·공예·예술">🎨 미술·공예</button>
+        <button class="filter-btn" data-filter="세무·회계">📊 세무·회계</button>
+        <button class="filter-btn" data-filter="레크레이션·진행">🎤 레크레이션</button>
+        <button class="filter-btn" data-filter="기타">✨ 기타</button>
+      </div>
+
+      <!-- 강사 리스트 -->
+      <div class="teacher-grid" id="teacher-list" style="margin-bottom: 60px;"></div>
+
+      <!-- PD 섹션 -->
+      <div class="pd-section-wrap" style="margin-top: 60px; border-top: 1px solid #eee; padding-top: 40px;">
+        <h3 id="pd-section" style="font-size:1.2rem; margin-bottom:12px; scroll-margin-top:100px; font-weight: 700;">
+          PD
+          & 현장 코디네이터</h3>
+        <p id="pd-year-subtitle" style="font-size:.9rem; color:#666; margin-bottom:20px; word-break: keep-all;">
+          각 프로젝트를 이끄는 중간관리자이자 활동가로서, 주민과 현장을 연결하는 역할을 수행합니다.
+        </p>
+
+        <!-- 연도 탭 -->
+        <div class="teacher-filter" id="pd-year-tabs" style="margin-bottom:15px;"></div>
+
+        <!-- 담당사업(프로젝트) 필터 -->
+        <div class="teacher-filter" id="pd-project-tabs" style="margin-bottom:20px;"></div>
+
+        <!-- PD 카드 리스트 -->
+        <div class="teacher-grid" id="pd-list"></div>
+      </div>
+  </section>
+
+  <!-- 공지사항 미리보기 -->
+  <section id="notice-preview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">공지사항</h2>
+        <p class="section-subtitle">
+          양양군 농촌활성화지원센터의 주요 안내와 새 소식을 확인하실 수 있습니다.
+        </p>
+      </div>
+
+      <div class="notice-wrapper">
+        <div class="notice-preview-body">
+          <table class="notice-table">
+            <thead>
+              <tr>
+                <th style="width:80px;">구분</th>
+                <th>제목</th>
+                <th style="width:120px;">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="notice-preview-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="notice-preview-footer">
+          <a href="notice.html" class="notice-more-btn">전체 공지사항 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 활동사진 -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">활동사진</h2>
+        <p class="section-subtitle">
+          현장 프로그램, 교육, 행사의 모습을 일부 담았습니다.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item"><img src="images/PD사진/24성과공유회 (2).JPG" alt="성과공유회 사진" /></div>
+        <div class="gallery-item"><img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" /></div>
+        <div class="gallery-item"><img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg" alt="두레동아리 워크숍" /></div>
+        <div class="gallery-item"><img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" /></div>
+        <div class="gallery-item"><img src="images/PD사진/두레동아리 (3).jpg" alt="두레동아리 활동 2" /></div>
+        <div class="gallery-item"><img src="images/PD사진/두레동아리 (4).jpg" alt="두레동아리 활동 3" /></div>
+        <div class="gallery-item"><img src="images/PD사진/두레동아리.jpg" alt="두레동아리 활동 4" /></div>
+        <div class="gallery-item"><img src="images/PD사진/문화배달 (1).jpg" alt="문화배달 활동 1" /></div>
+        <div class="gallery-item"><img src="images/PD사진/문화배달 (2).jpg" alt="문화배달 활동 2" /></div>
+        <div class="gallery-item"><img src="images/PD사진/문화배달 (3).jpg" alt="문화배달 활동 3" /></div>
+        <div class="gallery-item"><img src="images/PD사진/문화배달 (4).jpg" alt="문화배달 활동 4" /></div>
+        <div class="gallery-item"><img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 활동 5" /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 문의 & 오시는 길 -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">문의 & 오시는 길</h2>
+        <p class="section-subtitle">
+          주민 사업 제안, 교육 의뢰 등 궁금하신 점은 언제든지 연락 주세요.
+        </p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h3>연락처 정보</h3>
+          <div class="contact-row"><span class="contact-label">전화</span><span>033-673-0221</span></div>
+          <div class="contact-row"><span class="contact-label">이메일</span><span>yyfarmct@naver.com</span></div>
+          <div class="contact-row"><span class="contact-label">주소</span><span>강원특별자치도 양양군 동해대로 2558, 행복나눔터2층
+              (농촌활성화지원센터)</span></div>
+          <div class="contact-row"><span class="contact-label">운영시간</span><span>월–금 09:00–18:00 (공휴일 휴무)</span></div>
+          <div style="margin-top: 18px;">
+            <button type="button" class="btn-unified"
+              style="width: auto; height: 38px; padding: 0 16px; font-size: 0.85rem;"
+              onclick="location.href='iumteo/qna.html'">
+              <span class="btn-unified-icon">❓</span>
+              <span>Q&A</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="map-box">
+          <div class="map-box-title">찾아오는 길</div>
+          <p class="map-box-desc">
+            버튼을 클릭하시면 네이버 지도가 새 창(또는 탭)으로 열려 길찾기,
+            주변 정류장 등을 자세히 확인하실 수 있습니다.
+          </p>
+
+          <button type="button" class="btn-unified" onclick="window.open('https://naver.me/5mhpqk0D', '_blank')">
+            <span class="btn-unified-icon">📍</span>
+            <span>찾아오는 길</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 센터 채널 -->
+      <div class="extra-grid" style="grid-template-columns: 1fr;">
+        <!-- ✅ 센터 채널 -->
+        <div class="full-card channel-link-wrap">
+          <p class="channel-link-text">
+            센터의 다양한 채널, 자료, 서식 다운로드는 아래 링크를 통해 확인하실 수 있습니다.<br>
+            (블로그, 카페에서 자료 받기 가능)
+          </p>
+
+          <a href="https://litt.ly/yyfarmct" class="btn-unified" target="_blank" rel="noopener noreferrer">
+            <span class="btn-unified-icon">📌</span>
+            <span>센터 채널 & 소식 모아보기</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 지역 누리집 -->
+  <section id="site-links">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">유관기관 및 지역 정보 안내</h2>
+        <p class="section-subtitle">
+          양양군 유관기관과 행정구역별 주요 정보를 편리하게 확인해 보세요.
+        </p>
+      </div>
+
+      <div class="links-grid">
+        <details class="link-card">
+          <summary>양양군 관련기관</summary>
+          <div class="link-card-body">
+            <ul class="link-list">
+              <li><a href="https://www.eshare.go.kr/UserPortal/Upm/Main/index.do" target="_blank"
+                  rel="noopener noreferrer">공유누리</a></li>
+              <li><a href="https://health.yangyang.go.kr/gw/agriculture" target="_blank"
+                  rel="noopener noreferrer">농업기술센터</a></li>
+              <li><a href="https://www.ccfsm.foodnara.go.kr" target="_blank" rel="noopener noreferrer">농식품종합정보시스템</a>
+              </li>
+              <li><a href="https://www.foresttrip.go.kr/main.do" target="_blank" rel="noopener noreferrer">숲나들e</a>
+              </li>
+              <li><a href="https://www.yangyang.go.kr/gw/farm" target="_blank" rel="noopener noreferrer">양양군
+                  귀농귀촌센터</a>
+              </li>
+              <li><a href="https://edu.yangyang.go.kr/" target="_blank" rel="noopener noreferrer">양양군 평생학습관</a></li>
+              <li><a href="https://www.yangyang.go.kr/gw/portal" target="_blank" rel="noopener noreferrer">양양군청</a>
+              </li>
+              <li><a href="https://www.yangyang-mall.com" target="_blank" rel="noopener noreferrer">양양몰</a></li>
+              <li><a href="https://www.yycf.or.kr/contents/main.html" target="_blank"
+                  rel="noopener noreferrer">양양문화재단</a></li>
+              <li><a href="https://www.yangyang.go.kr/tour" target="_blank" rel="noopener noreferrer">오산리 선사유적박물관</a>
+              </li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="link-card">
+          <summary>읍면</summary>
+          <div class="link-card-body">
+            <ul class="link-list">
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_yyeup" target="_blank"
+                  rel="noopener noreferrer">양양읍</a></li>
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_seomyeon" target="_blank"
+                  rel="noopener noreferrer">서면</a></li>
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_sonyangmyeon_guide" target="_blank"
+                  rel="noopener noreferrer">손양면</a></li>
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_hyunbukmyeon_guide" target="_blank"
+                  rel="noopener noreferrer">현북면</a></li>
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_hyunnammyeon_guide" target="_blank"
+                  rel="noopener noreferrer">현남면</a></li>
+              <li><a href="https://gunsoo.yangyang.go.kr/gw/portal/em_ganghyeonmyeon_guide" target="_blank"
+                  rel="noopener noreferrer">강현면</a></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="link-card">
+          <summary>마을 누리집</summary>
+          <div class="link-card-body">
+            <ul class="link-list">
+              <li><a href="https://hd.invil.org" target="_blank" rel="noopener noreferrer">현동마을</a></li>
+              <li><a href="https://songcheon.invil.org" target="_blank" rel="noopener noreferrer">송천마을</a></li>
+              <li><a href="https://www.osaek.info" target="_blank" rel="noopener noreferrer">오색마을</a></li>
+              <li><a href="https://치래마을.kr" target="_blank" rel="noopener noreferrer">설악산치래마을</a></li>
+              <li><a href="https://황룡마을.kr" target="_blank" rel="noopener noreferrer">황룡마을</a></li>
+              <li><a href="http://공수전리.kr" target="_blank" rel="noopener noreferrer">공수전리마을</a></li>
+              <li><a href="https://www.donghori.com" target="_blank" rel="noopener noreferrer">동호해변마을</a></li>
+              <li><a href="https://www.hajodae.org" target="_blank" rel="noopener noreferrer">하조대마을</a></li>
+              <li><a href="https://www.jkbeach.com" target="_blank" rel="noopener noreferrer">정암해변마을</a></li>
+              <li><a href="https://www.wonpo.com" target="_blank" rel="noopener noreferrer">원포해변마을</a></li>
+              <li><a href="https://www.jeongamri.com" target="_blank" rel="noopener noreferrer">정암리마을</a></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="link-card">
+          <summary>시·군 누리집</summary>
+          <div class="link-card-body">
+            <ul class="link-list">
+              <li><a href="https://state.gwd.go.kr/portal/portalMain.do" target="_blank"
+                  rel="noopener noreferrer">강원특별자치도</a></li>
+              <li><a href="https://www.chuncheon.go.kr/index.chuncheon" target="_blank"
+                  rel="noopener noreferrer">춘천시</a></li>
+              <li><a href="https://www.wonju.go.kr/www" target="_blank" rel="noopener noreferrer">원주시</a></li>
+              <li><a href="https://www.gn.go.kr" target="_blank" rel="noopener noreferrer">강릉시</a></li>
+              <li><a href="https://www.dh.go.kr/www" target="_blank" rel="noopener noreferrer">동해시</a></li>
+              <li><a href="https://www.taebaek.go.kr/www" target="_blank" rel="noopener noreferrer">태백시</a></li>
+              <li><a href="https://www.sokcho.go.kr" target="_blank" rel="noopener noreferrer">속초시</a></li>
+              <li><a href="https://www.samcheok.go.kr" target="_blank" rel="noopener noreferrer">삼척시</a></li>
+              <li><a href="https://www.hongcheon.go.kr/www/index.do" target="_blank" rel="noopener noreferrer">홍천군</a>
+              </li>
+              <li><a href="https://www.hsg.go.kr" target="_blank" rel="noopener noreferrer">횡성군</a></li>
+              <li><a href="https://www.yw.go.kr/www/index.do" target="_blank" rel="noopener noreferrer">영월군</a></li>
+              <li><a href="https://www.pc.go.kr" target="_blank" rel="noopener noreferrer">평창군</a></li>
+              <li><a href="https://www.jeongseon.go.kr/intro/portal/index.html" target="_blank"
+                  rel="noopener noreferrer">정선군</a></li>
+              <li><a href="https://www.cwg.go.kr" target="_blank" rel="noopener noreferrer">철원군</a></li>
+              <li><a href="https://www.ihc.go.kr" target="_blank" rel="noopener noreferrer">화천군</a></li>
+              <li><a href="https://www.yanggu.go.kr" target="_blank" rel="noopener noreferrer">양구군</a></li>
+              <li><a href="https://www.inje.go.kr/portal" target="_blank" rel="noopener noreferrer">인제군</a></li>
+              <li><a href="https://www.gwgs.go.kr" target="_blank" rel="noopener noreferrer">고성군</a></li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 활동영상 미리보기 -->
+  <section id="video-preview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">활동영상</h2>
+        <p class="section-subtitle">
+          센터의 주요 활동과 현장 모습을 영상으로 확인하실 수 있습니다.
+        </p>
+      </div>
+
+      <div class="video-wrapper">
+        <div class="video-preview-hero">
+          <a class="video-preview-media" id="video-preview-media" href="videos.html" aria-label="활동영상 목록 보기">
+            <video id="video-preview-video" muted autoplay playsinline preload="metadata"></video>
+            <img id="video-preview-image" src="" alt="활동영상 미리보기" style="display:none;" />
+            <div class="video-preview-overlay">
+              <div class="video-preview-play">▶</div>
+            </div>
+          </a>
+          <div class="video-preview-info">
+            <a id="video-preview-title" class="video-preview-title" href="videos.html">활동영상</a>
+            <div id="video-preview-meta" class="video-preview-meta"></div>
+            <p id="video-preview-desc" class="video-preview-desc"></p>
+          </div>
+        </div>
+
+        <div class="video-preview-body">
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th>제목</th>
+                <th style="width:120px;">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="video-preview-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="video-preview-footer">
+          <a href="videos.html" class="video-more-btn">전체 활동영상 보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-logos">
+        <img src="images/농림축산식품부_국_상하_embedded.svg" alt="농림축산식품부 로고" class="is-large" />
+        <img src="images/농업기술센터_로고.svg" alt="농업기술센터 로고" class="is-xlarge" />
+        <img src="images/양양군_embedded.svg" alt="양양군 로고" />
+        <img src="images/logo-rural-center-footer.png" alt="양양군 농촌활성화지원센터 로고" class="is-rural-center" />
+      </div>
+      <div>© <span id="year"></span> 양양군 농촌활성화지원센터. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- 활동사진 라이트박스 -->
+  <div id="gallery-lightbox" class="gallery-lightbox" aria-hidden="true">
+    <div class="gallery-lightbox-overlay"></div>
+    <div class="gallery-lightbox-dialog" role="dialog" aria-modal="true" aria-label="활동 사진 확대">
+      <button type="button" class="gallery-lightbox-close" id="gallery-lightbox-close" aria-label="닫기">×</button>
+      <img id="gallery-lightbox-img" class="gallery-lightbox-img" src="" alt="" />
+      <div id="gallery-lightbox-caption" class="gallery-lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- 문의하기 모달 -->
+  <div id="contact-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-title">글로 문의하기</div>
+        <button class="modal-close" onclick="closeContactModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="contact-form" onsubmit="submitContactForm(event)">
+          <div class="teacher-submit-grid" style="grid-template-columns: 1fr; gap: 14px;">
+            <div>
+              <label>이름 <span style="color:red">*</span></label>
+              <input type="text" id="contact-name" required placeholder="이름을 입력하세요">
+            </div>
+            <div>
+              <label>전화번호 <span style="color:red">*</span></label>
+              <input type="tel" id="contact-phone" required placeholder="예: 010-1234-5678">
+            </div>
+            <div>
+              <label>문의 내용 <span style="color:red">*</span></label>
+              <textarea id="contact-message" required placeholder="문의하실 내용을 상세히 적어주세요"></textarea>
+            </div>
+          </div>
+          <div class="teacher-submit-actions" style="margin-top: 24px; justify-content: flex-end;">
+            <span id="contact-status" class="teacher-submit-status"
+              style="margin-right: auto; font-weight: 500;"></span>
+            <button type="button" class="btn-unified"
+              style="background: #888; width: auto; height: 40px; margin-right: 8px;"
+              onclick="closeContactModal()">취소</button>
+            <button type="submit" class="btn-unified" style="width: auto; height: 40px;"
+              id="contact-submit-btn">제출하기</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 게시판 모달 -->
+  <div id="board-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 800px; height: 80vh;">
+      <div class="modal-header">
+        <div class="modal-title">게시판</div>
+        <button class="modal-close" onclick="closeBoardModal()">×</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-size: 1.1rem; margin: 0; color: #3b5f4f;">자유 게시판</h3>
+          <button type="button" class="btn-unified"
+            style="width: auto; height: 36px; padding: 0 14px; font-size: 0.85rem;" onclick="openBoardWrite()">✏️
+            글쓰기</button>
+        </div>
+
+        <div id="board-list-view"
+          style="flex: 1; overflow-y: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); padding: 0;">
+          <div style="text-align: center; padding: 40px 20px; color: #888;" id="board-loading">
+            <span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> 게시글을 불러오는 중입니다...
+          </div>
+          <table class="notice-table" id="board-table" style="display:none; margin: 0; border: none;">
+            <thead>
+              <tr>
+                <th style="width: 120px; text-align: center;">작성일</th>
+                <th>내용</th>
+                <th style="width: 120px; text-align: center;">작성자</th>
+              </tr>
+            </thead>
+            <tbody id="board-tbody"></tbody>
+          </table>
+        </div>
+
+        <div id="board-write-view"
+          style="display: none; flex: 1; overflow-y: auto; border: 1px solid #e5e5e5; border-radius: var(--radius); padding: 20px;">
+          <h4 id="board-form-title" style="margin-bottom: 16px; font-size: 1.05rem; color: #222;">새 게시글 작성</h4>
+          <form id="board-form" onsubmit="submitBoardForm(event)">
+            <input type="hidden" id="board-row-id" value="">
+            <div class="teacher-submit-grid" style="grid-template-columns: 1fr; gap: 14px;">
+              <div>
+                <label>작성자 <span style="color:red">*</span></label>
+                <input type="text" id="board-name" required placeholder="이름 또는 닉네임" style="max-width: 300px;">
+              </div>
+              <div>
+                <label>내용 <span style="color:red">*</span></label>
+                <textarea id="board-message" required placeholder="게시글 내용을 작성하세요" style="min-height: 160px;"></textarea>
+              </div>
+            </div>
+            <div class="teacher-submit-actions" style="margin-top: 24px; justify-content: flex-end;">
+              <span id="board-status" class="teacher-submit-status"
+                style="margin-right: auto; font-weight: 500;"></span>
+              <button type="button" class="btn-unified"
+                style="background: #888; width: auto; height: 40px; margin-right: 8px;"
+                onclick="closeBoardWrite()">취소</button>
+              <button type="submit" class="btn-unified" style="width: auto; height: 40px;"
+                id="board-submit-btn">등록하기</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js?v=20260205e"></script>
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/teachers.js?v=20260205d"></script>
+  <script src="assets/js/notices.js"></script>
+  <script src="assets/js/videos.js"></script>
+  <script src="assets/js/programs.js?v=20260205d"></script>
+  <script src="assets/js/pd.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/board_contact.js"></script>
+
+  <script>
+    (function () {
+      const brand = document.getElementById("site-logo");
+      const viewport = document.getElementById("logo-switch-viewport");
+      const slots = [
+        document.getElementById("logo-switch-slot-a"),
+        document.getElementById("logo-switch-slot-b")
+      ];
+      if (!brand || !viewport || slots.some((slot) => !slot)) return;
+
+      const labels = [
+        { text: "농촌활성화지원센터", tone: "rural" },
+        { text: "농업기술센터", tone: "agri" }
+      ];
+      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let activeSlotIndex = 0;
+      let activeLabelIndex = 0;
+      let isAnimating = false;
+
+      function applyLabel(slot, label, isActive) {
+        slot.textContent = label.text;
+        slot.dataset.tone = label.tone;
+        slot.className = isActive ? "logo-switch-slot is-active" : "logo-switch-slot";
+      }
+
+      function syncAriaLabel(label) {
+        brand.setAttribute("aria-label", `양양군 ${label.text}`);
+      }
+
+      function updateViewportWidth() {
+        const width = Math.max(...slots.map((slot) => slot.scrollWidth));
+        if (width > 0) {
+          viewport.style.width = `${Math.ceil(width)}px`;
+        }
+      }
+
+      function switchLogoText() {
+        if (isAnimating) return;
+
+        const nextLabelIndex = (activeLabelIndex + 1) % labels.length;
+        const activeSlot = slots[activeSlotIndex];
+        const nextSlotIndex = (activeSlotIndex + 1) % slots.length;
+        const nextSlot = slots[nextSlotIndex];
+        const nextLabel = labels[nextLabelIndex];
+
+        applyLabel(nextSlot, nextLabel, false);
+        updateViewportWidth();
+        syncAriaLabel(nextLabel);
+
+        if (reduceMotionQuery.matches) {
+          applyLabel(activeSlot, labels[activeLabelIndex], false);
+          applyLabel(nextSlot, nextLabel, true);
+          activeSlotIndex = nextSlotIndex;
+          activeLabelIndex = nextLabelIndex;
+          return;
+        }
+
+        isAnimating = true;
+
+        requestAnimationFrame(() => {
+          activeSlot.classList.add("is-leaving");
+          nextSlot.classList.add("is-entering");
+        });
+
+        window.setTimeout(() => {
+          applyLabel(activeSlot, labels[activeLabelIndex], false);
+          applyLabel(nextSlot, nextLabel, true);
+          activeSlotIndex = nextSlotIndex;
+          activeLabelIndex = nextLabelIndex;
+          isAnimating = false;
+        }, 620);
+      }
+
+      applyLabel(slots[0], labels[0], true);
+      applyLabel(slots[1], labels[1], false);
+      syncAriaLabel(labels[0]);
+      updateViewportWidth();
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(updateViewportWidth).catch(() => { });
+      }
+      window.addEventListener("resize", updateViewportWidth);
+      reduceMotionQuery.addEventListener?.("change", updateViewportWidth);
+
+      window.setInterval(switchLogoText, 5000);
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById("gallery-lightbox");
+      const lightboxImg = document.getElementById("gallery-lightbox-img");
+      const lightboxCaption = document.getElementById("gallery-lightbox-caption");
+      const closeBtn = document.getElementById("gallery-lightbox-close");
+      const overlay = lightbox.querySelector(".gallery-lightbox-overlay");
+      const galleryImages = document.querySelectorAll(".gallery-item img");
+
+      if (!lightbox || !lightboxImg || !overlay || !galleryImages.length) return;
+
+      function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || "활동 사진";
+        lightboxCaption.textContent = alt || "";
+        lightbox.classList.add("is-open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("is-open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        lightboxImg.src = "";
+      }
+
+      galleryImages.forEach(img => {
+        img.addEventListener("click", () => {
+          openLightbox(img.src, img.alt);
+        });
+      });
+
+      closeBtn.addEventListener("click", closeLightbox);
+      overlay.addEventListener("click", closeLightbox);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
+
+</body>
+
+</html>

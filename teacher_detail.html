@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강사 상세 프로필 | 양양군 농촌활성화지원센터</title>
+
+    <style>
+        /* 기본 리셋 및 폰트 설정 (index.html 기반) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background: #f6fbf8;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* GNB 헤더 (공통) */
+        header {
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            color: #0b7c5b;
+            font-weight: 900;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0b7c5b;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 15px;
+        }
+
+        .dropdown-trigger {
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .dropdown-trigger:hover {
+            color: #0b7c5b;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 200px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+            z-index: 100;
+            border-radius: 14px;
+            overflow: hidden;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            padding: 6px 0;
+            border: 1px solid #f0f0f0;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f7f9f8;
+            color: #0b7c5b;
+            padding-left: 24px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* 상세 페이지 메인 레이아웃 */
+        .profile-hero {
+            background: linear-gradient(135deg, #0b7c5b, #125e47);
+            padding: 60px 0;
+            color: #fff;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: #e2e2e2;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-info h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .profile-info .role {
+            font-size: 1.1rem;
+            color: #bbf0dc;
+            margin-bottom: 15px;
+        }
+
+        .profile-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+        }
+
+        /* 본문 영역 */
+        .profile-content {
+            padding: 50px 0;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .content-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 30px;
+        }
+
+        .content-box h3 {
+            font-size: 1.3rem;
+            color: #0b7c5b;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .history-list {
+            list-style: none;
+        }
+
+        .history-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .history-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #0b7c5b;
+        }
+
+        .contact-info {
+            list-style: none;
+        }
+
+        .contact-info li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 24px;
+            background: #333;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #555;
+        }
+
+        /* 로딩 인디케이터 */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #0b7c5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-links.is-mobile-open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                padding: 24px 20px;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                border-bottom: 1px solid #e5e5e5;
+                align-items: flex-start;
+                gap: 16px;
+                z-index: 20;
+            }
+
+            .nav-links.is-mobile-open .dropdown {
+                width: 100%;
+            }
+
+            .nav-links.is-mobile-open .dropdown-trigger {
+                width: 100%;
+                text-align: left;
+                font-weight: 700;
+                font-size: 1.05rem;
+                padding: 8px 0;
+                background: transparent !important;
+                color: #333 !important;
+            }
+
+            .nav-links.is-mobile-open .dropdown-trigger::after {
+                content: "▼";
+                float: right;
+                font-size: 0.7rem;
+                margin-top: 6px;
+                transition: transform 0.2s;
+            }
+
+            .nav-links.is-mobile-open .dropdown.is-open .dropdown-trigger::after {
+                transform: rotate(180deg);
+            }
+
+            .nav-links.is-mobile-open .dropdown-content {
+                position: static;
+                display: none;
+                box-shadow: none;
+                border: none;
+                background: #f8fcfb;
+                width: 100%;
+                transform: none;
+                margin-top: 8px;
+                padding: 10px 0;
+                border-radius: 8px;
+            }
+
+            .nav-links.is-mobile-open .dropdown.is-open .dropdown-content {
+                display: block;
+            }
+
+            .nav-links.is-mobile-open a:not(.nav-community-link) {
+                font-size: 1.05rem;
+                font-weight: 700;
+                padding: 8px 0;
+                width: 100%;
+                color: #333;
+            }
+
+            .nav-links.is-mobile-open a:hover {
+                background: transparent;
+                color: #0b7c5b;
+            }
+
+            .nav-links.is-mobile-open .nav-community-link {
+                margin-top: 12px;
+                width: 100%;
+                justify-content: center;
+                padding: 14px !important;
+                font-size: 1rem;
+            }
+
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-tags {
+                justify-content: center;
+            }
+        }
+
+        /* GNB 동기화를 위한 CSS (patch_headers.py로 덮어쓰기됨) */
+    </style>
+</head>
+
+<body>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div style="margin-top:15px; color:#666;">강사 정보를 불러오는 중입니다...</div>
+    </div>
+
+    <header>
+        <div class="container nav">
+            <div class="logo" id="site-logo" aria-label="양양군 농촌활성화지원센터">
+                <span class="logo-prefix" aria-hidden="true">양양군</span>
+                <span class="logo-switch" aria-hidden="true">
+                    <span class="logo-switch-viewport" id="logo-switch-viewport">
+                        <span class="logo-switch-slot is-active" id="logo-switch-slot-a"
+                            data-tone="rural">농촌활성화지원센터</span>
+                        <span class="logo-switch-slot" id="logo-switch-slot-b" data-tone="agri">농업기술센터</span>
+                    </span>
+                </span>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html#about">홈</a>
+                <div class="dropdown">
+                    <span class="dropdown-trigger" onclick="location.href='index.html#programs'">주요사업</span>
+                    <div class="dropdown-content">
+                        <a href="index.html#programs">2026년</a>
+                        <a href="index.html#programs">2025년</a>
+                        <a href="index.html#programs">2024년</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <span class="dropdown-trigger" onclick="location.href='index.html#teachers'">강사 이음터</span>
+                    <div class="dropdown-content">
+                        <a href="index.html#teachers">강사 정보 등록</a>
+                        <a href="index.html#teachers">양양 강사 정보</a>
+                        <a href="index.html#teachers">PD</a>
+                    </div>
+                </div>
+                <a href="notice.html">공지사항</a>
+                <div class="dropdown">
+                    <span class="dropdown-trigger">아카이브</span>
+                    <div class="dropdown-content">
+                        <a href="index.html#gallery">활동사진</a>
+                        <a href="index.html#video-preview">활동영상</a>
+                    </div>
+                </div>
+                <a href="index.html#contact">오시는길</a>
+                <a href="qna.html">Q&A</a>
+                <a href="https://script.google.com/macros/s/AKfycbzBm19IfYNFk9DC130oP8jESqpZjal0bdMNd2DRh4y9BF3h-5T54MvnQv4Gp5B0xOcJQg/exec"
+                    target="_blank" rel="noopener noreferrer" class="nav-community-link" title="참여자 및 직원 전용 관리시스템">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    공동체 관리시스템
+                </a>
+            </nav>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            if (mobileBtn && navLinks) {
+                mobileBtn.addEventListener('click', () => {
+                    navLinks.classList.toggle('is-mobile-open');
+                });
+            }
+
+            const dropdowns = document.querySelectorAll('.nav-links .dropdown');
+            dropdowns.forEach(dropdown => {
+                const trigger = dropdown.querySelector('.dropdown-trigger');
+                if (trigger) {
+                    trigger.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) {
+                            e.preventDefault();
+                            dropdown.classList.toggle('is-open');
+                        }
+                    });
+                }
+            });
+
+            const links = document.querySelectorAll('.nav-links a:not(.dropdown-trigger)');
+            links.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        navLinks.classList.remove('is-mobile-open');
+                    }
+                });
+            });
+        });
+    </script>
+
+    <main>
+        <section class="profile-hero">
+            <div class="container profile-header">
+                <!-- 기본 실루엣 이미지 혹은 시트에서 가져올 이미지 -->
+                <img src="https://ui-avatars.com/api/?name=강사명&background=random&size=200" alt="강사 사진"
+                    class="profile-photo" id="t-photo">
+                <div class="profile-info">
+                    <h1 id="t-name">강사명 불러오는 중...</h1>
+                    <div class="role" id="t-role">소속 및 직함</div>
+                    <div class="profile-tags" id="t-tags">
+                        <!-- JS로 태그 삽입 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container profile-content">
+            <div class="content-left">
+                <div class="content-box">
+                    <h3>주요 강의 및 활동 계획</h3>
+                    <p id="t-desc" style="white-space: pre-wrap;">데이터를 불러오는 중입니다.</p>
+                </div>
+
+                <div class="content-box">
+                    <h3>주요 업력 및 자격사항</h3>
+                    <ul class="history-list" id="t-history">
+                        <!-- JS로 리스트 삽입 -->
+                    </ul>
+                </div>
+
+                <div class="content-box" style="background: #fdfdfd; border: 1px dashed #ddd; margin-top: 40px;">
+                    <h3 style="font-size: 1rem; color: #666; border-bottom: none; margin-bottom: 10px;">🛡️ 강사 정보 보호 및
+                        안내</h3>
+                    <p style="font-size: 0.85rem; color: #777; line-height: 1.7; word-break: keep-all;">
+                        본 페이지의 정보는 양양군 농촌활성화지원센터 강사 이음터 운영 및 마을 교육 연계를 목적으로만 제공됩니다.
+                        강사님의 개인식별정보(연락처 등)는 정보 보호 정책에 따라 비공개 처리되며, 강의 섭외 및 관련 문의는 센터를 통해 진행해 주시기 바랍니다.
+                    </p>
+                </div>
+
+                <a href="index.html#teachers" class="btn-back">← 강사 목록으로 돌아가기</a>
+            </div>
+
+            <div class="content-right">
+                <div class="content-box">
+                    <h3>전문 분야</h3>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;" id="t-categories">
+                        <!-- JS로 전문영역 태그 삽입 -->
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <h3>연락처 정보</h3>
+                    <ul class="contact-info" id="t-contact">
+                        <li>🔒 연락처는 정보 보호를 위해 비공개 처리됩니다.</li>
+                        <li style="font-size: 0.85rem; margin-top: 15px;">강의 섭외 문의:<br>양양군 농촌활성화지원센터<br>033-670-0000
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/utils/csvParser.js"></script>
+    <script>
+        // URL에서 파라미터 가져오기 (?name=송주연)
+        const urlParams = new URLSearchParams(window.location.search);
+        const teacherNameParam = urlParams.get('name');
+
+        async function loadTeacherDetail() {
+            if (!teacherNameParam) {
+                alert('잘못된 접근입니다. 강사 정보가 없습니다.');
+                window.location.href = 'index.html#teachers';
+                return;
+            }
+
+            try {
+                const url = window.SHEET_CONFIG.teachers.csvUrl;
+                const rows = await window.CSVUtils.fetchCSV(url);
+
+                const headers = rows[0].map(h => window.CSVUtils.safeText(h).trim());
+
+                // 데이터에서 이름이 일치하는 강사 찾기
+                let teacherData = null;
+                for (let i = 1; i < rows.length; i++) {
+                    const rowNames = [headers.indexOf('성명'), headers.indexOf('성명(대표자)')];
+                    let rowName = '';
+                    for (let idx of rowNames) {
+                        if (idx >= 0 && rows[i][idx]) {
+                            rowName = window.CSVUtils.safeText(rows[i][idx]).trim();
+                            break;
+                        }
+                    }
+                    if (rowName === teacherNameParam) {
+                        teacherData = rows[i];
+                        break;
+                    }
+                }
+
+                if (!teacherData) {
+                    alert('해당 강사 정보를 찾을 수 없습니다.');
+                    window.location.href = 'index.html#teachers';
+                    return;
+                }
+
+                const getCol = (possibleNames) => {
+                    const idx = headers.findIndex(h => possibleNames.some(pn => h.includes(pn)));
+                    return idx >= 0 ? window.CSVUtils.safeText(teacherData[idx]).trim() : '';
+                };
+
+                // UI 바인딩
+                const tName = getCol(['성명']) || teacherNameParam;
+                const tOrg = getCol(['소속', '단체', '농장']);
+                const tRole = getCol(['직위', '직함', '역할']);
+                const tField = getCol(['분야', '영역']);
+                const tTarget = getCol(['대상']);
+                const tHistory = getCol(['주요이력', '경력', '활동내역', '자격']);
+                const tDesc = getCol(['강의주제', '내용', '소개', '프로그램']);
+
+                const tInsta = getCol(['인스타그램', 'SNS']);
+                const tInstaPublic = getCol(['공개', '인스타 공개 여부']);
+
+                document.getElementById('t-name').textContent = tName;
+                document.getElementById('t-role').textContent = `${tOrg} ${tRole}`.trim() || '지역 활동가';
+
+                // 이미지 설정 (이름 기반으로 랜덤 아바타 생성, 추후 사진 URL 연동 시 변경 가능)
+                document.getElementById('t-photo').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(tName)}&background=random&color=fff&size=200`;
+
+                // 태그
+                const tagsHtml = [];
+                if (tTarget) tagsHtml.push(`<span class="profile-tag">대상: ${tTarget}</span>`);
+
+                const isInstaPublic = tInsta && /공개|동의|예|yes|y/i.test(tInstaPublic || "");
+                if (isInstaPublic) {
+                    let instaVal = tInsta.trim();
+                    let displayVal = "Instagram";
+                    let hrefVal = instaVal;
+                    if (instaVal.startsWith("@")) {
+                        displayVal = instaVal;
+                        hrefVal = `https://www.instagram.com/${instaVal.substring(1)}/`;
+                    } else if (instaVal.includes("instagram.com/")) {
+                        const parts = instaVal.split("/");
+                        const handle = parts.find((p, i) => i > 0 && parts[i - 1].includes("instagram.com")).split("?")[0];
+                        if (handle) displayVal = `@${handle}`;
+                    }
+                    tagsHtml.push(`<a href="${hrefVal}" target="_blank" class="profile-tag" style="background:#f0eefc; color:#6e4abd; text-decoration:none;">📱 ${displayVal}</a>`);
+                }
+                document.getElementById('t-tags').innerHTML = tagsHtml.join('');
+
+                // 분야
+                if (tField) {
+                    const fields = tField.split(/[,·/]+/).map(s => s.trim()).filter(Boolean);
+                    document.getElementById('t-categories').innerHTML = fields.map(f => `<span style="background:#eaf5f0; color:#0b7c5b; padding:4px 10px; border-radius:4px; font-size:0.85rem; font-weight:600;">#${f}</span>`).join('');
+                }
+
+                // 설명
+                document.getElementById('t-desc').textContent = tDesc || '등록된 상세 강의 내용이 없습니다.';
+
+                // 주요 이력
+                if (tHistory) {
+                    const histories = tHistory.split('\n').filter(s => s.trim());
+                    document.getElementById('t-history').innerHTML = histories.map(h => `<li>${h}</li>`).join('');
+                } else {
+                    document.getElementById('t-history').innerHTML = '<li>등록된 이력이 없습니다.</li>';
+                }
+
+                // 로딩 완료 후 오버레이 제거
+                setTimeout(() => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }, 300);
+
+            } catch (err) {
+                console.error("강사 상세 정보 불러오기 오류:", err);
+                alert('데이터를 불러오는데 실패했습니다.');
+                window.location.href = 'index.html#teachers';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTeacherDetail);
+    </script>
+</body>
+
+</html>

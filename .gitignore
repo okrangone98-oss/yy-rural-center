@@ -1,0 +1,10 @@
+﻿iumteo/node_modules/
+iumteo/.next/
+iumteo/out/
+iumteo/build/
+iumteo/.env*.local
+.env.local
+.env*.local
+firebase-debug.log
+.DS_Store
+Thumbs.db

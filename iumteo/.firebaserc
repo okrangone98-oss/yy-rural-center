@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "instructor-register",
+    "instructor-register": "instructor-register",
+    "homepage-media": "yy-content-system"
+  }
+}
