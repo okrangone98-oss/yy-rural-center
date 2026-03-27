@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequiredSession } from '@/lib/rbac';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
+import { areNonCoreFirestoreMirrorsEnabled } from '@/lib/firestore-mirror';
 import { syncSheetsToFirestoreMirror } from '@/lib/mirror-sync';
 
 export async function POST() {
@@ -14,6 +15,16 @@ export async function POST() {
         message: 'Firebase Admin credentials are not configured.',
       },
       { status: 400 },
+    );
+  }
+
+  if (!areNonCoreFirestoreMirrorsEnabled()) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: '비핵심 Firestore 미러링은 현재 기본 비활성화 상태입니다. 채팅과 공지처럼 실제로 읽는 저장소만 유지합니다.',
+      },
+      { status: 503 },
     );
   }
 

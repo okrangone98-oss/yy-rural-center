@@ -16,14 +16,26 @@
   - `이용자DB`
   - `문의접수`
 - `Users`, `Lecturer_Profiles`는 더 이상 운영 기준으로 사용하지 않습니다.
-- 상세 기준은 [운영_가이드라인_3시트_기준.md](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/운영_가이드라인_3시트_기준.md)를 따릅니다.
+- 상세 기준은 [운영_가이드라인_3시트_기준.md](./docs/운영_가이드라인_3시트_기준.md)를 따릅니다.
 
 ## 로컬 실행
 
-1. [`.env.example`](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/.env.example)를 기준으로 `iumteo/.env.local`을 만듭니다.
+1. [`./.env.example`](./.env.example)를 기준으로 `iumteo/.env.local`을 만듭니다.
 2. `GAS_API_URL`을 새 Apps Script 웹앱 배포 URL로 교체합니다.
 3. `npm install`
 4. `npm run dev`
+
+## 배포 경로 기준
+
+- 메인 홈페이지는 `yycenter.kr`
+- 이음터 앱은 `yycenter.kr/iumteo`
+- 운영 환경에서는 아래 값을 함께 맞추는 것을 권장합니다.
+
+```env
+NEXTAUTH_URL=https://yycenter.kr/iumteo/api/auth
+NEXT_PUBLIC_APP_BASE_PATH=/iumteo
+NEXT_PUBLIC_SITE_URL=https://yycenter.kr/iumteo
+```
 
 ## 필수 환경변수
 
@@ -67,7 +79,7 @@ FIREBASE_SERVICE_ACCOUNT_PATH=./secrets/firebase-service-account.json
 
 ## GAS 배포 절차
 
-1. [yy-integrated-backend-v3.gs](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/gas/yy-integrated-backend-v3.gs) 내용을 Google Apps Script에 반영합니다.
+1. [`docs/gas/yy-integrated-backend-v3.gs`](./docs/gas/yy-integrated-backend-v3.gs) 내용을 Google Apps Script에 반영합니다.
 2. 배포 > 새 배포 > 유형 `웹 앱`으로 배포합니다.
 3. 실행 계정은 스프레드시트 편집 권한이 있는 계정으로 설정합니다.
 4. 접근 권한은 웹앱 사용 시나리오에 맞게 설정합니다.
@@ -82,8 +94,10 @@ FIREBASE_SERVICE_ACCOUNT_PATH=./secrets/firebase-service-account.json
 
 ## 참고 문서
 
-- [운영_가이드라인_3시트_기준.md](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/운영_가이드라인_3시트_기준.md)
-- [yy-integrated-backend-v3.gs](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/gas/yy-integrated-backend-v3.gs)
-- [yy-local-badge-sync.gs](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/gas/yy-local-badge-sync.gs)
-- [admin-design-qa-checklist.md](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/admin-design-qa-checklist.md)
-- [firebase-project-separation.md](/mnt/g/진행중프로젝트/개인프로젝트/개발_202602/yy-rural-center-main/iumteo/docs/firebase-project-separation.md)
+- [운영_가이드라인_3시트_기준.md](./docs/운영_가이드라인_3시트_기준.md)
+- [iumteo-brand-guideline-2026-03.md](./docs/iumteo-brand-guideline-2026-03.md)
+- [vercel-deployment-checklist.md](./docs/vercel-deployment-checklist.md)
+- [yy-integrated-backend-v3.gs](./docs/gas/yy-integrated-backend-v3.gs)
+- [yy-local-badge-sync.gs](./docs/gas/yy-local-badge-sync.gs)
+- [admin-design-qa-checklist.md](./docs/admin-design-qa-checklist.md)
+- [firebase-project-separation.md](./docs/firebase-project-separation.md)

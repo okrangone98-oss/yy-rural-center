@@ -15,6 +15,10 @@ function ensureGasConfig() {
   }
 }
 
+export function isGasConfigured() {
+  return !!(GAS_API_URL && GAS_API_KEY);
+}
+
 export async function gasGet<T>(params: URLSearchParams): Promise<T> {
   ensureGasConfig();
   params.set('apiKey', GAS_API_KEY);

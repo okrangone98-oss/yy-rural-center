@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import { getFirebaseStorageBucketName, getStorageAdminBucket } from '@/lib/firebase-admin';
+import {
+  getFirebaseStorageBucketCandidates,
+  getFirebaseStorageBucketName,
+  getStorageAdminBucket,
+} from '@/lib/firebase-admin';
 
 const PROFILE_PHOTO_ROOT = 'instructor-register/profile-photos';
 const LEGACY_PROFILE_PHOTO_ROOT = 'profile_photos';
@@ -55,7 +59,6 @@ export async function uploadInstructorProfilePhoto(input: {
   name: string;
   email: string;
 }) {
-  const bucket = getStorageAdminBucket();
   const now = new Date();
   const year = String(now.getFullYear());
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -67,29 +70,45 @@ export async function uploadInstructorProfilePhoto(input: {
     `${Date.now()}-${sanitizeSegment(input.name, 'instructor')}-${sanitizeSegment(input.email, 'member')}.${ext}`,
   ].join('/');
 
-  const token = randomUUID();
-  const file = bucket.file(objectPath);
-  await file.save(input.buffer, {
-    resumable: false,
-    contentType: input.contentType,
-    metadata: {
-      cacheControl: 'public,max-age=31536000,immutable',
-      metadata: {
-        firebaseStorageDownloadTokens: token,
-      },
-    },
-  });
+  let lastError: unknown = null;
 
-  return {
-    bucket: bucket.name,
-    objectPath,
-    url: buildDownloadUrl(bucket.name, objectPath, token),
-  };
+  for (const bucketName of getFirebaseStorageBucketCandidates()) {
+    try {
+      const bucket = getStorageAdminBucket(bucketName);
+      const token = randomUUID();
+      const file = bucket.file(objectPath);
+
+      await file.save(input.buffer, {
+        resumable: false,
+        contentType: input.contentType,
+        metadata: {
+          cacheControl: 'public,max-age=31536000,immutable',
+          metadata: {
+            firebaseStorageDownloadTokens: token,
+          },
+        },
+      });
+
+      return {
+        bucket: bucket.name,
+        objectPath,
+        url: buildDownloadUrl(bucket.name, objectPath, token),
+      };
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message.toLowerCase() : '';
+      if (!message.includes('bucket does not exist')) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('프로필 사진 업로드에 실패했습니다.');
 }
 
 export function extractStorageObjectPath(fileUrl: string) {
   const parsed = new URL(fileUrl);
-  const expectedBucket = getFirebaseStorageBucketName();
+  const expectedBuckets = getFirebaseStorageBucketCandidates();
 
   if (!parsed.pathname.startsWith('/v0/b/')) {
     return null;
@@ -97,7 +116,7 @@ export function extractStorageObjectPath(fileUrl: string) {
 
   const segments = parsed.pathname.split('/');
   const bucketName = segments[3] || '';
-  if (bucketName !== expectedBucket) {
+  if (!expectedBuckets.includes(bucketName)) {
     return null;
   }
 

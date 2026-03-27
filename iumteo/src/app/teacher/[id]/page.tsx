@@ -1,416 +1,664 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { inquiryCreateSchema } from '@/lib/domain';
+import { getAppPath } from '@/lib/app-url';
+import { resolveProfilePhotoPublicUrl } from '@/lib/profile-photo-client';
 
-// Fallback CSV Parsing function for Client side
+type TeacherData = {
+  name: string;
+  org: string;
+  role: string;
+  field: string;
+  area: string;
+  address: string;
+  target: string;
+  history: string;
+  desc: string;
+  insta: string;
+  instaPublic: string;
+  email: string;
+  phone: string;
+  photo: string;
+};
+
+type InquiryQuota = {
+  monthlyLimit: number;
+  usedCount: number;
+  remainingCount: number;
+  canSend: boolean;
+};
+
+type InquiryFormValues = {
+  teacherName: string;
+  teacherEmail?: string;
+  inquirerName: string;
+  requesterEmail: string;
+  contactMethod: 'PHONE' | 'EMAIL' | 'NONE';
+  contactValue?: string;
+  purpose: string;
+  message?: string;
+};
+
+const emptyTeacher: TeacherData = {
+  name: '',
+  org: '',
+  role: '',
+  field: '',
+  area: '',
+  address: '',
+  target: '',
+  history: '',
+  desc: '',
+  insta: '',
+  instaPublic: '',
+  email: '',
+  phone: '',
+  photo: '',
+};
+
+const emptyQuota: InquiryQuota = {
+  monthlyLimit: 20,
+  usedCount: 0,
+  remainingCount: 20,
+  canSend: true,
+};
+
 function parseCSV(text: string): string[][] {
-    const rows: string[][] = [];
-    let row: string[] = [], field = "", inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        if (c === '"') {
-            if (inQuotes && text[i + 1] === '"') { field += '"'; i++; }
-            else inQuotes = !inQuotes;
-        } else if (c === "," && !inQuotes) {
-            row.push(field); field = "";
-        } else if ((c === "\n" || c === "\r") && !inQuotes) {
-            if (field !== "" || row.length > 0) { row.push(field); rows.push(row); row = []; field = ""; }
-        } else {
-            field += c;
-        }
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === '"') {
+      if (inQuotes && text[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      row.push(field);
+      field = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (field !== '' || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+        row = [];
+        field = '';
+      }
+    } else {
+      field += char;
     }
-    if (field !== "" || row.length > 0) { row.push(field); rows.push(row); }
-    return rows;
+  }
+
+  if (field !== '' || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+function normalizeHeader(value: string) {
+  return (value || '').trim().replace(/\s+/g, '');
+}
+
+function getField(headers: string[], row: string[], aliases: string[]) {
+  const index = headers.findIndex((header) => aliases.some((alias) => header.includes(alias)));
+  return index >= 0 ? (row[index] || '').trim() : '';
+}
+
+function normalizeTeacherData(headers: string[], row: string[], teacherName: string): TeacherData {
+  return {
+    name: getField(headers, row, ['성명', '강사명']) || teacherName,
+    org: getField(headers, row, ['소속', '기관', '직장']),
+    role: getField(headers, row, ['직위', '직함', '역할']),
+    field: getField(headers, row, ['분야', '영역']),
+    area: getField(headers, row, ['활동지역', '활동 지역']),
+    address: getField(headers, row, ['주소', '거주지']),
+    target: getField(headers, row, ['대상']),
+    history: getField(headers, row, ['주요이력', '경력', '활동이력', '자격']),
+    desc: getField(headers, row, ['강의주제', '내용', '소개', '프로그램']),
+    insta: getField(headers, row, ['인스타그램', 'SNS']),
+    instaPublic: getField(headers, row, ['공개', '인스타공개여부']),
+    email: getField(headers, row, ['이메일', '로그인용이메일', 'Email', 'email']),
+    phone: getField(headers, row, ['연락처', '전화번호', '핸드폰번호', '휴대폰']),
+    photo: '',
+  };
 }
 
 export default function TeacherDetailPage() {
-    const params = useParams();
-    const router = useRouter();
-    const { data: session, status: sessionStatus } = useSession();
-    const teacherId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
-    const teacherName = decodeURIComponent(teacherId);
+  const params = useParams();
+  const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
+  const teacherId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
+  const teacherName = decodeURIComponent(teacherId);
 
-    const [teacher, setTeacher] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [inquiryForm, setInquiryForm] = useState({
-        inquirerName: '',
-        inquirerPhone: '',
-        inquirerEmail: '',
+  const [teacher, setTeacher] = useState<TeacherData>(emptyTeacher);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState(false);
+  const [quota, setQuota] = useState<InquiryQuota>(emptyQuota);
+  const [quotaLoading, setQuotaLoading] = useState(false);
+  const [inquirySubmitting, setInquirySubmitting] = useState(false);
+  const [inquiryMessage, setInquiryMessage] = useState<string | null>(null);
+  const [inquiryError, setInquiryError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<InquiryFormValues>({
+    resolver: zodResolver(inquiryCreateSchema),
+    defaultValues: {
+      teacherName,
+      teacherEmail: '',
+      inquirerName: '',
+      requesterEmail: '',
+      contactMethod: 'PHONE',
+      contactValue: '',
+      purpose: '',
+      message: '',
+    },
+  });
+
+  const messageValue = watch('message') || '';
+  const contactMethod = watch('contactMethod');
+  const sessionRole = session?.user?.role || '';
+  const canInquire = sessionRole === 'USER' || sessionRole === 'ADMIN';
+  const isOwner =
+    !!session?.user?.email &&
+    !!teacher.email &&
+    session.user.email.toLowerCase() === teacher.email.toLowerCase();
+
+  const fieldTags = useMemo(
+    () => teacher.field.split(/[,/]+/).map((item) => item.trim()).filter(Boolean),
+    [teacher.field],
+  );
+
+  const histories = useMemo(
+    () => teacher.history.split('\n').map((item) => item.trim()).filter(Boolean),
+    [teacher.history],
+  );
+
+  useEffect(() => {
+    async function fetchTeacherData() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`${getAppPath('/api/instructor')}?name=${encodeURIComponent(teacherName)}`, {
+          cache: 'no-store',
+        });
+        if (!response.ok) {
+          throw new Error('강사 정보를 불러오지 못했습니다.');
+        }
+
+        const json = await response.json();
+        const record = json?.data as (Partial<TeacherData> & { intro?: string; photo?: string }) | null;
+        if (!json?.success || !record) {
+          throw new Error('해당 강사 정보를 찾을 수 없습니다.');
+        }
+
+        const nextTeacher: TeacherData = {
+          ...emptyTeacher,
+          name: record.name || teacherName,
+          org: record.org || '',
+          role: record.role || '',
+          field: record.field || '',
+          area: record.area || '',
+          address: record.address || '',
+          target: record.target || '',
+          history: record.history || '',
+          desc: record.desc || record.intro || '',
+          insta: record.insta || '',
+          instaPublic: record.instaPublic || '',
+          email: typeof record.email === 'string' && record.email.includes('@') ? record.email : '',
+          phone: record.phone || '',
+          photo: resolveProfilePhotoPublicUrl(record.photo || ''),
+        };
+
+        setTeacher(nextTeacher);
+        setValue('teacherName', nextTeacher.name);
+        setValue('teacherEmail', nextTeacher.email);
+        setValue('requesterEmail', session?.user?.email || '');
+      } catch (fetchError) {
+        console.error(fetchError);
+        setError(fetchError instanceof Error ? fetchError.message : '강사 정보를 불러오지 못했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (teacherName) {
+      void fetchTeacherData();
+    }
+  }, [session?.user?.email, setValue, teacherName]);
+
+  useEffect(() => {
+    async function prefillInquiryForm() {
+      if (!session?.user || !canInquire) return;
+
+      setValue('inquirerName', session.user.name || '');
+      setValue('requesterEmail', session.user.email || '');
+
+      try {
+        const response = await fetch(getAppPath('/api/account/profile'), { cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !result.success || !result.data) return;
+
+        setValue('inquirerName', result.data['이용자명'] || result.data.Name || session.user.name || '');
+      } catch (prefillError) {
+        console.warn(prefillError);
+      }
+    }
+
+    void prefillInquiryForm();
+  }, [canInquire, session, setValue]);
+
+  useEffect(() => {
+    async function fetchQuota() {
+      if (!session?.user || !canInquire || !teacher.name) {
+        setQuota(emptyQuota);
+        return;
+      }
+
+      setQuotaLoading(true);
+      try {
+        const query = new URLSearchParams({
+          teacherName: teacher.name,
+          teacherEmail: teacher.email || '',
+        });
+        const response = await fetch(`${getAppPath('/api/inquiries')}?${query.toString()}`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (response.ok && result.success && result.quota) {
+          setQuota(result.quota as InquiryQuota);
+        }
+      } catch (quotaError) {
+        console.warn('[teacher page] quota fetch failed:', quotaError);
+      } finally {
+        setQuotaLoading(false);
+      }
+    }
+
+    void fetchQuota();
+  }, [canInquire, session, teacher.email, teacher.name]);
+
+  const onSubmitInquiry = handleSubmit(async (data) => {
+    setInquiryError(null);
+    setInquiryMessage(null);
+
+    if (!session?.user) {
+      setInquiryError('로그인 후 문의를 남길 수 있습니다.');
+      return;
+    }
+
+    if (!canInquire) {
+      setInquiryError('문의는 일반 회원 계정에서만 보낼 수 있습니다.');
+      return;
+    }
+
+    if (!quota.canSend) {
+      setInquiryError('이번 달 문의 가능 횟수를 모두 사용했습니다.');
+      return;
+    }
+
+    setInquirySubmitting(true);
+
+    try {
+      const response = await fetch(getAppPath('/api/inquiries'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacherName: teacher.name || teacherName,
+          teacherEmail: teacher.email || '',
+          inquirerName: data.inquirerName,
+          requesterEmail: session.user.email,
+          contactMethod: data.contactMethod,
+          contactValue: data.contactValue,
+          purpose: data.purpose,
+          message: data.message,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '문의 접수에 실패했습니다.');
+      }
+
+      setInquiryMessage(result.message || '문의가 접수되었습니다.');
+      if (result.data?.quota) {
+        setQuota(result.data.quota as InquiryQuota);
+      }
+
+      reset({
+        teacherName: teacher.name || teacherName,
+        teacherEmail: teacher.email || '',
+        inquirerName: data.inquirerName,
+        requesterEmail: session.user.email || '',
+        contactMethod: data.contactMethod,
+        contactValue: '',
         purpose: '',
         message: '',
-    });
-    const [inquirySubmitting, setInquirySubmitting] = useState(false);
-    const [inquiryMessage, setInquiryMessage] = useState<string | null>(null);
-    const [inquiryError, setInquiryError] = useState<string | null>(null);
-
-    useEffect(() => {
-        async function fetchTeacherData() {
-            try {
-                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv";
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Failed to fetch teacher data");
-
-                const text = await res.text();
-                const rows = parseCSV(text);
-
-                const headers = rows[0].map(h => (h || "").toString().trim().replace(/\s+/g, ""));
-
-                let found = null;
-                for (let i = 1; i < rows.length; i++) {
-                    const nameIdx1 = headers.findIndex(h => h.includes("성명"));
-                    const nameIdx2 = headers.findIndex(h => h.includes("대표자"));
-                    const name1 = nameIdx1 >= 0 ? (rows[i][nameIdx1] || "").trim() : "";
-                    const name2 = nameIdx2 >= 0 ? (rows[i][nameIdx2] || "").trim() : "";
-
-                    if (name1 === teacherName || name2 === teacherName) {
-                        found = rows[i];
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    setError("해당 강사 정보를 찾을 수 없습니다.");
-                    setLoading(false);
-                    return;
-                }
-
-                const getCol = (possibleNames: string[]) => {
-                    const idx = headers.findIndex(h => possibleNames.some(pn => h.includes(pn)));
-                    return idx >= 0 ? (found[idx] || "").trim() : '';
-                };
-
-                const tData = {
-                    name: getCol(['성명']) || teacherName,
-                    org: getCol(['소속', '단체', '농장']),
-                    role: getCol(['직위', '직함', '역할']),
-                    field: getCol(['분야', '영역']),
-                    target: getCol(['대상']),
-                    history: getCol(['주요이력', '경력', '활동내역', '자격']),
-                    desc: getCol(['강의주제', '내용', '소개', '프로그램']),
-                    insta: getCol(['인스타그램', 'SNS']),
-                    instaPublic: getCol(['공개', '인스타공개여부'])
-                };
-
-                setTeacher(tData);
-                setLoading(false);
-            } catch (err) {
-                console.error(err);
-                setError("데이터를 불러오는데 실패했습니다.");
-                setLoading(false);
-            }
-        }
-
-        if (teacherName) {
-            fetchTeacherData();
-        }
-    }, [teacherName]);
-
-    useEffect(() => {
-        async function prefillInquiryForm() {
-            if (!session?.user || (session.user.role !== 'USER' && session.user.role !== 'ADMIN')) {
-                return;
-            }
-
-            setInquiryForm((prev) => ({
-                ...prev,
-                inquirerName: prev.inquirerName || session.user.name || '',
-                inquirerEmail: prev.inquirerEmail || session.user.email || '',
-            }));
-
-            try {
-                const response = await fetch('/api/account/profile', { cache: 'no-store' });
-                const result = await response.json();
-                if (!response.ok || !result.success || !result.data) return;
-
-                setInquiryForm((prev) => ({
-                    ...prev,
-                    inquirerName: prev.inquirerName || result.data['이용자명'] || result.data['Name'] || '',
-                    inquirerPhone: prev.inquirerPhone || result.data['연락처'] || result.data['Phone'] || '',
-                    inquirerEmail: prev.inquirerEmail || result.data['이메일'] || result.data['Email'] || '',
-                }));
-            } catch (err) {
-                console.warn(err);
-            }
-        }
-
-        void prefillInquiryForm();
-    }, [session]);
-
-    const handleInquirySubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        setInquiryError(null);
-        setInquiryMessage(null);
-
-        if (!session?.user) {
-            setInquiryError('문의하기는 로그인 후 이용할 수 있습니다.');
-            return;
-        }
-
-        if (session.user.role !== 'USER' && session.user.role !== 'ADMIN') {
-            setInquiryError('일반회원 또는 관리자 계정으로 문의를 접수할 수 있습니다.');
-            return;
-        }
-
-        if (!inquiryForm.inquirerName || !inquiryForm.inquirerPhone || !inquiryForm.inquirerEmail || !inquiryForm.purpose) {
-            setInquiryError('이름, 연락처, 이메일, 문의 목적을 입력해 주세요.');
-            return;
-        }
-
-        setInquirySubmitting(true);
-
-        try {
-            const response = await fetch('/api/inquiries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    teacherName: teacher?.name || teacherName,
-                    inquirerName: inquiryForm.inquirerName,
-                    inquirerPhone: inquiryForm.inquirerPhone,
-                    inquirerEmail: inquiryForm.inquirerEmail,
-                    purpose: inquiryForm.purpose,
-                    message: inquiryForm.message,
-                }),
-            });
-
-            const result = await response.json();
-            if (!response.ok || !result.success) {
-                throw new Error(result.message || '문의 접수에 실패했습니다.');
-            }
-
-            setInquiryMessage('문의가 접수되었습니다. 센터 확인 후 강사에게 전달됩니다.');
-            setInquiryForm((prev) => ({
-                ...prev,
-                purpose: '',
-                message: '',
-            }));
-        } catch (err) {
-            setInquiryError(err instanceof Error ? err.message : '문의 접수에 실패했습니다.');
-        } finally {
-            setInquirySubmitting(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <div className="w-10 h-10 border-4 border-gray-200 border-t-emerald-700 justify-center flex mx-auto rounded-full animate-spin mb-4"></div>
-                    <p className="text-gray-500 text-sm">강사 정보를 불러오는 중입니다...</p>
-                </div>
-            </div>
-        );
+      });
+    } catch (submitError) {
+      setInquiryError(submitError instanceof Error ? submitError.message : '문의 접수에 실패했습니다.');
+    } finally {
+      setInquirySubmitting(false);
     }
+  });
 
-    if (error || !teacher) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-                <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-md w-full">
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">접근 오류</h2>
-                    <p className="text-red-500 text-sm mb-6">{error || '잘못된 접근입니다.'}</p>
-                    <button onClick={() => router.push('/#teachers')} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-semibold transition-colors">
-                        ← 강사 목록으로 돌아가기
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    const roleText = `${teacher.org} ${teacher.role}`.trim() || '지역 활동가';
-    const isInstaPublic = teacher.insta && /공개|동의|예|yes|y/i.test(teacher.instaPublic || "");
-    const fields = teacher.field ? teacher.field.split(/[,·/]+/).map((s: string) => s.trim()).filter(Boolean) : [];
-    const histories = teacher.history ? teacher.history.split('\n').filter((s: string) => s.trim()) : [];
-
+  if (loading) {
     return (
-        <main className="min-h-screen bg-[#f6fbf8]">
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-emerald-700 to-emerald-900 py-16 text-white text-center md:text-left">
-                <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                    <img
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name)}&background=random&color=fff&size=200`}
-                        alt="강사 프로필"
-                        className="w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-white/30 object-cover shadow-lg"
-                    />
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-bold mb-2">{teacher.name}</h1>
-                        <div className="text-emerald-200 text-lg mb-4">{roleText}</div>
-                        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                            {teacher.target && (
-                                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">대상: {teacher.target}</span>
-                            )}
-                            {isInstaPublic && (
-                                <a href={teacher.insta.startsWith('@') ? `https://www.instagram.com/${teacher.insta.substring(1)}/` : teacher.insta} target="_blank" rel="noopener noreferrer" className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center hover:bg-purple-200 transition-colors">
-                                    📱 Instagram
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Content Section */}
-            <section className="max-w-5xl mx-auto px-6 py-12 flex flex-col md:flex-row gap-8 items-start">
-                <div className="flex-1 w-full space-y-8">
-                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                        <h3 className="text-xl font-bold text-emerald-800 mb-4 pb-3 border-b border-gray-100">주요 강의 및 활동 계획</h3>
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{teacher.desc || '등록된 상세 강의 내용이 없습니다.'}</p>
-                    </div>
-
-                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                        <h3 className="text-xl font-bold text-emerald-800 mb-4 pb-3 border-b border-gray-100">주요 업력 및 자격사항</h3>
-                        <ul className="space-y-3">
-                            {histories.length > 0 ? (
-                                histories.map((h: string, i: number) => (
-                                    <li key={i} className="flex items-start gap-2 text-gray-700 relative pl-4 before:content-[''] before:absolute before:w-1.5 before:h-1.5 before:bg-emerald-600 before:rounded-full before:left-0 before:top-2.5">
-                                        {h}
-                                    </li>
-                                ))
-                            ) : (
-                                <li className="text-gray-500 italic">등록된 이력이 없습니다.</li>
-                            )}
-                        </ul>
-                    </div>
-
-                    <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-6">
-                        <h3 className="text-sm font-bold text-gray-600 flex items-center gap-2 mb-2">🛡️ 강사 정보 보호 및 안내</h3>
-                        <p className="text-xs text-gray-500 leading-relaxed break-keep">
-                            본 페이지의 정보는 양양군 농촌활성화지원센터 강사 이음터 운영 및 마을 교육 연계를 목적으로만 제공됩니다.
-                            강사님의 개인식별정보(연락처 등)는 정보 보호 정책에 따라 비공개 처리되며, 강의 섭외 및 관련 문의는 센터를 통해 진행해 주시기 바랍니다.
-                        </p>
-                    </div>
-
-                    <section className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                            <div>
-                                <h3 className="text-xl font-bold text-emerald-800">강사 문의하기</h3>
-                                <p className="mt-2 text-sm text-gray-500">
-                                    일반회원으로 로그인하면 이 강사에게 매칭 문의를 접수할 수 있습니다. 문의는 센터 확인 후 강사에게 전달됩니다.
-                                </p>
-                            </div>
-                            {!session?.user && (
-                                <button
-                                    type="button"
-                                    onClick={() => signIn(undefined, { callbackUrl: `/teacher/${encodeURIComponent(teacherId)}` })}
-                                    className="rounded-full border border-emerald-700 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
-                                >
-                                    로그인 후 문의하기
-                                </button>
-                            )}
-                        </div>
-
-                        <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleInquirySubmit}>
-                            <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700">문의 대상 강사</label>
-                                <input value={teacher?.name || teacherName} readOnly className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500" />
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">신청인 성명</label>
-                                <input
-                                    value={inquiryForm.inquirerName}
-                                    onChange={(e) => setInquiryForm((prev) => ({ ...prev, inquirerName: e.target.value }))}
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                                    placeholder="이름을 입력해 주세요"
-                                />
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">연락처</label>
-                                <input
-                                    value={inquiryForm.inquirerPhone}
-                                    onChange={(e) => setInquiryForm((prev) => ({ ...prev, inquirerPhone: e.target.value }))}
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                                    placeholder="연락 가능한 번호"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700">회신 받을 이메일</label>
-                                <input
-                                    value={inquiryForm.inquirerEmail}
-                                    onChange={(e) => setInquiryForm((prev) => ({ ...prev, inquirerEmail: e.target.value }))}
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                                    placeholder="센터 회신을 받을 이메일"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700">문의 목적</label>
-                                <input
-                                    value={inquiryForm.purpose}
-                                    onChange={(e) => setInquiryForm((prev) => ({ ...prev, purpose: e.target.value }))}
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                                    placeholder="예: 마을 프로그램 협업 제안"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700">상세 내용</label>
-                                <textarea
-                                    rows={5}
-                                    value={inquiryForm.message}
-                                    onChange={(e) => setInquiryForm((prev) => ({ ...prev, message: e.target.value }))}
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                                    placeholder="필요한 프로그램, 일정, 대상, 지역 등 상세 요청을 적어 주세요"
-                                />
-                            </div>
-
-                            {(inquiryError || inquiryMessage) && (
-                                <div className={`md:col-span-2 rounded-xl px-4 py-3 text-sm ${inquiryError ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
-                                    {inquiryError || inquiryMessage}
-                                </div>
-                            )}
-
-                            <div className="md:col-span-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                                <p className="text-xs leading-5 text-gray-500">
-                                    문의 내용은 센터에서 먼저 검토한 뒤 강사에게 전달되며, 회신도 센터를 통해 전달됩니다.
-                                </p>
-                                <button
-                                    type="submit"
-                                    disabled={inquirySubmitting || sessionStatus === 'loading'}
-                                    className="rounded-full bg-emerald-800 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-900 disabled:opacity-50"
-                                >
-                                    {inquirySubmitting ? '문의 접수 중...' : '문의 접수'}
-                                </button>
-                            </div>
-                        </form>
-                    </section>
-
-                    <button onClick={() => router.push('/#teachers')} className="inline-block mt-4 px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors shadow-sm">
-                        ← 강사 목록으로 돌아가기
-                    </button>
-                </div>
-
-                {/* Right Sidebar */}
-                <div className="w-full md:w-80 flex flex-col gap-6 shrink-0">
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">전문 분야</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {fields.length > 0 ? (
-                                fields.map((f: string, i: number) => (
-                                    <span key={i} className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-sm font-semibold border border-emerald-100">
-                                        #{f}
-                                    </span>
-                                ))
-                            ) : (
-                                <span className="text-gray-500 text-sm">지정된 분야 없음</span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">연락처 정보</h3>
-                        <ul className="text-sm space-y-4">
-                            <li className="flex items-start gap-2 text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                <span>🔒</span>
-                                <span>연락처는 정보 보호를 위해 비공개 처리됩니다.</span>
-                            </li>
-                            <li className="text-gray-600 mt-4 leading-relaxed">
-                                <strong>강의 섭외 문의:</strong><br />
-                                양양군 농촌활성화지원센터<br />
-                                <a href="tel:033-673-0221" className="text-emerald-700 hover:underline font-semibold mt-1 inline-block">📞 033-673-0221</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-        </main>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7fbf8]">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-emerald-700" />
+          <p className="text-sm text-gray-500">강사 정보를 불러오는 중입니다...</p>
+        </div>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f7fbf8] px-4">
+        <div className="w-full max-w-md rounded-[32px] bg-white p-8 text-center shadow-sm">
+          <h2 className="text-xl font-black text-gray-900">정보를 불러오지 못했습니다</h2>
+          <p className="mt-3 text-sm text-red-600">{error}</p>
+          <button
+            type="button"
+            onClick={() => router.push('/instructors')}
+            className="mt-6 rounded-full bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+          >
+            강사 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f5faf7]">
+      <section className="bg-[radial-gradient(circle_at_top_left,#0f766e_0%,#065f46_48%,#022c22_100%)] py-20 text-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6 md:flex-row md:items-center">
+          <div className="h-40 w-40 overflow-hidden rounded-full border-4 border-white/25 bg-emerald-900 shadow-2xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={
+                !photoError && teacher.photo
+                  ? teacher.photo
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name)}&background=047857&color=ffffff&size=240`
+              }
+              alt={`${teacher.name} 강사 프로필`}
+              className="h-full w-full object-cover"
+              onError={() => setPhotoError(true)}
+            />
+          </div>
+
+          <div className="flex-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Yangyang Iumteo Instructor</p>
+            <h1 className="mt-3 text-4xl font-black">{teacher.name}</h1>
+            <p className="mt-2 text-lg text-emerald-100">{`${teacher.org} ${teacher.role}`.trim() || '양양 지역 강사'}</p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {teacher.target ? (
+                <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm">
+                  대상 {teacher.target}
+                </span>
+              ) : null}
+              {teacher.area ? (
+                <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm">
+                  활동 지역 {teacher.area}
+                </span>
+              ) : null}
+              {teacher.insta && /공개|동의|yes|y/i.test(teacher.instaPublic || '') ? (
+                <a
+                  href={/^https?:\/\//i.test(teacher.insta) ? teacher.insta : `https://www.instagram.com/${teacher.insta.replace(/^@/, '')}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+                >
+                  @{teacher.insta.replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/?$/, '')}
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 lg:flex-row">
+        <div className="flex-1 space-y-8">
+          <div className="rounded-[28px] border border-white/80 bg-white p-8 shadow-[0_20px_60px_rgba(8,48,37,0.08)]">
+            <h2 className="text-xl font-bold text-emerald-900">강의 소개</h2>
+            <p className="mt-4 whitespace-pre-wrap leading-8 text-gray-700">
+              {teacher.desc || '등록된 강의 소개가 아직 없습니다.'}
+            </p>
+          </div>
+
+          <div className="rounded-[28px] border border-white/80 bg-white p-8 shadow-[0_20px_60px_rgba(8,48,37,0.08)]">
+            <h2 className="text-xl font-bold text-emerald-900">주요 이력</h2>
+            {histories.length > 0 ? (
+              <ul className="mt-4 space-y-3">
+                {histories.map((history, index) => (
+                  <li key={`${history}-${index}`} className="relative pl-5 text-gray-700">
+                    <span className="absolute left-0 top-2.5 h-2 w-2 rounded-full bg-emerald-600" />
+                    {history}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-gray-500">등록된 이력이 아직 없습니다.</p>
+            )}
+          </div>
+
+          <div className="rounded-[28px] border border-dashed border-emerald-200 bg-emerald-50/70 p-6">
+            <h2 className="text-sm font-bold text-emerald-900">안심 블라인드 정책</h2>
+            <p className="mt-3 break-keep text-sm leading-7 text-emerald-900/80">
+              강사님의 전화번호와 이메일은 공용 화면에 공개되지 않습니다. 문의는 센터를 통해 접수되며,
+              강사님께 전달된 뒤 확인 후 회신이 진행됩니다.
+            </p>
+          </div>
+        </div>
+
+        <aside className="w-full space-y-6 lg:sticky lg:top-8 lg:w-[340px]">
+          <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_60px_rgba(8,48,37,0.08)]">
+            <h2 className="text-lg font-bold text-gray-900">전문 분야</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {fieldTags.length > 0 ? (
+                fieldTags.map((field) => (
+                  <span key={field} className="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+                    #{field}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-gray-500">등록된 전문 분야가 없습니다.</span>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/80 bg-white p-6 shadow-[0_20px_60px_rgba(8,48,37,0.08)]">
+            <h2 className="text-lg font-bold text-gray-900">연락 안내</h2>
+            <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-700">
+              강사님 개인정보는 보호를 위해 비공개 처리됩니다.
+            </div>
+            <p className="mt-4 text-sm leading-7 text-gray-600">
+              강의 외 센터 문의는 양양군 농촌활성화지원센터로 연락해주세요.
+            </p>
+            <a href="tel:033-673-0221" className="mt-3 inline-flex text-sm font-bold text-emerald-700 hover:underline">
+              033-673-0221
+            </a>
+
+            {(sessionRole === 'ADMIN' || isOwner) && teacher.address ? (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700">관리용 주소</p>
+                <p className="mt-2 text-sm text-gray-700">{teacher.address}</p>
+              </div>
+            ) : null}
+          </div>
+        </aside>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 pb-20">
+        <div className="rounded-[36px] border border-white/80 bg-white p-8 shadow-[0_25px_80px_rgba(8,48,37,0.08)] md:p-10">
+          <div className="flex flex-col gap-5 border-b border-gray-100 pb-8 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Async Inquiry</p>
+              <h2 className="mt-3 text-3xl font-black text-emerald-900">강사님께 문의 남기기</h2>
+              <p className="mt-3 max-w-2xl break-keep text-sm leading-7 text-gray-600">
+                강사님께 문의 내용이 전달되며, 확인 후 회신해 드립니다. 월 20회, 300자 제한입니다.
+              </p>
+            </div>
+
+            {!session?.user ? (
+              <button
+                type="button"
+                onClick={() => signIn(undefined, { callbackUrl: getAppPath(`/teacher/${encodeURIComponent(teacherId)}`) })}
+                className="rounded-full border border-emerald-700 px-6 py-3 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
+              >
+                로그인 후 문의하기
+              </button>
+            ) : canInquire ? (
+              <div className="rounded-3xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-800">
+                {quotaLoading ? '문의 가능 횟수를 확인하는 중입니다...' : `이번 달 잔여 문의 횟수: ${quota.remainingCount}회`}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-amber-100 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-800">
+                문의는 일반 회원 계정에서 이용할 수 있습니다.
+              </div>
+            )}
+          </div>
+
+          <form className="mt-10 grid gap-6 md:grid-cols-2" onSubmit={onSubmitInquiry}>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-gray-700">이름</label>
+              <input
+                {...register('inquirerName')}
+                className={`w-full rounded-2xl border px-4 py-3 text-sm ${errors.inquirerName ? 'border-red-500' : 'border-gray-200'}`}
+                placeholder="문의하시는 분 성함"
+              />
+              {errors.inquirerName ? <p className="mt-1 text-xs text-red-600">{errors.inquirerName.message}</p> : null}
+            </div>
+
+            <div>
+              <input type="hidden" {...register('requesterEmail')} />
+              <label className="mb-2 block text-sm font-bold text-gray-700">회신 받을 연락처</label>
+              <div className="mb-3 flex flex-wrap gap-2">
+                {[
+                  { value: 'PHONE', label: '전화번호' },
+                  { value: 'EMAIL', label: '이메일' },
+                  { value: 'NONE', label: '선택 안 함' },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      contactMethod === option.value
+                        ? 'border-emerald-700 bg-emerald-50 text-emerald-800'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
+                    }`}
+                  >
+                    <input type="radio" value={option.value} {...register('contactMethod')} className="sr-only" />
+                    <span>{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              <input
+                {...register('contactValue')}
+                disabled={contactMethod === 'NONE'}
+                className={`w-full rounded-2xl border px-4 py-3 text-sm disabled:cursor-not-allowed disabled:bg-gray-50 ${errors.contactValue ? 'border-red-500' : 'border-gray-200'}`}
+                placeholder={
+                  contactMethod === 'NONE'
+                    ? '연락처 없이 문의를 보냅니다'
+                    : contactMethod === 'EMAIL'
+                    ? '회신 받을 이메일을 입력해주세요'
+                    : '회신 받을 전화번호를 입력해주세요'
+                }
+              />
+              {errors.contactValue ? <p className="mt-1 text-xs text-red-600">{errors.contactValue.message}</p> : null}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-bold text-gray-700">문의 목적</label>
+              <select
+                {...register('purpose')}
+                className={`w-full rounded-2xl border px-4 py-3 text-sm ${errors.purpose ? 'border-red-500' : 'border-gray-200'}`}
+              >
+                <option value="">문의 목적을 선택해주세요</option>
+                <option value="강의 섭외">강의 섭외</option>
+                <option value="협업 제안">협업 제안</option>
+                <option value="정보 교류">정보 교류</option>
+                <option value="프로그램 기획">프로그램 기획</option>
+                <option value="기타">기타</option>
+              </select>
+              {errors.purpose ? <p className="mt-1 text-xs text-red-600">{errors.purpose.message}</p> : null}
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-bold text-gray-700">문의 내용</label>
+              <textarea
+                rows={7}
+                {...register('message')}
+                className={`w-full rounded-3xl border px-5 py-4 text-sm leading-7 ${errors.message ? 'border-red-500' : 'border-gray-200'}`}
+                placeholder="강의 요청 배경, 희망 일정, 진행 방식 등 필요한 내용을 300자 이내로 작성해주세요."
+              />
+              <div className="mt-2 flex items-center justify-between text-xs">
+                <span className={errors.message ? 'text-red-600' : 'text-gray-500'}>
+                  {errors.message ? errors.message.message : '텍스트만 전송되며 파일과 사진은 첨부되지 않습니다.'}
+                </span>
+                <span className={messageValue.length > 300 ? 'font-semibold text-red-600' : 'text-gray-500'}>
+                  {messageValue.length} / 300자
+                </span>
+              </div>
+            </div>
+
+            {inquiryError || inquiryMessage ? (
+              <div
+                className={`md:col-span-2 rounded-2xl border px-4 py-3 text-sm ${
+                  inquiryError ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                }`}
+              >
+                {inquiryError || inquiryMessage}
+              </div>
+            ) : null}
+
+            <div className="md:col-span-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <p className="text-sm text-gray-500">
+                {quotaLoading
+                  ? '문의 가능 횟수를 확인하는 중입니다...'
+                  : `이번 달 잔여 문의 횟수: ${quota.remainingCount}회 / 총 ${quota.monthlyLimit}회`}
+              </p>
+
+              <button
+                type="submit"
+                disabled={inquirySubmitting || sessionStatus === 'loading' || !session?.user || !canInquire || !quota.canSend}
+                className="inline-flex items-center justify-center rounded-full bg-emerald-800 px-7 py-3 text-sm font-bold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {inquirySubmitting ? '문의 접수 중...' : quota.canSend ? '문의 접수하기' : '이번 달 문의 마감'}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-8">
+            <button
+              type="button"
+              onClick={() => router.push('/instructors')}
+              className="rounded-full border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              강사 목록으로 돌아가기
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }

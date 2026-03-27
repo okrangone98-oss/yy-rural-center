@@ -305,7 +305,10 @@ window.TeachersModule = (function () {
   // 홈페이지/플랫폼 공통 핸들러
   function handleViewDetails(rowIndex, isHomePage) {
     if (isHomePage) {
-      location.href = 'iumteo/index.html?teacher=' + rowIndex;
+      const targetTeacher = TEACHERS.find((teacher) => teacher.rowIndex === rowIndex);
+      location.href = targetTeacher && targetTeacher.name
+        ? `/iumteo/teacher/${encodeURIComponent(targetTeacher.name)}`
+        : '/iumteo/instructors';
     } else {
       if (typeof window.showTeacherDetails === 'function') {
         window.showTeacherDetails(rowIndex, true);
@@ -325,13 +328,13 @@ window.TeachersModule = (function () {
       if (typeof window.openAuthDrawer === 'function') {
         window.openAuthDrawer('user');
       } else {
-        location.href = 'iumteo/index.html?action=join';
+        location.href = '/iumteo/register?type=user';
       }
     } else {
       if (typeof window.openInquiryModal === 'function') {
         window.openInquiryModal(name, photo);
       } else {
-        location.href = `iumteo/index.html?action=inquiry&name=${encodeURIComponent(name)}`;
+        location.href = `/iumteo/teacher/${encodeURIComponent(name)}`;
       }
     }
   }

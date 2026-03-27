@@ -1,3 +1,5 @@
+import { getAppPath, getSiteOrigin } from '@/lib/app-url';
+
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_WIDTH = 1280;
 const MAX_IMAGE_HEIGHT = 1280;
@@ -75,7 +77,7 @@ export async function uploadProfilePhoto(file: File, name: string, email: string
   formData.append('name', name || 'instructor');
   formData.append('email', email || 'unknown');
 
-  const response = await fetch('/api/uploads/profile-photo', {
+  const response = await fetch(getAppPath('/api/uploads/profile-photo'), {
     method: 'POST',
     body: formData,
   });
@@ -91,7 +93,7 @@ export async function uploadProfilePhoto(file: File, name: string, email: string
 export async function deleteProfilePhoto(fileUrl: string) {
   if (!fileUrl) return;
 
-  const response = await fetch('/api/uploads/profile-photo', {
+  const response = await fetch(getAppPath('/api/uploads/profile-photo'), {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fileUrl }),
@@ -101,4 +103,12 @@ export async function deleteProfilePhoto(fileUrl: string) {
   if (!response.ok || (result && result.success === false)) {
     throw new Error(result?.message || '프로필 사진 삭제에 실패했습니다.');
   }
+}
+
+export function resolveProfilePhotoPublicUrl(fileUrl?: string | null) {
+  const value = String(fileUrl || '').trim();
+  if (!value) return '';
+  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value;
+  if (value.startsWith('/')) return new URL(value, `${getSiteOrigin()}/`).toString();
+  return value;
 }

@@ -9,6 +9,20 @@ const STATUS_KEYS = ['status', '상태'] as const;
 const LOCAL_KEYS = ['isLocal', '로컬', '로컬여부'] as const;
 const SAMPLE_KEYS = ['isSample'] as const;
 const EMAIL_KEYS = ['이메일', '로그인용 이메일', 'Email', 'email'] as const;
+const NAME_KEYS = ['name', '성명', '강사명'] as const;
+const ORG_KEYS = ['org', '소속', '기관'] as const;
+const FIELD_KEYS = ['field', '강의분야', '분야', '상세내용', '활동내용', '전문분야'] as const;
+const AREA_KEYS = ['area', '활동지역', '활동 지역'] as const;
+const INTRO_KEYS = ['intro', '소개', '강의주제', '내용', '프로그램'] as const;
+const PROFILE_PHOTO_KEYS = ['profilePhoto', '프로필사진', 'photo'] as const;
+const INSTA_KEYS = ['insta', '인스타그램주소', '인스타그램', 'SNS'] as const;
+const INSTAGRAM_PUBLIC_KEYS = ['instaPublic', '인스타그램공개', '인스타공개여부', '공개'] as const;
+const ROLE_KEYS = ['role', '직위', '직함', '역할'] as const;
+const ADDRESS_KEYS = ['address', '주소', '거주지'] as const;
+const TARGET_KEYS = ['target', '대상'] as const;
+const HISTORY_KEYS = ['history', '주요경력', '경력', '활동이력', '자격'] as const;
+const DESCRIPTION_KEYS = ['desc', '강의주제', '내용', '소개', '프로그램'] as const;
+const PHONE_KEYS = ['phone', '연락처', '전화번호', '핸드폰번호', '휴대폰'] as const;
 
 function pickFirstValue(record: Record<string, unknown>, keys: readonly string[]) {
   for (const key of keys) {
@@ -48,6 +62,21 @@ function normalizeInstructorRecord(record: Record<string, unknown>) {
   const status = normalizeStatus(pickFirstValue(record, STATUS_KEYS));
   const isLocal = normalizeYesNo(pickFirstValue(record, LOCAL_KEYS));
   const isSample = normalizeBoolean(pickFirstValue(record, SAMPLE_KEYS), true);
+  const name = String(pickFirstValue(record, NAME_KEYS) || '').trim();
+  const org = String(pickFirstValue(record, ORG_KEYS) || '').trim();
+  const field = String(pickFirstValue(record, FIELD_KEYS) || '').trim();
+  const area = String(pickFirstValue(record, AREA_KEYS) || '').trim();
+  const intro = String(pickFirstValue(record, INTRO_KEYS) || '').trim();
+  const email = String(pickFirstValue(record, EMAIL_KEYS) || '').trim();
+  const profilePhoto = String(pickFirstValue(record, PROFILE_PHOTO_KEYS) || '').trim();
+  const insta = String(pickFirstValue(record, INSTA_KEYS) || '').trim();
+  const instaPublic = String(pickFirstValue(record, INSTAGRAM_PUBLIC_KEYS) || '').trim();
+  const role = String(pickFirstValue(record, ROLE_KEYS) || '').trim();
+  const address = String(pickFirstValue(record, ADDRESS_KEYS) || '').trim();
+  const target = String(pickFirstValue(record, TARGET_KEYS) || '').trim();
+  const history = String(pickFirstValue(record, HISTORY_KEYS) || '').trim();
+  const desc = String(pickFirstValue(record, DESCRIPTION_KEYS) || '').trim();
+  const phone = String(pickFirstValue(record, PHONE_KEYS) || '').trim();
 
   return {
     ...record,
@@ -55,6 +84,21 @@ function normalizeInstructorRecord(record: Record<string, unknown>) {
     '상태': record['상태'] ?? status,
     isLocal,
     isSample,
+    name,
+    org,
+    field,
+    area,
+    intro,
+    email,
+    profilePhoto,
+    insta,
+    instaPublic,
+    role,
+    address,
+    target,
+    history,
+    desc,
+    phone,
   };
 }
 
@@ -63,6 +107,7 @@ export async function GET(request: Request) {
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
     const emailParam = searchParams.get('email');
+    const nameParam = searchParams.get('name');
     const isAdmin = session?.user?.role === 'ADMIN';
 
     let url = `${GAS_API_URL}?apiKey=${encodeURIComponent(GAS_API_KEY)}`;
@@ -76,7 +121,12 @@ export async function GET(request: Request) {
       }
     }
 
-    const gasRes = await fetch(url, { cache: 'no-store' });
+    const gasRes = await fetch(
+      url,
+      emailParam || isAdmin
+        ? { cache: 'no-store' }
+        : { next: { revalidate: 300 } },
+    );
     const result = await gasRes.json();
 
     if (!result.success) {
@@ -98,6 +148,8 @@ export async function GET(request: Request) {
         '전화번호': '*** (센터 문의)',
         '이메일': '*** (센터 문의)',
         '사용자비번': '********',
+        '프로필사진': '',
+        profilePhoto: '',
       };
     };
 
@@ -105,8 +157,18 @@ export async function GET(request: Request) {
 
     if (Array.isArray(data)) {
       data = data.map((item) => applyBlindPolicy(item));
+      if (nameParam) {
+        data =
+          data.find(
+            (item: Record<string, unknown>) => String(item.name || '').trim() === nameParam.trim(),
+          ) || null;
+      }
     } else if (data) {
       data = applyBlindPolicy(data);
+    }
+
+    if (nameParam && !data) {
+      return NextResponse.json({ success: false, message: '강사 정보를 찾을 수 없습니다.' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, data });

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { inquiryForwardSchema, type MailOutboxEntry } from '@/lib/domain';
-import { assertGasSuccess, gasPost, type GasEnvelope } from '@/lib/gas-api';
+import { assertGasSuccess, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { updateMirrorInquiry } from '@/lib/firestore-mirror';
-import { sendManagedMail } from '@/lib/mail';
+import { isMailConfigured, sendManagedMail } from '@/lib/mail';
 import { getRequiredSession } from '@/lib/rbac';
 
 export async function POST(request: Request) {
@@ -10,6 +10,20 @@ export async function POST(request: Request) {
   if (error) return error;
 
   try {
+    if (!isGasConfigured()) {
+      return NextResponse.json(
+        { success: false, message: '문의 상태를 갱신할 GAS 설정이 아직 완료되지 않았습니다.' },
+        { status: 503 },
+      );
+    }
+
+    if (!isMailConfigured()) {
+      return NextResponse.json(
+        { success: false, message: '강사 전달 메일을 보내려면 SMTP 설정이 필요합니다.' },
+        { status: 503 },
+      );
+    }
+
     const body = await request.json();
     const parsed = inquiryForwardSchema.parse(body);
 

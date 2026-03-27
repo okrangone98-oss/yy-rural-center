@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { assertGasSuccess, gasPost, type GasEnvelope } from '@/lib/gas-api';
+import { assertGasSuccess, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { registerPayloadSchema, type MirrorInstructorProfile, type MirrorUserRecord } from '@/lib/domain';
 import { upsertMirrorInstructorProfile, upsertMirrorUser } from '@/lib/firestore-mirror';
 
@@ -11,6 +11,13 @@ function nowIso() {
 
 export async function POST(request: Request) {
   try {
+    if (!isGasConfigured()) {
+      return NextResponse.json(
+        { success: false, message: '회원가입 설정이 아직 완료되지 않았습니다. 관리자 환경변수를 확인해 주세요.' },
+        { status: 503 },
+      );
+    }
+
     const body = await request.json();
     const parsed = registerPayloadSchema.parse(body);
     const session = await getServerSession(authOptions);

@@ -2,6 +2,10 @@ import nodemailer from 'nodemailer';
 import { queueMailOutbox } from '@/lib/firestore-mirror';
 import type { MailOutboxEntry } from '@/lib/domain';
 
+export function isMailConfigured() {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
 function createTransport() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT || '587');

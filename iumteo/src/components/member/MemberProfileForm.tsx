@@ -2,9 +2,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { profileUpdateSchema, type ProfileUpdatePayload } from '@/lib/domain';
+import { getAppPath } from '@/lib/app-url';
 
 type MemberProfileData = {
   name: string;
@@ -21,12 +22,15 @@ type MemberInquiry = {
   rowIndex: number;
   receivedAt: string;
   teacherName: string;
+  teacherEmail?: string;
   inquirerName: string;
   inquirerPhone: string;
   inquirerEmail: string;
   purpose: string;
   message: string;
   status: string;
+  chatRoomId?: string;
+  chatRoomStatus?: 'PENDING' | 'ACTIVE' | 'ARCHIVED';
 };
 
 function firstString(source: Record<string, unknown>, keys: string[]) {
@@ -61,6 +65,22 @@ const emptyProfile: MemberProfileData = {
   joinedAt: '',
 };
 
+const INQUIRY_PAGE_SIZE = 4;
+
+function ChatStatusBadge({ status }: { status?: MemberInquiry['chatRoomStatus'] }) {
+  if (!status) return null;
+
+  const tone =
+    status === 'ACTIVE'
+      ? 'bg-emerald-100 text-emerald-700'
+      : status === 'PENDING'
+      ? 'bg-amber-100 text-amber-800'
+      : 'bg-gray-100 text-gray-500';
+
+  const label = status === 'ACTIVE' ? '채팅 가능' : status === 'PENDING' ? '수락 대기' : '종료';
+  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tone}`}>{label}</span>;
+}
+
 export default function MemberProfileForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -68,9 +88,15 @@ export default function MemberProfileForm() {
   const [submitError, setSubmitError] = useState('');
   const [submitMessage, setSubmitMessage] = useState('');
   const [profile, setProfile] = useState<MemberProfileData>(emptyProfile);
+  const [profileWarning, setProfileWarning] = useState('');
+  const [saveAvailable, setSaveAvailable] = useState(true);
   const [inquiries, setInquiries] = useState<MemberInquiry[]>([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(true);
   const [inquiriesError, setInquiriesError] = useState('');
+  const [chatEnabled, setChatEnabled] = useState(true);
+  const [inquiryView, setInquiryView] = useState<'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED'>('ALL');
+  const [inquirySearch, setInquirySearch] = useState('');
+  const [inquiryPage, setInquiryPage] = useState(1);
 
   const {
     register,
@@ -88,12 +114,14 @@ export default function MemberProfileForm() {
       setLoadError('');
 
       try {
-        const response = await fetch('/api/account/profile', { cache: 'no-store' });
+        const response = await fetch(getAppPath('/api/account/profile'), { cache: 'no-store' });
         const result = await response.json();
         if (!response.ok || !result.success || !result.data) {
           throw new Error(result.message || '회원 정보를 불러오지 못했습니다.');
         }
 
+        setProfileWarning(result.degraded ? result.message || '' : '');
+        setSaveAvailable(result.saveAvailable !== false);
         const normalized = normalizeProfile(result.data);
         setProfile(normalized);
         reset(normalized);
@@ -113,12 +141,13 @@ export default function MemberProfileForm() {
       setInquiriesError('');
 
       try {
-        const response = await fetch('/api/account/inquiries', { cache: 'no-store' });
+        const response = await fetch(getAppPath('/api/account/inquiries'), { cache: 'no-store' });
         const result = await response.json();
         if (!response.ok || !result.success) {
           throw new Error(result.message || '문의 내역을 불러오지 못했습니다.');
         }
 
+        setChatEnabled(result.chatEnabled !== false);
         setInquiries(Array.isArray(result.data) ? result.data : []);
       } catch (error) {
         setInquiriesError(error instanceof Error ? error.message : '문의 내역을 불러오지 못했습니다.');
@@ -135,7 +164,7 @@ export default function MemberProfileForm() {
     setSubmitMessage('');
 
     try {
-      const response = await fetch('/api/account/profile', {
+      const response = await fetch(getAppPath('/api/account/profile'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -163,6 +192,60 @@ export default function MemberProfileForm() {
       setSubmitError(error instanceof Error ? error.message : '회원 정보 저장에 실패했습니다.');
     }
   });
+
+  const inquiryStats = useMemo(
+    () => ({
+      total: inquiries.length,
+      pending: inquiries.filter((item) => item.chatRoomStatus === 'PENDING' || !item.chatRoomStatus).length,
+      active: inquiries.filter((item) => item.chatRoomStatus === 'ACTIVE').length,
+      archived: inquiries.filter((item) => item.chatRoomStatus === 'ARCHIVED').length,
+    }),
+    [inquiries],
+  );
+
+  const visibleInquiries = useMemo(() => {
+    if (inquiryView === 'ALL') return inquiries;
+    if (inquiryView === 'PENDING') {
+      return inquiries.filter((item) => item.chatRoomStatus === 'PENDING' || !item.chatRoomStatus);
+    }
+    return inquiries.filter((item) => item.chatRoomStatus === inquiryView);
+  }, [inquiries, inquiryView]);
+
+  const filteredVisibleInquiries = useMemo(() => {
+    const keyword = inquirySearch.trim().toLowerCase();
+    if (!keyword) return visibleInquiries;
+
+    return visibleInquiries.filter((item) =>
+      [item.teacherName, item.inquirerPhone, item.purpose, item.message]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(keyword)),
+    );
+  }, [inquirySearch, visibleInquiries]);
+
+  useEffect(() => {
+    setInquiryPage(1);
+  }, [inquirySearch, inquiryView]);
+
+  const inquiryPageCount = Math.max(1, Math.ceil(filteredVisibleInquiries.length / INQUIRY_PAGE_SIZE));
+
+  const paginatedInquiries = useMemo(() => {
+    const start = (inquiryPage - 1) * INQUIRY_PAGE_SIZE;
+    return filteredVisibleInquiries.slice(start, start + INQUIRY_PAGE_SIZE);
+  }, [filteredVisibleInquiries, inquiryPage]);
+
+  const memberAlerts = useMemo(() => {
+    const alerts: string[] = [];
+    if (inquiryStats.pending > 0) {
+      alerts.push(`답변 또는 수락을 기다리는 문의 ${inquiryStats.pending}건`);
+    }
+    if (inquiryStats.active > 0) {
+      alerts.push(`바로 채팅 가능한 문의 ${inquiryStats.active}건`);
+    }
+    if (!alerts.length && inquiries.length > 0) {
+      alerts.push('최근 문의 이력이 보관되어 있습니다.');
+    }
+    return alerts;
+  }, [inquiries.length, inquiryStats.active, inquiryStats.pending]);
 
   if (loading) {
     return <div className="rounded-3xl border border-emerald-100 bg-white p-8 text-sm text-gray-500">회원 정보를 불러오는 중입니다.</div>;
@@ -233,6 +316,12 @@ export default function MemberProfileForm() {
           </div>
         </section>
 
+        {profileWarning && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {profileWarning} 저장 기능은 설정이 완료되면 다시 사용할 수 있습니다.
+          </div>
+        )}
+
         {(submitError || submitMessage) && (
           <div
             className={`rounded-2xl px-4 py-3 text-sm ${
@@ -255,7 +344,7 @@ export default function MemberProfileForm() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !isDirty}
+              disabled={isSubmitting || !isDirty || !saveAvailable}
               className="rounded-full bg-sky-800 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-900 disabled:opacity-50"
             >
               {isSubmitting ? '저장 중...' : '일반회원 정보 저장'}
@@ -270,15 +359,94 @@ export default function MemberProfileForm() {
           <p className="mt-1 text-sm text-gray-500">센터를 통해 접수한 강사 문의 현황을 확인합니다.</p>
         </div>
 
+        <div className="mb-5 grid gap-3 md:grid-cols-3">
+          <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">문의하기 중</p>
+            <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.pending}</p>
+            <p className="mt-1 text-xs text-slate-500">수락 대기 또는 진행 전 문의</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">채팅 진행</p>
+            <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.active}</p>
+            <p className="mt-1 text-xs text-slate-500">강사와 대화를 이어가는 문의</p>
+          </div>
+          <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">문의 완료</p>
+            <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.archived}</p>
+            <p className="mt-1 text-xs text-slate-500">답변 완료 후 보관된 문의</p>
+          </div>
+        </div>
+
+        {memberAlerts.length > 0 ? (
+          <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-emerald-900">알림</p>
+                <p className="text-xs text-emerald-700">새로운 내용이나 확인이 필요한 문의를 먼저 보여드립니다.</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                {memberAlerts.length}건
+              </span>
+            </div>
+            <div className="space-y-2">
+              {memberAlerts.map((alert) => (
+                <div key={alert} className="rounded-xl bg-white/80 px-3 py-2 text-sm text-slate-700">
+                  {alert}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          {[
+            { key: 'ALL', label: '전체', count: inquiryStats.total },
+            { key: 'PENDING', label: '문의하기 중', count: inquiryStats.pending },
+            { key: 'ACTIVE', label: '채팅', count: inquiryStats.active },
+            { key: 'ARCHIVED', label: '완료', count: inquiryStats.archived },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setInquiryView(tab.key as 'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED')}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                inquiryView === tab.key
+                  ? 'bg-slate-900 text-white'
+                  : 'border border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
+              }`}
+            >
+              {tab.label} {tab.count}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-5">
+          <label className="sr-only" htmlFor="member-inquiry-search">
+            문의 검색
+          </label>
+          <input
+            id="member-inquiry-search"
+            type="search"
+            value={inquirySearch}
+            onChange={(event) => setInquirySearch(event.target.value)}
+            placeholder="강사명, 연락처, 문의 목적, 문의 내용 검색"
+            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+          />
+        </div>
+
         {inquiriesLoading ? (
           <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-500">문의 내역을 불러오는 중입니다.</div>
         ) : inquiriesError ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{inquiriesError}</div>
-        ) : inquiries.length === 0 ? (
+        ) : !chatEnabled ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+            문의 내역은 확인할 수 있지만, 채팅 기능은 아직 설정되지 않았습니다. 현재는 센터를 통한 문의 접수와 확인 흐름만 우선 사용 가능합니다.
+          </div>
+        ) : filteredVisibleInquiries.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-6 text-sm text-gray-500">아직 접수된 문의가 없습니다.</div>
         ) : (
           <div className="space-y-3">
-            {inquiries.map((item) => (
+            {paginatedInquiries.map((item) => (
               <div key={item.inquiryId} className="rounded-2xl border border-gray-200 p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
@@ -287,15 +455,51 @@ export default function MemberProfileForm() {
                       접수일시 {item.receivedAt || '-'} / 문의 목적 {item.purpose || '-'}
                     </div>
                   </div>
-                  <span className="inline-flex w-fit rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-                    {item.status}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                      {item.status}
+                    </span>
+                    <ChatStatusBadge status={item.chatRoomStatus} />
+                  </div>
                 </div>
-                <div className="mt-3 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700 whitespace-pre-line">
+                <div className="mt-3 whitespace-pre-line rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
                   {item.message || '상세 내용 없음'}
                 </div>
+                {item.chatRoomId && (
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/chat/${item.chatRoomId}`)}
+                      className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold text-sky-800 hover:bg-sky-100"
+                    >
+                      {item.chatRoomStatus === 'ACTIVE' ? '채팅 열기' : '문의 현황 보기'}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
+            {inquiryPageCount > 1 ? (
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                {Array.from({ length: inquiryPageCount }, (_, index) => {
+                  const pageNumber = index + 1;
+                  const active = inquiryPage === pageNumber;
+                  return (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => setInquiryPage(pageNumber)}
+                      className={`h-9 min-w-9 rounded-full border px-3 text-sm font-semibold transition ${
+                        active
+                          ? 'border-sky-800 bg-sky-800 text-white'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         )}
       </section>

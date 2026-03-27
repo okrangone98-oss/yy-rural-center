@@ -46,7 +46,7 @@ export const registerPayloadSchema = z.object({
   career: z.string().trim().optional().default(''),
   address: z.string().trim().optional().default(''),
   instagram: z.string().trim().optional().default(''),
-  instagramOpen: z.enum(['공개', '미공개']).optional().default('미공개'),
+  instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional().default('미공개'),
   portfolioLink: z.string().trim().optional().default(''),
   profilePhoto: z.string().trim().optional().default(''),
   consent: consentPayloadSchema,
@@ -64,7 +64,7 @@ export const profileUpdateSchema = z.object({
   career: z.string().trim().optional(),
   address: z.string().trim().optional(),
   instagram: z.string().trim().optional(),
-  instagramOpen: z.enum(['공개', '미공개']).optional(),
+  instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional(),
   portfolioLink: z.string().trim().optional(),
   profilePhoto: z.string().trim().optional(),
   marketingAccepted: z.boolean().optional(),
@@ -73,15 +73,50 @@ export const profileUpdateSchema = z.object({
 
 export type ProfileUpdatePayload = z.infer<typeof profileUpdateSchema>;
 
-export const inquiryCreateSchema = z.object({
-  teacherName: z.string().trim().min(1),
-  teacherEmail: z.string().trim().email().optional(),
-  inquirerName: z.string().trim().min(2),
-  inquirerPhone: z.string().trim().min(8),
-  inquirerEmail: z.string().trim().email(),
-  purpose: z.string().trim().min(1),
-  message: z.string().trim().optional().default(''),
-});
+export const inquiryContactMethodSchema = z.enum(['PHONE', 'EMAIL', 'NONE']);
+export type InquiryContactMethod = z.infer<typeof inquiryContactMethodSchema>;
+
+export const inquiryCreateSchema = z
+  .object({
+    teacherName: z.string().trim().min(1),
+    teacherEmail: z.string().trim().email().optional(),
+    inquirerName: z.string().trim().min(2),
+    requesterEmail: z.string().trim().email(),
+    contactMethod: inquiryContactMethodSchema,
+    contactValue: z.string().trim().optional().default(''),
+    purpose: z.string().trim().min(1),
+    message: z.string().trim().max(300).optional().default(''),
+  })
+  .superRefine((data, ctx) => {
+    if (data.contactMethod === 'NONE') {
+      return;
+    }
+
+    if (!data.contactValue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['contactValue'],
+        message: data.contactMethod === 'EMAIL' ? '이메일을 입력해주세요.' : '전화번호를 입력해주세요.',
+      });
+      return;
+    }
+
+    if (data.contactMethod === 'EMAIL' && !z.string().email().safeParse(data.contactValue).success) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['contactValue'],
+        message: '올바른 이메일 형식을 입력해주세요.',
+      });
+    }
+
+    if (data.contactMethod === 'PHONE' && data.contactValue.replace(/[^0-9]/g, '').length < 8) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['contactValue'],
+        message: '연락 가능한 전화번호를 입력해주세요.',
+      });
+    }
+  });
 
 export type InquiryCreatePayload = z.infer<typeof inquiryCreateSchema>;
 
@@ -200,13 +235,48 @@ export type MirrorInquiry = {
 
 export type MailOutboxEntry = {
   id: string;
-  category: 'CENTER_INQUIRY' | 'TEACHER_FORWARD' | 'MEMBER_REPLY';
+  category: 'CENTER_INQUIRY' | 'TEACHER_FORWARD' | 'MEMBER_REPLY' | 'CHAT_MESSAGE';
   to: string;
   subject: string;
   html: string;
   relatedInquiryId?: string;
+  relatedRoomId?: string;
   status: 'QUEUED' | 'SENT' | 'FAILED' | 'SKIPPED';
   errorMessage?: string;
   createdAt: string;
   sentAt?: string;
+};
+
+export const CHAT_ROOM_MAX_LENGTH = 300;
+export const CHAT_ROOM_WARN_LENGTH = 240;
+
+export type ChatRoomStatus = 'PENDING' | 'ACTIVE' | 'ARCHIVED';
+
+export type ChatRoom = {
+  id: string;
+  inquiryId: string;
+  memberEmail: string;
+  memberName: string;
+  instructorEmail: string;
+  instructorName: string;
+  status: ChatRoomStatus;
+  totalLength: number;
+  lastMessage: string;
+  lastMessageAt: string;
+  firstMessageNotified: boolean;
+  unreadCount: Record<string, number>;
+  hiddenFor?: string[];
+  createdAt: string;
+  updatedAt: string;
+  archivedAt?: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  roomId: string;
+  senderEmail: string;
+  senderName: string;
+  senderRole: 'USER' | 'INSTRUCTOR' | 'ADMIN';
+  content: string;
+  createdAt: string;
 };

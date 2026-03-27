@@ -1,249 +1,318 @@
-import { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import NaverProvider from "next-auth/providers/naver";
-import KakaoProvider from "next-auth/providers/kakao";
-import CredentialsProvider from "next-auth/providers/credentials";
+import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { assertGasSuccess, gasGet, type GasEnvelope } from '@/lib/gas-api';
+import { normalizeEmail, normalizePhone, pickByAliases, type CsvRecord } from '@/lib/sheets';
 
 type AppRole = 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
+type UserSource = 'USER' | 'INSTRUCTOR';
 
-function resolveRole(userData: any): AppRole {
-    const roleStr = String(
-        userData?._role ||
-        userData?.Role ||
-        userData?.['권한(USER)'] ||
-        'USER'
-    ).toUpperCase();
+type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  organization: string;
+  role: AppRole;
+  provider: string;
+  consentDate: string | null;
+  consentRequired: boolean;
+  password: string;
+};
 
-    if (roleStr.includes('ADMIN') || roleStr.includes('관리자')) return 'ADMIN';
-    if (roleStr.includes('INSTRUCTOR') || roleStr.includes('강사')) return 'INSTRUCTOR';
-    if (roleStr.includes('GUEST')) return 'GUEST';
-    return 'USER';
-}
-
-async function loadGasUserByEmail(email?: string | null) {
-    const normalizedEmail = email?.trim().toLowerCase();
-    const apiUrl = process.env.GAS_API_URL;
-    const apiKey = process.env.GAS_API_KEY;
-
-    if (!normalizedEmail || !apiUrl || !apiKey) {
-        return null;
-    }
-
-    try {
-        const response = await fetch(
-            `${apiUrl}?action=getUser&email=${encodeURIComponent(normalizedEmail)}&apiKey=${encodeURIComponent(apiKey)}`,
-            {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                cache: 'no-store',
-            }
-        );
-
-        const result = await response.json();
-        if (!result.success || !result.data) {
-            return null;
-        }
-
-        const userData = result.data;
-        return {
-            id: String(userData['강사ID'] || userData._rowIndex || normalizedEmail),
-            name: userData['성명'] || userData['이용자명'] || userData['Name'] || normalizedEmail.split('@')[0],
-            email: normalizedEmail,
-            role: resolveRole(userData),
-            provider: userData['Provider'] || 'credentials',
-            consentDate: userData['Consent_Date'] || 'sheet-registered',
-            consentRequired: false,
-            password: String(
-                userData['Password_Hash'] ||
-                userData['사용자비번'] ||
-                userData['비밀번호'] ||
-                ''
-            ),
-        };
-    } catch (error) {
-        console.error('[NextAuth] Failed to load GAS user:', error);
-        return null;
-    }
-}
-
-// Extend the built-in session types to include our custom RBAC roles and consent info
-declare module "next-auth" {
-    interface Session {
-        user: {
-            id: string;
-            name?: string | null;
-            email?: string | null;
-            image?: string | null;
-            role: 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
-            provider: string;
-            consentDate?: string | null;
-            consentRequired?: boolean;
-        }
-    }
-
-    interface User {
-        id: string;
-        role: 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
-        provider: string;
-        consentDate?: string | null;
-        consentRequired?: boolean;
-    }
-}
-
-declare module "next-auth/jwt" {
-    interface JWT {
-        id: string;
-        role: 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
-        provider: string;
-        consentDate?: string | null;
-        consentRequired?: boolean;
-    }
-}
-const providers: any[] = [
-    CredentialsProvider({
-        name: "Credentials",
-        credentials: {
-            username: { label: "Username", type: "text" },
-            password: { label: "Password", type: "password" }
-        },
-        async authorize(credentials) {
-            const email = credentials?.username?.trim();
-            const password = credentials?.password;
-
-            console.log("[NextAuth] Authorize attempt:", { email });
-
-            // Hardcoded admin for testing and fallback
-            if (email === "admin" && password === "admin") {
-                console.log("[NextAuth] Authorize SUCCESS: admin login");
-                return {
-                    id: "admin-1",
-                    name: "Admin User",
-                    email: "admin@yangyang.go.kr",
-                    role: "ADMIN",
-                    provider: "credentials"
-                };
-            }
-
-            if (!email || !password) return null;
-
-            try {
-                console.log(`[NextAuth] Fetching from GAS API for email: ${email}`);
-                const gasUser = await loadGasUserByEmail(email);
-
-                if (gasUser) {
-                    const dbPassword = gasUser.password;
-
-                    // 시트의 평문 비밀번호와 비교
-                    if (String(password) === dbPassword) {
-                        console.log("[NextAuth] Login SUCCESS via GAS for:", email);
-
-                        return {
-                            id: gasUser.id,
-                            name: gasUser.name,
-                            email: email,
-                            role: gasUser.role,
-                            provider: "credentials"
-                        };
-                    } else {
-                        console.log("[NextAuth] Password mismatch for:", email);
-                        return null;
-                    }
-                }
-
-                console.log("[NextAuth] User not found in GAS DB");
-                return null;
-            } catch (err) {
-                console.error("[NextAuth] GAS API Fetch Exception:", err);
-                return null;
-            }
-        }
-    })
+const EMAIL_ALIASES = [
+  '이메일',
+  '로그인 이메일',
+  '로그인용 이메일',
+  '이메일(로그인용)',
+  'Email',
+  'email',
 ];
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    providers.push(GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }));
+const PHONE_ALIASES = [
+  '연락처',
+  '핸드폰 번호',
+  '전화번호',
+  '휴대폰',
+  '휴대폰 번호',
+  'Phone',
+  'phone',
+];
+
+const NAME_ALIASES = ['이용자명', '이름', '성명', '강사명', 'Name', 'name'];
+const ORG_ALIASES = ['소속', '기관', 'Org', 'org'];
+const ROLE_ALIASES = ['role', 'Role', '회원유형', '사용자유형', '권한', '_role'];
+const PASSWORD_ALIASES = ['비밀번호', 'Password_Hash', 'password', 'Password'];
+
+function isEmailIdentifier(value: string) {
+  return value.includes('@');
 }
 
-if (process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET) {
-    providers.push(NaverProvider({
-        clientId: process.env.NAVER_CLIENT_ID,
-        clientSecret: process.env.NAVER_CLIENT_SECRET,
-    }));
+function getRecordEmail(record: CsvRecord) {
+  return normalizeEmail(pickByAliases(record, EMAIL_ALIASES));
 }
 
-if (process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET) {
-    providers.push(KakaoProvider({
-        clientId: process.env.KAKAO_CLIENT_ID,
-        clientSecret: process.env.KAKAO_CLIENT_SECRET,
-    }));
+function getRecordPhone(record: CsvRecord) {
+  return normalizePhone(pickByAliases(record, PHONE_ALIASES));
+}
+
+function getRecordName(record: CsvRecord, fallback: string) {
+  return pickByAliases(record, NAME_ALIASES) || fallback;
+}
+
+function resolveRole(record: CsvRecord, source?: UserSource): AppRole {
+  const rawRole = String(pickByAliases(record, ROLE_ALIASES) || source || 'USER').trim().toUpperCase();
+
+  if (rawRole.includes('ADMIN') || rawRole.includes('관리자')) return 'ADMIN';
+  if (rawRole.includes('INSTRUCTOR') || rawRole.includes('강사')) return 'INSTRUCTOR';
+  if (rawRole.includes('GUEST')) return 'GUEST';
+  return source === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'USER';
+}
+
+function resolvePassword(record: CsvRecord, role: AppRole, phone: string) {
+  const storedPassword = pickByAliases(record, PASSWORD_ALIASES);
+  if (storedPassword) return storedPassword;
+
+  if (role === 'INSTRUCTOR' && phone.length >= 4) {
+    return phone.slice(-4);
+  }
+
+  return '';
+}
+
+function toAuthUser(record: CsvRecord, source?: UserSource): AuthUser | null {
+  const email = getRecordEmail(record);
+  const phone = getRecordPhone(record);
+  const role = resolveRole(record, source);
+  const name = getRecordName(record, email || phone || '이음터 사용자');
+  const password = resolvePassword(record, role, phone);
+
+  if (!email) {
+    return null;
+  }
+
+  return {
+    id: email,
+    name,
+    email,
+    phone,
+    organization: pickByAliases(record, ORG_ALIASES) || '',
+    role,
+    provider: 'credentials',
+    consentDate: new Date().toISOString(),
+    consentRequired: false,
+    password,
+  };
+}
+
+async function fetchGasRecords(action: 'getInstructors' | 'getMembers', includeAll = false) {
+  const params = new URLSearchParams({ action });
+  if (includeAll) {
+    params.set('includeAll', 'Y');
+  }
+
+  const result = assertGasSuccess(await gasGet<GasEnvelope<CsvRecord[]>>(params), action);
+  return Array.isArray(result.data) ? result.data : [];
+}
+
+async function loadGasUserByEmail(email: string) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return null;
+
+  const params = new URLSearchParams({
+    action: 'getUser',
+    email: normalizedEmail,
+  });
+
+  const result = assertGasSuccess(await gasGet<GasEnvelope<CsvRecord>>(params), 'getUser');
+  return result.data ? toAuthUser(result.data) : null;
+}
+
+async function loadGasUserByPhone(phone: string) {
+  const normalizedPhone = normalizePhone(phone);
+  if (!normalizedPhone) return null;
+
+  const [instructors, members] = await Promise.all([
+    fetchGasRecords('getInstructors', true),
+    fetchGasRecords('getMembers'),
+  ]);
+
+  const instructor = instructors.find((record) => getRecordPhone(record) === normalizedPhone);
+  if (instructor) {
+    return toAuthUser(instructor, 'INSTRUCTOR');
+  }
+
+  const member = members.find((record) => getRecordPhone(record) === normalizedPhone);
+  if (member) {
+    return toAuthUser(member, 'USER');
+  }
+
+  return null;
+}
+
+async function findGasUserByIdentifier(identifier: string) {
+  const trimmed = String(identifier || '').trim();
+  if (!trimmed) return null;
+
+  if (isEmailIdentifier(trimmed)) {
+    return loadGasUserByEmail(trimmed);
+  }
+
+  return loadGasUserByPhone(trimmed);
+}
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      phone?: string | null;
+      role: AppRole;
+      provider: string;
+      consentDate?: string | null;
+      consentRequired?: boolean;
+      organization?: string | null;
+    };
+  }
+
+  interface User {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    role: AppRole;
+    provider: string;
+    consentDate?: string | null;
+    consentRequired?: boolean;
+    organization?: string | null;
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    phone?: string | null;
+    role: AppRole;
+    provider: string;
+    consentDate?: string | null;
+    consentRequired?: boolean;
+    organization?: string | null;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
-    providers: providers,
-    callbacks: {
-        async jwt({ token, user, account }) {
-            if (user) {
-                token.id = user.id;
-                const provider = account?.provider || user.provider || 'unknown';
-                const isSocialProvider = provider !== 'credentials';
-                const hasConsent = Boolean(user.consentDate);
+  providers: [
+    CredentialsProvider({
+      name: '이음터 로그인',
+      credentials: {
+        username: { label: '전화번호 또는 가입 이메일', type: 'text' },
+        password: { label: '비밀번호', type: 'password' },
+      },
+      async authorize(credentials) {
+        const identifier = String(credentials?.username || '').trim();
+        const password = String(credentials?.password || '').trim();
 
-                // Keep social logins in GUEST state until the same consent policy is captured.
-                token.role = user.role || (isSocialProvider && !hasConsent ? 'GUEST' : 'USER');
-                token.provider = provider;
-                token.consentDate = user.consentDate || null;
-                token.consentRequired = isSocialProvider && !hasConsent;
-                console.log("[NextAuth] Token generated:", {
-                    id: token.id,
-                    role: token.role,
-                    provider: token.provider,
-                    consentRequired: token.consentRequired,
-                });
-            }
-
-            if (token.email && (token.role === 'GUEST' || !token.role)) {
-                const gasUser = await loadGasUserByEmail(token.email);
-                if (gasUser) {
-                    token.id = gasUser.id;
-                    token.role = gasUser.role;
-                    token.provider = token.provider || gasUser.provider;
-                    token.consentDate = gasUser.consentDate;
-                    token.consentRequired = false;
-                    if (!token.name) {
-                        token.name = gasUser.name;
-                    }
-                }
-            }
-
-            return token;
-        },
-        async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.id;
-                session.user.role = token.role;
-                session.user.provider = token.provider;
-                session.user.consentDate = token.consentDate;
-                session.user.consentRequired = token.consentRequired;
-                console.log("[NextAuth] Session started:", {
-                    id: session.user.id,
-                    role: session.user.role,
-                    provider: session.user.provider,
-                    consentRequired: session.user.consentRequired,
-                });
-            }
-            return session;
+        if (!identifier || !password) {
+          return null;
         }
+
+        const isDevelopment = process.env.NODE_ENV !== 'production';
+        const adminId = process.env.IUMTEO_ADMIN_ID || (isDevelopment ? 'admin' : '');
+        const adminPassword = process.env.IUMTEO_ADMIN_PASSWORD || (isDevelopment ? '1234' : '');
+
+        if (adminId && adminPassword && identifier === adminId && password === adminPassword) {
+          return {
+            id: 'admin',
+            name: '관리자',
+            email: process.env.IUMTEO_ADMIN_EMAIL || 'admin@yycenter.kr',
+            phone: '',
+            role: 'ADMIN',
+            provider: 'credentials',
+            consentDate: new Date().toISOString(),
+            consentRequired: false,
+            organization: '양양군 농촌활성화지원센터',
+          };
+        }
+
+        try {
+          const gasUser = await findGasUserByIdentifier(identifier);
+          if (!gasUser) {
+            return null;
+          }
+
+          if (password !== gasUser.password) {
+            return null;
+          }
+
+          return {
+            id: gasUser.id,
+            name: gasUser.name,
+            email: gasUser.email,
+            phone: gasUser.phone,
+            organization: gasUser.organization || null,
+            role: gasUser.role,
+            provider: gasUser.provider,
+            consentDate: gasUser.consentDate,
+            consentRequired: gasUser.consentRequired,
+          };
+        } catch (error) {
+          console.error('[NextAuth] credentials authorize failed:', error);
+          return null;
+        }
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.provider = user.provider;
+        token.phone = user.phone || null;
+        token.consentDate = user.consentDate || null;
+        token.consentRequired = user.consentRequired || false;
+        token.organization = user.organization || null;
+      }
+
+      if (token.email && (!token.role || token.role === 'GUEST')) {
+        const gasUser = await loadGasUserByEmail(String(token.email));
+        if (gasUser) {
+          token.id = gasUser.id;
+          token.role = gasUser.role;
+          token.provider = gasUser.provider;
+          token.phone = gasUser.phone || null;
+          token.consentDate = gasUser.consentDate;
+          token.consentRequired = gasUser.consentRequired;
+          if (!token.name) {
+            token.name = gasUser.name;
+          }
+        }
+      }
+
+      return token;
     },
-    pages: {
-        signIn: '/login',
-        error: '/login',
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.provider = token.provider;
+        session.user.phone = token.phone || null;
+        session.user.consentDate = token.consentDate || null;
+        session.user.consentRequired = token.consentRequired || false;
+        session.user.organization = token.organization || null;
+      }
+
+      return session;
     },
-    session: {
-        strategy: 'jwt',
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-    },
-    secret: process.env.NEXTAUTH_SECRET,
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };

@@ -13,6 +13,8 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://127.0.0.1:3001',
   'http://localhost:5500',
   'http://127.0.0.1:5500',
+  'https://yycenter.kr',
+  'https://www.yycenter.kr',
 ];
 
 function getAllowedOrigins() {

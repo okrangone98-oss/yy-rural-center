@@ -48,6 +48,8 @@ window.IUMTEO_STORAGE_CONFIG = {
     profilePhotoFolder: "instructor-register/profile-photos",
     legacyProfilePhotoFolder: "profile_photos",
     uploadApiCandidates: [
+      "https://yycenter.kr/iumteo/api/uploads/profile-photo",
+      "/iumteo/api/uploads/profile-photo",
       "http://localhost:3000/api/uploads/profile-photo",
       "http://127.0.0.1:3000/api/uploads/profile-photo",
       "http://localhost:3001/api/uploads/profile-photo",

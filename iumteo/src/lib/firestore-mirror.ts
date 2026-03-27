@@ -2,6 +2,8 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { getFirestoreAdmin, isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import type { MailOutboxEntry, MirrorInquiry, MirrorInstructorProfile, MirrorUserRecord } from '@/lib/domain';
 
+const NON_CORE_FIRESTORE_MIRRORS_ENABLED = process.env.ENABLE_NON_CORE_FIRESTORE_MIRRORS === 'true';
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -10,8 +12,12 @@ function noopResult<T>(data: T) {
   return { enabled: false, skipped: true, data };
 }
 
+export function areNonCoreFirestoreMirrorsEnabled() {
+  return isFirebaseMirrorEnabled() && NON_CORE_FIRESTORE_MIRRORS_ENABLED;
+}
+
 export async function upsertMirrorUser(user: MirrorUserRecord) {
-  if (!isFirebaseMirrorEnabled()) return noopResult(user);
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult(user);
   const db = getFirestoreAdmin();
   await db.collection('users').doc(user.id).set(
     {
@@ -26,7 +32,7 @@ export async function upsertMirrorUser(user: MirrorUserRecord) {
 }
 
 export async function updateMirrorUser(userId: string, payload: Partial<MirrorUserRecord>) {
-  if (!isFirebaseMirrorEnabled()) return noopResult({ userId, ...payload });
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult({ userId, ...payload });
   const db = getFirestoreAdmin();
   await db.collection('users').doc(userId).set(
     {
@@ -40,7 +46,7 @@ export async function updateMirrorUser(userId: string, payload: Partial<MirrorUs
 }
 
 export async function upsertMirrorInstructorProfile(profile: MirrorInstructorProfile) {
-  if (!isFirebaseMirrorEnabled()) return noopResult(profile);
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult(profile);
   const db = getFirestoreAdmin();
   await db.collection('lecturer_profiles').doc(profile.id).set(
     {
@@ -54,7 +60,7 @@ export async function upsertMirrorInstructorProfile(profile: MirrorInstructorPro
 }
 
 export async function updateMirrorInstructorProfile(profileId: string, payload: Partial<MirrorInstructorProfile>) {
-  if (!isFirebaseMirrorEnabled()) return noopResult({ profileId, ...payload });
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult({ profileId, ...payload });
   const db = getFirestoreAdmin();
   await db.collection('lecturer_profiles').doc(profileId).set(
     {
@@ -68,7 +74,7 @@ export async function updateMirrorInstructorProfile(profileId: string, payload: 
 }
 
 export async function createMirrorInquiry(inquiry: MirrorInquiry) {
-  if (!isFirebaseMirrorEnabled()) return noopResult(inquiry);
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult(inquiry);
   const db = getFirestoreAdmin();
   await db.collection('inquiries').doc(inquiry.id).set({
     ...inquiry,
@@ -78,7 +84,7 @@ export async function createMirrorInquiry(inquiry: MirrorInquiry) {
 }
 
 export async function updateMirrorInquiry(inquiryId: string, payload: Partial<MirrorInquiry>) {
-  if (!isFirebaseMirrorEnabled()) return noopResult({ inquiryId, ...payload });
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult({ inquiryId, ...payload });
   const db = getFirestoreAdmin();
   await db.collection('inquiries').doc(inquiryId).set(
     {
@@ -92,7 +98,7 @@ export async function updateMirrorInquiry(inquiryId: string, payload: Partial<Mi
 }
 
 export async function queueMailOutbox(entry: MailOutboxEntry) {
-  if (!isFirebaseMirrorEnabled()) return noopResult(entry);
+  if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult(entry);
   const db = getFirestoreAdmin();
   await db.collection('mail_outbox').doc(entry.id).set({
     ...entry,

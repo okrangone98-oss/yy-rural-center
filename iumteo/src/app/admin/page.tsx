@@ -1,9 +1,11 @@
 'use client';
 
+import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { INSTAGRAM_VISIBILITY_OPTIONS, INSTRUCTOR_FIELD_OPTIONS } from '@/lib/domain';
+import { getAppPath } from '@/lib/app-url';
 import { compressImageForProfile, getImageFileFromClipboard, uploadProfilePhoto } from '@/lib/profile-photo-client';
 
 type Role = 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
@@ -118,6 +120,7 @@ const INQUIRY_STATUS_PRESETS = ['운영확인중', '강사전달완료', '회원
 const INSTRUCTOR_STATUS_OPTIONS = ['대기', '승인', '삭제요청', '반려'];
 
 const PUBLIC_PAGE_SIZE = 20;
+const ADMIN_INQUIRY_PAGE_SIZE = 7;
 
 function hasMeaningfulValue(value: unknown) {
   if (value === null || value === undefined) return false;
@@ -267,6 +270,7 @@ function getInstructorStatusCategory(status: string) {
 }
 
 function getInquiryStatusCategory(status: string) {
+  if (status.includes('삭제')) return 'deleted';
   if (status.includes('완료') || status.includes('회신')) return 'completed';
   if (status.includes('전달')) return 'forwarded';
   return 'pending';
@@ -391,7 +395,10 @@ export default function AdminDashboardPage() {
   const [instructorStatusLoading, setInstructorStatusLoading] = useState<string | null>(null);
 
   const [inquirySearch, setInquirySearch] = useState('');
-  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<'all' | 'pending' | 'forwarded' | 'completed'>('pending');
+  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<'all' | 'pending' | 'forwarded' | 'completed' | 'deleted'>('pending');
+  const [selectedInquiryIds, setSelectedInquiryIds] = useState<string[]>([]);
+  const [inquiryPage, setInquiryPage] = useState(1);
+  const [bulkInquiryDeleting, setBulkInquiryDeleting] = useState(false);
   const [manualInquiryLoadingId, setManualInquiryLoadingId] = useState<string | null>(null);
   const [manualInquiryMessage, setManualInquiryMessage] = useState<string | null>(null);
   const [inquiryActionTarget, setInquiryActionTarget] = useState<{ inquiryId: string; mode: InquiryActionMode } | null>(null);
@@ -428,7 +435,7 @@ export default function AdminDashboardPage() {
   const fetchAllInstructors = useCallback(async () => {
     setInstructorsLoading(true);
     try {
-      const res = await fetch('/api/instructor');
+      const res = await fetch(getAppPath('/api/instructor'));
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setInstructors(data.data);
@@ -446,7 +453,7 @@ export default function AdminDashboardPage() {
     setSheetError(null);
 
     try {
-      const res = await fetch('/api/admin/sheets?limit=200');
+      const res = await fetch(getAppPath('/api/admin/sheets?limit=200'));
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.message || '시트 통합 데이터를 불러오지 못했습니다.');
@@ -493,7 +500,7 @@ export default function AdminDashboardPage() {
     setSaveMessage(null);
 
     try {
-      const res = await fetch('/api/instructor', {
+      const res = await fetch(getAppPath('/api/instructor'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -523,7 +530,7 @@ export default function AdminDashboardPage() {
     setMirrorMessage(null);
 
     try {
-      const res = await fetch('/api/admin/mirror/sync', { method: 'POST' });
+      const res = await fetch(getAppPath('/api/admin/mirror/sync'), { method: 'POST' });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.message || '미러 동기화 실패');
@@ -834,6 +841,18 @@ export default function AdminDashboardPage() {
     });
   }, [inquiryItems, inquirySearch, inquiryStatusFilter]);
 
+  useEffect(() => {
+    setInquiryPage(1);
+    setSelectedInquiryIds([]);
+  }, [inquirySearch, inquiryStatusFilter, filteredInquiryItems.length]);
+
+  const inquiryPageCount = Math.max(1, Math.ceil(filteredInquiryItems.length / ADMIN_INQUIRY_PAGE_SIZE));
+
+  const paginatedInquiryItems = useMemo(() => {
+    const start = (inquiryPage - 1) * ADMIN_INQUIRY_PAGE_SIZE;
+    return filteredInquiryItems.slice(start, start + ADMIN_INQUIRY_PAGE_SIZE);
+  }, [filteredInquiryItems, inquiryPage]);
+
   const openInquiryAction = useCallback((item: InquiryItem, mode: InquiryActionMode) => {
     setInquiryActionMessage(null);
     setManualInquiryMessage(null);
@@ -861,7 +880,7 @@ export default function AdminDashboardPage() {
 
   const handleInquiryAction = useCallback(
     async (item: InquiryItem, mode: InquiryActionMode) => {
-      const endpoint = mode === 'forward' ? '/api/admin/inquiries/forward' : '/api/admin/inquiries/reply';
+      const endpoint = getAppPath(mode === 'forward' ? '/api/admin/inquiries/forward' : '/api/admin/inquiries/reply');
       const draft = mode === 'forward' ? forwardDrafts[item.inquiryId] : replyDrafts[item.inquiryId];
 
       if (!draft?.subject || !draft?.message) {
@@ -932,7 +951,7 @@ export default function AdminDashboardPage() {
     setMemberMessage(null);
 
     try {
-      const res = await fetch('/api/admin/members', {
+      const res = await fetch(getAppPath('/api/admin/members'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -973,7 +992,7 @@ export default function AdminDashboardPage() {
     setAdminInstructorMessage(null);
 
     try {
-      const res = await fetch('/api/admin/instructors', {
+      const res = await fetch(getAppPath('/api/admin/instructors'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1073,7 +1092,7 @@ export default function AdminDashboardPage() {
     setAdminInstructorMessage(null);
 
     try {
-      const res = await fetch('/api/admin/instructors/status', {
+      const res = await fetch(getAppPath('/api/admin/instructors/status'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1100,7 +1119,7 @@ export default function AdminDashboardPage() {
     setManualInquiryMessage(null);
 
     try {
-      const res = await fetch('/api/admin/inquiries/status', {
+      const res = await fetch(getAppPath('/api/admin/inquiries/status'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1121,6 +1140,64 @@ export default function AdminDashboardPage() {
       setManualInquiryLoadingId(null);
     }
   };
+
+  const handleToggleInquirySelection = useCallback((inquiryId: string) => {
+    setSelectedInquiryIds((prev) =>
+      prev.includes(inquiryId) ? prev.filter((item) => item !== inquiryId) : [...prev, inquiryId],
+    );
+  }, []);
+
+  const handleToggleInquiryPageSelection = useCallback(() => {
+    const pageIds = paginatedInquiryItems.map((item) => item.inquiryId);
+    const allSelected = pageIds.every((id) => selectedInquiryIds.includes(id));
+
+    setSelectedInquiryIds((prev) =>
+      allSelected ? prev.filter((id) => !pageIds.includes(id)) : Array.from(new Set([...prev, ...pageIds])),
+    );
+  }, [paginatedInquiryItems, selectedInquiryIds]);
+
+  const handleBulkDeleteInquiries = useCallback(async () => {
+    if (selectedInquiryIds.length === 0) return;
+
+    setBulkInquiryDeleting(true);
+    setManualInquiryMessage(null);
+    setInquiryActionMessage(null);
+
+    try {
+      const responses = await Promise.all(
+        selectedInquiryIds.map((inquiryId) =>
+          fetch(getAppPath('/api/admin/inquiries/status'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              inquiryId,
+              status: '삭제완료',
+            }),
+          }).then((response) => response.json()),
+        ),
+      );
+
+      const failed = responses.find((item) => !item.success);
+      if (failed) {
+        throw new Error(failed.message || '선택한 문의 삭제 처리에 실패했습니다.');
+      }
+
+      setSelectedInquiryIds([]);
+      setManualInquiryMessage(`${responses.length}건의 문의를 운영함에서 제외했습니다.`);
+      await fetchAdminSheets();
+    } catch (error) {
+      setManualInquiryMessage(error instanceof Error ? error.message : '문의 일괄 삭제 처리에 실패했습니다.');
+    } finally {
+      setBulkInquiryDeleting(false);
+    }
+  }, [fetchAdminSheets, selectedInquiryIds]);
+
+  const navigateToInquiryInbox = useCallback(() => {
+    setActiveTab('admin');
+    window.setTimeout(() => {
+      document.getElementById('admin-inquiry-box')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }, []);
 
   const overview = useMemo(() => {
     const pendingInstructors = adminInstructorItems.filter((item) => getInstructorStatusCategory(item.status) === 'pending').length;
@@ -1388,6 +1465,14 @@ export default function AdminDashboardPage() {
               }`}
             >
               시트 통합 관리
+            </button>
+          )}
+          {actualRole === 'ADMIN' && (
+            <button
+              onClick={navigateToInquiryInbox}
+              className="whitespace-nowrap rounded-xl px-4 py-3 text-left text-sm font-medium text-gray-600 hover:bg-gray-100"
+            >
+              문의 운영함
             </button>
           )}
         </nav>
@@ -2189,9 +2274,12 @@ export default function AdminDashboardPage() {
                             >
                               <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                                 {getInstructorProfilePhoto(adminInstructorForm) ? (
-                                  <img
+                                  <Image
                                     src={getInstructorProfilePhoto(adminInstructorForm)}
                                     alt={`${getInstructorName(adminInstructorForm)} 강사 프로필 사진`}
+                                    width={1200}
+                                    height={960}
+                                    unoptimized
                                     className="h-80 w-full object-cover"
                                   />
                                 ) : (
@@ -2356,7 +2444,7 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4">
+                <div id="admin-inquiry-box" className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                       <h3 className="text-sm font-semibold text-gray-700">문의 운영함</h3>
@@ -2372,7 +2460,7 @@ export default function AdminDashboardPage() {
                       <select
                         value={inquiryStatusFilter}
                         onChange={(event) =>
-                          setInquiryStatusFilter(event.target.value as 'all' | 'pending' | 'forwarded' | 'completed')
+                          setInquiryStatusFilter(event.target.value as 'all' | 'pending' | 'forwarded' | 'completed' | 'deleted')
                         }
                         className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
                       >
@@ -2380,7 +2468,16 @@ export default function AdminDashboardPage() {
                         <option value="all">전체 상태</option>
                         <option value="forwarded">강사 전달 완료</option>
                         <option value="completed">회신 완료</option>
+                        <option value="deleted">삭제완료</option>
                       </select>
+                      <button
+                        type="button"
+                        onClick={handleBulkDeleteInquiries}
+                        disabled={bulkInquiryDeleting || selectedInquiryIds.length === 0}
+                        className="rounded-lg border border-rose-300 px-3 py-2 text-sm text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {bulkInquiryDeleting ? '삭제 처리 중...' : `선택 삭제 ${selectedInquiryIds.length}`}
+                      </button>
                     </div>
                   </div>
 
@@ -2399,7 +2496,24 @@ export default function AdminDashboardPage() {
                     <div className="text-sm text-gray-500">조건에 맞는 문의가 없습니다.</div>
                   ) : (
                     <div className="space-y-3">
-                      {filteredInquiryItems.slice(0, 20).map((item) => {
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-500">
+                        <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={
+                              paginatedInquiryItems.length > 0 &&
+                              paginatedInquiryItems.every((item) => selectedInquiryIds.includes(item.inquiryId))
+                            }
+                            onChange={handleToggleInquiryPageSelection}
+                          />
+                          현재 페이지 전체 선택
+                        </label>
+                        <span>
+                          총 {filteredInquiryItems.length}건 중 {Math.min((inquiryPage - 1) * ADMIN_INQUIRY_PAGE_SIZE + 1, filteredInquiryItems.length)}-
+                          {Math.min(inquiryPage * ADMIN_INQUIRY_PAGE_SIZE, filteredInquiryItems.length)}번째
+                        </span>
+                      </div>
+                      {paginatedInquiryItems.map((item) => {
                         const isForwardOpen =
                           inquiryActionTarget?.inquiryId === item.inquiryId && inquiryActionTarget.mode === 'forward';
                         const isReplyOpen =
@@ -2411,6 +2525,14 @@ export default function AdminDashboardPage() {
                           <div key={item.inquiryId} className="rounded-xl border border-gray-200 p-4">
                             <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                               <div className="space-y-1">
+                                <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-500">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedInquiryIds.includes(item.inquiryId)}
+                                    onChange={() => handleToggleInquirySelection(item.inquiryId)}
+                                  />
+                                  선택
+                                </label>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span className="text-sm font-semibold text-gray-900">{item.teacherName}</span>
                                   <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${getInquiryStatusTone(item.status)}`}>
@@ -2555,6 +2677,24 @@ export default function AdminDashboardPage() {
                           </div>
                         );
                       })}
+                      {inquiryPageCount > 1 ? (
+                        <div className="flex flex-wrap justify-center gap-2 pt-2">
+                          {Array.from({ length: inquiryPageCount }, (_, index) => index + 1).map((page) => (
+                            <button
+                              key={page}
+                              type="button"
+                              onClick={() => setInquiryPage(page)}
+                              className={`h-8 min-w-8 rounded-full px-3 text-xs font-semibold ${
+                                inquiryPage === page
+                                  ? 'bg-gray-900 text-white'
+                                  : 'border border-gray-200 bg-white text-gray-600 hover:border-emerald-200 hover:text-emerald-700'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </div>

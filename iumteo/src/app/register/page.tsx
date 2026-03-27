@@ -1,11 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { registerPayloadSchema, type RegisterPayload, type RegisterMemberType } from '@/lib/domain';
+import { getAppPath } from '@/lib/app-url';
 import { compressImageForProfile, getImageFileFromClipboard, uploadProfilePhoto } from '@/lib/profile-photo-client';
 
 const defaultValues: RegisterPayload = {
@@ -120,8 +122,13 @@ export default function RegisterPage() {
     if (!session?.user) return;
     if (currentRole === 'GUEST') return;
 
-    if (currentRole === 'ADMIN' || currentRole === 'INSTRUCTOR') {
+    if (currentRole === 'ADMIN') {
       router.replace('/admin');
+      return;
+    }
+
+    if (currentRole === 'INSTRUCTOR') {
+      router.replace('/teacher');
       return;
     }
 
@@ -172,7 +179,7 @@ export default function RegisterPage() {
     setSubmitting(true);
 
     try {
-      const response = await fetch('/api/account/register', {
+      const response = await fetch(getAppPath('/api/account/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
@@ -394,7 +401,14 @@ export default function RegisterPage() {
                     </div>
                     {photoPreview && (
                       <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-100 bg-white">
-                        <img src={photoPreview} alt="강사 프로필 미리보기" className="h-48 w-full object-cover" />
+                        <Image
+                          src={photoPreview}
+                          alt="강사 프로필 미리보기"
+                          width={1200}
+                          height={720}
+                          unoptimized
+                          className="h-48 w-full object-cover"
+                        />
                       </div>
                     )}
                     {photoError && <p className="mt-2 text-xs text-red-600">{photoError}</p>}

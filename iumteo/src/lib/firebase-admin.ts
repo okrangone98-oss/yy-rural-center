@@ -10,6 +10,8 @@ type FirebaseAdminConfig = {
   privateKey: string;
 };
 
+const FIREBASE_OPERATION_TIMEOUT_MS = Number(process.env.FIREBASE_OPERATION_TIMEOUT_MS || '8000');
+
 function normalizePrivateKey(value?: string | null) {
   return value?.replace(/\\n/g, '\n').trim() || '';
 }
@@ -65,7 +67,21 @@ export function getFirebaseStorageBucketName() {
     throw new Error('Firebase Admin credentials are not configured.');
   }
 
-  return (process.env.FIREBASE_STORAGE_BUCKET || `${config.projectId}.firebasestorage.app`).trim();
+  return getFirebaseStorageBucketCandidates()[0];
+}
+
+export function getFirebaseStorageBucketCandidates() {
+  const config = getFirebaseConfig();
+  if (!config) {
+    throw new Error('Firebase Admin credentials are not configured.');
+  }
+
+  const configured = (process.env.FIREBASE_STORAGE_BUCKET || '').trim();
+  return Array.from(
+    new Set(
+      [configured, `${config.projectId}.appspot.com`, `${config.projectId}.firebasestorage.app`].filter(Boolean),
+    ),
+  );
 }
 
 export function isFirebaseMirrorEnabled() {
@@ -92,6 +108,31 @@ export function getFirestoreAdmin() {
   return getFirestore(getFirebaseAdminApp());
 }
 
-export function getStorageAdminBucket() {
-  return getStorage(getFirebaseAdminApp()).bucket(getFirebaseStorageBucketName());
+export function getStorageAdminBucket(bucketName?: string) {
+  return getStorage(getFirebaseAdminApp()).bucket(bucketName || getFirebaseStorageBucketName());
+}
+
+export function isFirebaseTimeoutError(error: unknown) {
+  return error instanceof Error && error.message.startsWith('Firebase operation timed out:');
+}
+
+export async function runWithFirebaseTimeout<T>(operation: Promise<T>, label: string) {
+  if (!Number.isFinite(FIREBASE_OPERATION_TIMEOUT_MS) || FIREBASE_OPERATION_TIMEOUT_MS <= 0) {
+    return operation;
+  }
+
+  let timer: NodeJS.Timeout | null = null;
+
+  try {
+    return await Promise.race([
+      operation,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(new Error(`Firebase operation timed out: ${label}`));
+        }, FIREBASE_OPERATION_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
