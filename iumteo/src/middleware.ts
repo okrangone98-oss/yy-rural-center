@@ -61,7 +61,7 @@ export default withAuth(
     },
     {
         pages: {
-            signIn: "/login",
+            signIn: getAppPath("/login"),
         },
         callbacks: {
             authorized: ({ token }) => !!token,

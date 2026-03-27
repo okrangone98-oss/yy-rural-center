@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { getAppPath } from '@/lib/app-url';
 import { assertGasSuccess, gasGet, type GasEnvelope } from '@/lib/gas-api';
 import { normalizeEmail, normalizePhone, pickByAliases, type CsvRecord } from '@/lib/sheets';
 
@@ -217,9 +218,8 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const isDevelopment = process.env.NODE_ENV !== 'production';
-        const adminId = process.env.IUMTEO_ADMIN_ID || (isDevelopment ? 'admin' : '');
-        const adminPassword = process.env.IUMTEO_ADMIN_PASSWORD || (isDevelopment ? '1234' : '');
+        const adminId = process.env.IUMTEO_ADMIN_ID || '';
+        const adminPassword = process.env.IUMTEO_ADMIN_PASSWORD || '';
 
         if (adminId && adminPassword && identifier === adminId && password === adminPassword) {
           return {
@@ -307,8 +307,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/login',
-    error: '/login',
+    signIn: getAppPath('/login'),
+    error: getAppPath('/login'),
   },
   session: {
     strategy: 'jwt',
@@ -316,3 +316,7 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('[auth] NEXTAUTH_SECRET 환경변수가 설정되지 않았습니다. .env.local을 확인하세요.');
+}
