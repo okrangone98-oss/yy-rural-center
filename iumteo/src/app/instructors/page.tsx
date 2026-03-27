@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
@@ -25,7 +25,7 @@ function normalizeIsLocal(value: Instructor['isLocal']): 'Y' | 'N' {
   return value === true || value === 'Y' ? 'Y' : 'N';
 }
 
-function InstructorCard({ instructor }: { instructor: Instructor }) {
+const InstructorCard = memo(function InstructorCard({ instructor }: { instructor: Instructor }) {
   const router = useRouter();
   const name = instructor.name || '이름 없음';
   const isLocal = normalizeIsLocal(instructor.isLocal);
@@ -77,7 +77,7 @@ function InstructorCard({ instructor }: { instructor: Instructor }) {
       </div>
     </button>
   );
-}
+});
 
 export default function InstructorsPage() {
   const { data: session, status } = useSession();

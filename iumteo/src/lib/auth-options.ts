@@ -275,7 +275,9 @@ export const authOptions: NextAuthOptions = {
         token.organization = user.organization || null;
       }
 
-      if (token.email && (!token.role || token.role === 'GUEST')) {
+      // role이 없거나 GUEST인 경우에만 GAS 재조회 (매 요청마다 재조회 방지)
+      const needsRoleRefresh = !token.role || token.role === 'GUEST';
+      if (token.email && needsRoleRefresh) {
         const gasUser = await loadGasUserByEmail(String(token.email));
         if (gasUser) {
           token.id = gasUser.id;

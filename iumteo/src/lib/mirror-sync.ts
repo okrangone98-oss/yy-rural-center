@@ -164,10 +164,12 @@ export async function syncSheetsToFirestoreMirror() {
   const instructorProfiles = instructorDb.map(toMirrorInstructorProfile).filter(Boolean) as MirrorInstructorProfile[];
   const inquiryRecords = inquiryDb.map(toMirrorInquiry).filter(Boolean) as MirrorInquiry[];
 
-  await Promise.all(memberRecords.map((member) => upsertMirrorUser(member)));
-  await Promise.all(instructorUsers.map((instructor) => upsertMirrorUser(instructor)));
-  await Promise.all(instructorProfiles.map((profile) => upsertMirrorInstructorProfile(profile)));
-  await Promise.all(inquiryRecords.map((inquiry) => createMirrorInquiry(inquiry)));
+  await Promise.all([
+    ...memberRecords.map((member) => upsertMirrorUser(member)),
+    ...instructorUsers.map((instructor) => upsertMirrorUser(instructor)),
+    ...instructorProfiles.map((profile) => upsertMirrorInstructorProfile(profile)),
+    ...inquiryRecords.map((inquiry) => createMirrorInquiry(inquiry)),
+  ]);
 
   return {
     syncId: randomUUID(),

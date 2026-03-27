@@ -21,26 +21,54 @@ export function isGasConfigured() {
 
 export async function gasGet<T>(params: URLSearchParams): Promise<T> {
   ensureGasConfig();
+
+  // Keep both query param and header for compatibility with existing GAS deployments.
   params.set('apiKey', GAS_API_KEY);
+
   const response = await fetch(`${GAS_API_URL}?${params.toString()}`, {
     method: 'GET',
     cache: 'no-store',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Api-Key': GAS_API_KEY,
+    },
   });
-  return response.json();
+
+  if (!response.ok) {
+    throw new Error(`GAS API error: ${response.status} ${response.statusText}`);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Failed to parse GAS API response.');
+  }
 }
 
 export async function gasPost<T>(payload: Record<string, unknown>): Promise<T> {
   ensureGasConfig();
+
   const response = await fetch(GAS_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Api-Key': GAS_API_KEY,
+    },
     body: JSON.stringify({
       apiKey: GAS_API_KEY,
       ...payload,
     }),
   });
-  return response.json();
+
+  if (!response.ok) {
+    throw new Error(`GAS API error: ${response.status} ${response.statusText}`);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Failed to parse GAS API response.');
+  }
 }
 
 export function assertGasSuccess<T>(result: GasEnvelope<T>, action: string) {
@@ -48,7 +76,7 @@ export function assertGasSuccess<T>(result: GasEnvelope<T>, action: string) {
     const message = String(result?.message || `${action} failed`).trim();
     const lowered = message.toLowerCase();
     if (lowered.includes('unknown action') || lowered.includes('unsupported')) {
-      throw new Error(`GAS 배포 코드가 최신이 아닙니다. ${action} 액션을 지원하지 않습니다.`);
+      throw new Error(`GAS deployment is outdated and does not support ${action}.`);
     }
     throw new Error(message);
   }

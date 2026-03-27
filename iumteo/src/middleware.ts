@@ -10,7 +10,9 @@ export default withAuth(
         const role = String(token?.role || '');
         const registerUrl = new URL(getAppPath("/register"), req.url);
 
-        console.log(`[Middleware] Path: ${path} | RoutePath: ${routePath} | Role: ${role || 'UNAUTHENTICATED'}`);
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[Middleware] Path: ${path} | RoutePath: ${routePath} | Role: ${role || 'UNAUTHENTICATED'}`);
+        }
 
         if (!token) {
             return NextResponse.redirect(new URL(getAppPath("/login"), req.url));

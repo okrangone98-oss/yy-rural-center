@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import {
   deleteInstructorProfilePhotoByUrl,
@@ -6,16 +9,24 @@ import {
 } from '@/lib/firebase-storage';
 import { assertUploadImageInput, normalizeProfileImage } from '@/lib/image-normalization';
 
-const DEFAULT_ALLOWED_ORIGINS = [
+const PROD_ALLOWED_ORIGINS = [
+  'https://yycenter.kr',
+  'https://www.yycenter.kr',
+];
+
+const DEV_ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
   'http://localhost:5500',
   'http://127.0.0.1:5500',
-  'https://yycenter.kr',
-  'https://www.yycenter.kr',
 ];
+
+const DEFAULT_ALLOWED_ORIGINS =
+  process.env.NODE_ENV === 'production'
+    ? PROD_ALLOWED_ORIGINS
+    : [...PROD_ALLOWED_ORIGINS, ...DEV_ALLOWED_ORIGINS];
 
 function getAllowedOrigins() {
   const configured = (process.env.PROFILE_UPLOAD_ALLOWED_ORIGINS || '')
@@ -61,9 +72,26 @@ export function OPTIONS(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
 
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit(`upload:${ip}`, { windowMs: 60_000, max: 3 });
+  if (!rateLimit.success) {
+    return withCors(
+      NextResponse.json({ success: false, message: '잠시 후 다시 시도해 주세요.' }, { status: 429 }),
+      origin,
+    );
+  }
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return withCors(
+      NextResponse.json({ success: false, message: '로그인이 필요합니다.' }, { status: 401 }),
+      origin,
+    );
+  }
+
   if (!isFirebaseMirrorEnabled()) {
     return withCors(
-      NextResponse.json({ success: false, message: 'Firebase Admin credentials are not configured.' }, { status: 400 }),
+      NextResponse.json({ success: false, message: '파일 업로드를 처리할 수 없습니다.' }, { status: 400 }),
       origin,
     );
   }
@@ -109,10 +137,13 @@ export async function POST(request: NextRequest) {
       },
     }), origin);
   } catch (error) {
+    const isUserError = error instanceof Error && (
+      error.message.includes('이미지') || error.message.includes('파일')
+    );
     return withCors(
       NextResponse.json(
-        { success: false, message: error instanceof Error ? error.message : '프로필 사진 업로드 실패' },
-        { status: 500 },
+        { success: false, message: isUserError ? error.message : '프로필 사진 업로드에 실패했습니다.' },
+        { status: isUserError ? 400 : 500 },
       ),
       origin,
     );
@@ -122,9 +153,17 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const origin = request.headers.get('origin');
 
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return withCors(
+      NextResponse.json({ success: false, message: '로그인이 필요합니다.' }, { status: 401 }),
+      origin,
+    );
+  }
+
   if (!isFirebaseMirrorEnabled()) {
     return withCors(
-      NextResponse.json({ success: false, message: 'Firebase Admin credentials are not configured.' }, { status: 400 }),
+      NextResponse.json({ success: false, message: '파일 삭제를 처리할 수 없습니다.' }, { status: 400 }),
       origin,
     );
   }
@@ -143,9 +182,10 @@ export async function DELETE(request: NextRequest) {
     const result = await deleteInstructorProfilePhotoByUrl(fileUrl);
     return withCors(NextResponse.json({ success: true, data: result }), origin);
   } catch (error) {
+    console.error('[profile-photo DELETE]', error);
     return withCors(
       NextResponse.json(
-        { success: false, message: error instanceof Error ? error.message : '프로필 사진 삭제 실패' },
+        { success: false, message: '프로필 사진 삭제에 실패했습니다.' },
         { status: 500 },
       ),
       origin,

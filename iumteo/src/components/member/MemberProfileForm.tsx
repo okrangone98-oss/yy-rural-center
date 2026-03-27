@@ -109,55 +109,49 @@ export default function MemberProfileForm() {
   });
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadInitialData() {
       setLoading(true);
-      setLoadError('');
-
-      try {
-        const response = await fetch(getAppPath('/api/account/profile'), { cache: 'no-store' });
-        const result = await response.json();
-        if (!response.ok || !result.success || !result.data) {
-          throw new Error(result.message || '회원 정보를 불러오지 못했습니다.');
-        }
-
-        setProfileWarning(result.degraded ? result.message || '' : '');
-        setSaveAvailable(result.saveAvailable !== false);
-        const normalized = normalizeProfile(result.data);
-        setProfile(normalized);
-        reset(normalized);
-      } catch (error) {
-        setLoadError(error instanceof Error ? error.message : '회원 정보를 불러오지 못했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void loadProfile();
-  }, [reset]);
-
-  useEffect(() => {
-    async function loadInquiries() {
       setInquiriesLoading(true);
+      setLoadError('');
       setInquiriesError('');
 
-      try {
-        const response = await fetch(getAppPath('/api/account/inquiries'), { cache: 'no-store' });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.message || '문의 내역을 불러오지 못했습니다.');
-        }
+      const [profileResult, inquiriesResult] = await Promise.allSettled([
+        fetch(getAppPath('/api/account/profile'), { cache: 'no-store' }).then((r) => r.json()),
+        fetch(getAppPath('/api/account/inquiries'), { cache: 'no-store' }).then((r) => r.json()),
+      ]);
 
-        setChatEnabled(result.chatEnabled !== false);
-        setInquiries(Array.isArray(result.data) ? result.data : []);
-      } catch (error) {
-        setInquiriesError(error instanceof Error ? error.message : '문의 내역을 불러오지 못했습니다.');
-      } finally {
-        setInquiriesLoading(false);
+      if (profileResult.status === 'fulfilled') {
+        const result = profileResult.value;
+        if (!result.success || !result.data) {
+          setLoadError(result.message || '회원 정보를 불러오지 못했습니다.');
+        } else {
+          setProfileWarning(result.degraded ? result.message || '' : '');
+          setSaveAvailable(result.saveAvailable !== false);
+          const normalized = normalizeProfile(result.data);
+          setProfile(normalized);
+          reset(normalized);
+        }
+      } else {
+        setLoadError('회원 정보를 불러오지 못했습니다.');
       }
+      setLoading(false);
+
+      if (inquiriesResult.status === 'fulfilled') {
+        const result = inquiriesResult.value;
+        if (!result.success) {
+          setInquiriesError(result.message || '문의 내역을 불러오지 못했습니다.');
+        } else {
+          setChatEnabled(result.chatEnabled !== false);
+          setInquiries(Array.isArray(result.data) ? result.data : []);
+        }
+      } else {
+        setInquiriesError('문의 내역을 불러오지 못했습니다.');
+      }
+      setInquiriesLoading(false);
     }
 
-    void loadInquiries();
-  }, []);
+    void loadInitialData();
+  }, [reset]);
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError('');
@@ -203,35 +197,37 @@ export default function MemberProfileForm() {
     [inquiries],
   );
 
-  const visibleInquiries = useMemo(() => {
-    if (inquiryView === 'ALL') return inquiries;
-    if (inquiryView === 'PENDING') {
-      return inquiries.filter((item) => item.chatRoomStatus === 'PENDING' || !item.chatRoomStatus);
+  // 뷰필터 → 검색 → 페이지네이션을 단일 useMemo로 통합
+  const { filteredVisibleInquiries, paginatedInquiries, inquiryPageCount } = useMemo(() => {
+    let filtered = inquiries;
+
+    if (inquiryView !== 'ALL') {
+      if (inquiryView === 'PENDING') {
+        filtered = filtered.filter((item) => item.chatRoomStatus === 'PENDING' || !item.chatRoomStatus);
+      } else {
+        filtered = filtered.filter((item) => item.chatRoomStatus === inquiryView);
+      }
     }
-    return inquiries.filter((item) => item.chatRoomStatus === inquiryView);
-  }, [inquiries, inquiryView]);
 
-  const filteredVisibleInquiries = useMemo(() => {
     const keyword = inquirySearch.trim().toLowerCase();
-    if (!keyword) return visibleInquiries;
+    if (keyword) {
+      filtered = filtered.filter((item) =>
+        [item.teacherName, item.inquirerPhone, item.purpose, item.message]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(keyword)),
+      );
+    }
 
-    return visibleInquiries.filter((item) =>
-      [item.teacherName, item.inquirerPhone, item.purpose, item.message]
-        .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(keyword)),
-    );
-  }, [inquirySearch, visibleInquiries]);
+    const pageCount = Math.max(1, Math.ceil(filtered.length / INQUIRY_PAGE_SIZE));
+    const start = (inquiryPage - 1) * INQUIRY_PAGE_SIZE;
+    const paginated = filtered.slice(start, start + INQUIRY_PAGE_SIZE);
+
+    return { filteredVisibleInquiries: filtered, paginatedInquiries: paginated, inquiryPageCount: pageCount };
+  }, [inquiries, inquiryView, inquirySearch, inquiryPage]);
 
   useEffect(() => {
     setInquiryPage(1);
   }, [inquirySearch, inquiryView]);
-
-  const inquiryPageCount = Math.max(1, Math.ceil(filteredVisibleInquiries.length / INQUIRY_PAGE_SIZE));
-
-  const paginatedInquiries = useMemo(() => {
-    const start = (inquiryPage - 1) * INQUIRY_PAGE_SIZE;
-    return filteredVisibleInquiries.slice(start, start + INQUIRY_PAGE_SIZE);
-  }, [filteredVisibleInquiries, inquiryPage]);
 
   const memberAlerts = useMemo(() => {
     const alerts: string[] = [];

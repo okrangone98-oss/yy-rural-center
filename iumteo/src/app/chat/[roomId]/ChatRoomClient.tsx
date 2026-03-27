@@ -11,6 +11,7 @@ import {
   type ChatRoom,
 } from '@/lib/domain';
 import { getAppPath } from '@/lib/app-url';
+import { getClientFirestore, isClientFirestoreEnabled } from '@/lib/firebase-client';
 
 interface ChatRoomClientProps {
   roomId: string;
@@ -43,11 +44,13 @@ export default function ChatRoomClient({
   const [room, setRoom] = useState(initialRoom);
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState('');
-  const [sending, setSending] = useState(false);
-  const [accepting, setAccepting] = useState(false);
-  const [archiving, setArchiving] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [actionState, setActionState] = useState<'sending' | 'accepting' | 'archiving' | 'closing' | null>(null);
   const [error, setError] = useState('');
+
+  const sending = actionState === 'sending';
+  const accepting = actionState === 'accepting';
+  const archiving = actionState === 'archiving';
+  const closing = actionState === 'closing';
   const [refreshTick, setRefreshTick] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -88,13 +91,30 @@ export default function ChatRoomClient({
     void fetch(getAppPath(`/api/chat/rooms/${roomId}/read`), { method: 'POST' });
   }, [roomId, refreshTick]);
 
+  // Firestore onSnapshot 실시간 리스너 (NEXT_PUBLIC_FIREBASE_* 미설정 시 폴링으로 fallback)
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      void refreshRoom();
-    }, 5000);
+    if (isClientFirestoreEnabled()) {
+      const db = getClientFirestore();
+      if (db) {
+        const { collection, doc, onSnapshot, orderBy, query } = require('firebase/firestore') as typeof import('firebase/firestore');
+        const roomRef = doc(db, 'chatRooms', roomId);
+        const messagesRef = query(collection(db, 'chatRooms', roomId, 'messages'), orderBy('createdAt', 'asc'));
 
+        const unsubRoom = onSnapshot(roomRef, (snap: import('firebase/firestore').DocumentSnapshot) => {
+          if (snap.exists()) setRoom(snap.data() as ChatRoom);
+        });
+        const unsubMessages = onSnapshot(messagesRef, (snap: import('firebase/firestore').QuerySnapshot) => {
+          setMessages(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ChatMessage)));
+        });
+
+        return () => { unsubRoom(); unsubMessages(); };
+      }
+    }
+
+    // fallback: 5초 폴링
+    const interval = window.setInterval(() => { void refreshRoom(); }, 5000);
     return () => window.clearInterval(interval);
-  }, [refreshRoom]);
+  }, [roomId, refreshRoom]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,7 +123,7 @@ export default function ChatRoomClient({
   const handleAccept = useCallback(async () => {
     if (!canAccept || accepting) return;
 
-    setAccepting(true);
+    setActionState('accepting');
     setError('');
 
     try {
@@ -119,14 +139,14 @@ export default function ChatRoomClient({
     } catch (acceptError) {
       setError(acceptError instanceof Error ? acceptError.message : '문의 수락에 실패했습니다.');
     } finally {
-      setAccepting(false);
+      setActionState(null);
     }
   }, [accepting, canAccept, refreshRoom, roomId]);
 
   const handleArchive = useCallback(async () => {
     if (!canArchive || archiving) return;
 
-    setArchiving(true);
+    setActionState('archiving');
     setError('');
 
     try {
@@ -142,14 +162,14 @@ export default function ChatRoomClient({
     } catch (archiveError) {
       setError(archiveError instanceof Error ? archiveError.message : '문의 종료에 실패했습니다.');
     } finally {
-      setArchiving(false);
+      setActionState(null);
     }
   }, [archiving, canArchive, refreshRoom, roomId]);
 
   const handleClose = useCallback(async () => {
     if (!canClose || closing) return;
 
-    setClosing(true);
+    setActionState('closing');
     setError('');
 
     try {
@@ -164,7 +184,7 @@ export default function ChatRoomClient({
       router.refresh();
     } catch (closeError) {
       setError(closeError instanceof Error ? closeError.message : '채팅방 닫기에 실패했습니다.');
-      setClosing(false);
+      setActionState(null);
     }
   }, [canClose, closing, roomId, router]);
 
@@ -172,7 +192,7 @@ export default function ChatRoomClient({
     const content = input.trim();
     if (!content || sending || isReadOnly) return;
 
-    setSending(true);
+    setActionState('sending');
     setError('');
 
     try {
@@ -199,7 +219,7 @@ export default function ChatRoomClient({
     } catch (sendError) {
       setError(sendError instanceof Error ? sendError.message : '메시지 전송에 실패했습니다.');
     } finally {
-      setSending(false);
+      setActionState(null);
     }
   }, [input, isReadOnly, roomId, sending]);
 

@@ -35,38 +35,38 @@ export const consentPayloadSchema = z.object({
 
 export const registerPayloadSchema = z.object({
   memberType: registerMemberTypeSchema,
-  name: z.string().trim().min(2),
-  email: z.string().trim().email(),
-  phone: z.string().trim().min(8),
-  password: z.string().trim().min(4).optional(),
-  org: z.string().trim().optional().default(''),
-  field: z.string().trim().optional().default(''),
-  area: z.string().trim().optional().default(''),
-  intro: z.string().trim().optional().default(''),
-  career: z.string().trim().optional().default(''),
-  address: z.string().trim().optional().default(''),
-  instagram: z.string().trim().optional().default(''),
+  name: z.string().trim().min(2).max(50),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().min(8).max(20),
+  password: z.string().trim().min(8).max(100).optional(),
+  org: z.string().trim().max(100).optional().default(''),
+  field: z.string().trim().max(50).optional().default(''),
+  area: z.string().trim().max(100).optional().default(''),
+  intro: z.string().trim().max(1000).optional().default(''),
+  career: z.string().trim().max(2000).optional().default(''),
+  address: z.string().trim().max(200).optional().default(''),
+  instagram: z.string().trim().max(100).optional().default(''),
   instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional().default('미공개'),
-  portfolioLink: z.string().trim().optional().default(''),
-  profilePhoto: z.string().trim().optional().default(''),
+  portfolioLink: z.string().trim().max(500).optional().default(''),
+  profilePhoto: z.string().trim().max(2000).optional().default(''),
   consent: consentPayloadSchema,
 });
 
 export type RegisterPayload = z.infer<typeof registerPayloadSchema>;
 
 export const profileUpdateSchema = z.object({
-  name: z.string().trim().min(2).optional(),
-  phone: z.string().trim().min(8).optional(),
-  org: z.string().trim().optional(),
-  field: z.string().trim().optional(),
-  area: z.string().trim().optional(),
-  intro: z.string().trim().optional(),
-  career: z.string().trim().optional(),
-  address: z.string().trim().optional(),
-  instagram: z.string().trim().optional(),
+  name: z.string().trim().min(2).max(50).optional(),
+  phone: z.string().trim().min(8).max(20).optional(),
+  org: z.string().trim().max(100).optional(),
+  field: z.string().trim().max(50).optional(),
+  area: z.string().trim().max(100).optional(),
+  intro: z.string().trim().max(1000).optional(),
+  career: z.string().trim().max(2000).optional(),
+  address: z.string().trim().max(200).optional(),
+  instagram: z.string().trim().max(100).optional(),
   instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional(),
-  portfolioLink: z.string().trim().optional(),
-  profilePhoto: z.string().trim().optional(),
+  portfolioLink: z.string().trim().max(500).optional(),
+  profilePhoto: z.string().trim().max(2000).optional(),
   marketingAccepted: z.boolean().optional(),
   profilePublicAccepted: z.boolean().optional(),
 });
@@ -121,19 +121,19 @@ export const inquiryCreateSchema = z
 export type InquiryCreatePayload = z.infer<typeof inquiryCreateSchema>;
 
 export const inquiryForwardSchema = z.object({
-  inquiryId: z.string().trim().min(1),
-  teacherEmail: z.string().trim().email(),
-  teacherName: z.string().trim().min(1),
-  subject: z.string().trim().min(1),
-  message: z.string().trim().min(1),
+  inquiryId: z.string().trim().min(1).max(100),
+  teacherEmail: z.string().trim().email().max(255),
+  teacherName: z.string().trim().min(1).max(50),
+  subject: z.string().trim().min(1).max(200),
+  message: z.string().trim().min(1).max(3000),
 });
 
 export const inquiryReplySchema = z.object({
-  inquiryId: z.string().trim().min(1),
-  memberEmail: z.string().trim().email(),
-  memberName: z.string().trim().min(1),
-  subject: z.string().trim().min(1),
-  message: z.string().trim().min(1),
+  inquiryId: z.string().trim().min(1).max(100),
+  memberEmail: z.string().trim().email().max(255),
+  memberName: z.string().trim().min(1).max(50),
+  subject: z.string().trim().min(1).max(200),
+  message: z.string().trim().min(1).max(3000),
 });
 
 export const adminInstructorStatusSchema = z.object({
@@ -142,23 +142,23 @@ export const adminInstructorStatusSchema = z.object({
 });
 
 export const adminInstructorUpdateSchema = z.object({
-  email: z.string().trim().email(),
-  name: z.string().trim().min(2),
+  email: z.string().trim().email().max(255),
+  name: z.string().trim().min(2).max(50),
   contactEmail: optionalEmailSchema,
-  phone: z.string().trim().optional().default(''),
-  org: z.string().trim().optional().default(''),
-  field: z.string().trim().optional().default(''),
-  area: z.string().trim().optional().default(''),
-  intro: z.string().trim().optional().default(''),
-  career: z.string().trim().optional().default(''),
-  address: z.string().trim().optional().default(''),
-  instagram: z.string().trim().optional().default(''),
+  phone: z.string().trim().max(20).optional().default(''),
+  org: z.string().trim().max(100).optional().default(''),
+  field: z.string().trim().max(50).optional().default(''),
+  area: z.string().trim().max(100).optional().default(''),
+  intro: z.string().trim().max(1000).optional().default(''),
+  career: z.string().trim().max(2000).optional().default(''),
+  address: z.string().trim().max(200).optional().default(''),
+  instagram: z.string().trim().max(100).optional().default(''),
   instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional().default('미공개'),
-  portfolioLink: z.string().trim().optional().default(''),
-  profilePhoto: z.string().trim().optional().default(''),
+  portfolioLink: z.string().trim().max(500).optional().default(''),
+  profilePhoto: z.string().trim().max(2000).optional().default(''),
   isLocal: z.enum(['Y', 'N']).optional().default('N'),
-  status: z.string().trim().optional().default('대기'),
-  finalStatus: z.string().trim().optional().default('대기'),
+  status: z.string().trim().max(20).optional().default('대기'),
+  finalStatus: z.string().trim().max(20).optional().default('대기'),
 });
 
 export const adminMemberUpdateSchema = z.object({

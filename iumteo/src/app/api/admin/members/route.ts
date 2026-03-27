@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { adminMemberUpdateSchema } from '@/lib/domain';
 import { assertGasSuccess, gasPost, type GasEnvelope } from '@/lib/gas-api';
 import { updateMirrorUser } from '@/lib/firestore-mirror';
@@ -34,9 +35,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: { sheetSync, mirrorSync } });
   } catch (memberError) {
-    return NextResponse.json(
-      { success: false, message: memberError instanceof Error ? memberError.message : '회원 정보 수정 실패' },
-      { status: 400 },
-    );
+    if (memberError instanceof ZodError) {
+      return NextResponse.json({ success: false, message: '입력값을 확인해 주세요.' }, { status: 400 });
+    }
+    console.error('[admin/members POST]', memberError);
+    return NextResponse.json({ success: false, message: '회원 정보 수정에 실패했습니다.' }, { status: 500 });
   }
 }

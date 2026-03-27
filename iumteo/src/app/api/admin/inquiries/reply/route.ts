@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { inquiryReplySchema, type MailOutboxEntry } from '@/lib/domain';
 import { assertGasSuccess, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { updateMirrorInquiry } from '@/lib/firestore-mirror';
@@ -56,9 +57,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: { mailResult, sheetResult } });
   } catch (replyError) {
-    return NextResponse.json(
-      { success: false, message: replyError instanceof Error ? replyError.message : '회원 회신 실패' },
-      { status: 400 },
-    );
+    if (replyError instanceof ZodError) {
+      return NextResponse.json({ success: false, message: '입력값을 확인해 주세요.' }, { status: 400 });
+    }
+    console.error('[admin/inquiries/reply POST]', replyError);
+    return NextResponse.json({ success: false, message: '회원 회신 처리에 실패했습니다.' }, { status: 500 });
   }
 }

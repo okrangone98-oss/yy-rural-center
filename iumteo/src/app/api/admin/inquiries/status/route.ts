@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { adminInquiryStatusSchema, type MirrorInquiry } from '@/lib/domain';
 import { assertGasSuccess, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { updateMirrorInquiry } from '@/lib/firestore-mirror';
@@ -43,9 +44,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: { sheetSync, mirrorSync } });
   } catch (inquiryError) {
-    return NextResponse.json(
-      { success: false, message: inquiryError instanceof Error ? inquiryError.message : '문의 상태 변경 실패' },
-      { status: 400 },
-    );
+    if (inquiryError instanceof ZodError) {
+      return NextResponse.json({ success: false, message: '입력값을 확인해 주세요.' }, { status: 400 });
+    }
+    console.error('[admin/inquiries/status POST]', inquiryError);
+    return NextResponse.json({ success: false, message: '문의 상태 변경에 실패했습니다.' }, { status: 500 });
   }
 }

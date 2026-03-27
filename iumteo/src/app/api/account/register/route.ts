@@ -1,15 +1,26 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { assertGasSuccess, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { registerPayloadSchema, type MirrorInstructorProfile, type MirrorUserRecord } from '@/lib/domain';
 import { upsertMirrorInstructorProfile, upsertMirrorUser } from '@/lib/firestore-mirror';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 function nowIso() {
   return new Date().toISOString();
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rateLimit = checkRateLimit(`register:${ip}`, { windowMs: 60_000, max: 5 });
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { success: false, message: '잠시 후 다시 시도해 주세요.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) } },
+    );
+  }
+
   try {
     if (!isGasConfigured()) {
       return NextResponse.json(
@@ -115,12 +126,10 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: error instanceof Error ? error.message : '회원가입 처리에 실패했습니다.',
-      },
-      { status: 400 },
-    );
+    if (error instanceof ZodError) {
+      return NextResponse.json({ success: false, message: '입력값을 확인해 주세요.' }, { status: 400 });
+    }
+    console.error('[account/register POST]', error);
+    return NextResponse.json({ success: false, message: '회원가입 처리에 실패했습니다.' }, { status: 500 });
   }
 }

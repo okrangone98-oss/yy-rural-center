@@ -1,12 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getRequiredSession } from '@/lib/rbac';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import { areNonCoreFirestoreMirrorsEnabled } from '@/lib/firestore-mirror';
 import { syncSheetsToFirestoreMirror } from '@/lib/mirror-sync';
+import { checkRateLimit } from '@/lib/rate-limit';
 
-export async function POST() {
-  const { error } = await getRequiredSession(['ADMIN']);
+export async function POST(request: NextRequest) {
+  const { session, error } = await getRequiredSession(['ADMIN']);
   if (error) return error;
+
+  const userId = session!.user.id;
+  const rateLimit = checkRateLimit(`mirror-sync:${userId}`, { windowMs: 60_000, max: 1 });
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { success: false, message: '동기화는 1분에 1회만 실행할 수 있습니다.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)) } },
+    );
+  }
 
   if (!isFirebaseMirrorEnabled()) {
     return NextResponse.json(
@@ -32,9 +42,7 @@ export async function POST() {
     const result = await syncSheetsToFirestoreMirror();
     return NextResponse.json({ success: true, data: result });
   } catch (syncError) {
-    return NextResponse.json(
-      { success: false, message: syncError instanceof Error ? syncError.message : '미러 동기화 실패' },
-      { status: 500 },
-    );
+    console.error('[admin/mirror/sync POST]', syncError);
+    return NextResponse.json({ success: false, message: '미러 동기화에 실패했습니다.' }, { status: 500 });
   }
 }

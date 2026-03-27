@@ -2,11 +2,15 @@
 
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { INSTAGRAM_VISIBILITY_OPTIONS, INSTRUCTOR_FIELD_OPTIONS } from '@/lib/domain';
 import { getAppPath } from '@/lib/app-url';
-import { compressImageForProfile, getImageFileFromClipboard, uploadProfilePhoto } from '@/lib/profile-photo-client';
+
+// 이미지 압축 라이브러리는 무겁기 때문에 lazy import로 처리
+async function getProfilePhotoUtils() {
+  return import('@/lib/profile-photo-client');
+}
 
 type Role = 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
 
@@ -327,7 +331,7 @@ function renderGenericTable(records: GenericRecord[], emptyText: string) {
   );
 }
 
-function StatCard({
+const StatCard = memo(function StatCard({
   label,
   value,
   description,
@@ -343,11 +347,11 @@ function StatCard({
       <div className="mt-1 text-xs text-gray-500">{description}</div>
     </div>
   );
-}
+});
 
-function FieldLabel({ children }: { children: ReactNode }) {
+const FieldLabel = memo(function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="mb-1 block text-xs font-medium text-gray-500">{children}</label>;
-}
+});
 
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
@@ -1049,6 +1053,7 @@ export default function AdminDashboardPage() {
           throw new Error('이미지 파일만 업로드할 수 있습니다.');
         }
 
+        const { compressImageForProfile, uploadProfilePhoto } = await getProfilePhotoUtils();
         const compressed = await compressImageForProfile(file);
         const uploadedUrl = await uploadProfilePhoto(compressed, getInstructorName(adminInstructorForm), targetEmail);
 
@@ -1066,6 +1071,7 @@ export default function AdminDashboardPage() {
 
   const handleAdminInstructorPhotoPaste = useCallback(
     async (event: React.ClipboardEvent<HTMLDivElement>) => {
+      const { getImageFileFromClipboard } = await getProfilePhotoUtils();
       const pastedFile = getImageFileFromClipboard(event);
       if (!pastedFile) return;
       event.preventDefault();
