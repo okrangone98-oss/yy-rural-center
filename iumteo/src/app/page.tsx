@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { getAppPath } from '@/lib/app-url';
+import { FIELD_CATEGORIES } from '@/lib/field-categories';
 import { resolveProfilePhotoPublicUrl } from '@/lib/profile-photo-client';
 import NotificationBell from '@/components/common/NotificationBell';
 
@@ -212,17 +213,17 @@ export default function HomePage() {
 
     return {
       badge: 'Yangyang Iumteo',
-      title: '양양의 강사님과\n기관, 지역 주민을 연결하는\n지역 커뮤니티 플랫폼',
+      title: '양양의 어제와 오늘을 잇고,\n내일을 일구는 사람들의 네트워크',
       description:
-        '양양 이음터는 교육과 지역 서비스를 중심으로 수업 문의, 업무 협의, 관계 형성이 이어지도록 돕는 비영리 연결 플랫폼입니다.',
+        "'양양 이음터'는 지역의 숨은 전문가를 발굴하고, 인적 자원이 필요한 기관에는 신뢰할 수 있는 인력 데이터 풀을 제공하는 징검다리입니다.",
       secondary:
-        '강사님은 활동 분야와 강사 카드를 운영하고, 공개 동의한 경우 인스타그램 주소와 연동 버튼도 함께 노출할 수 있습니다. 기관과 지역 주민은 필요한 강사님을 찾아 문의와 채팅으로 협의할 수 있습니다.',
+        '다양한 분야에서 활동 중인 양양의 전문가들을 만나보세요. 서로의 경험을 나누고 함께 성장하는 단단한 공동체를 지향합니다.',
       primaryHref: '/instructors',
-      primaryLabel: '강사찾기',
-      secondaryHref: isLoggedIn ? '/chat' : '/login',
-      secondaryLabel: isLoggedIn ? '채팅 확인하기' : '로그인하기',
+      primaryLabel: '양양 강사 보기',
+      secondaryHref: '/register',
+      secondaryLabel: '회원가입하기',
     };
-  }, [isLoggedIn, role]);
+  }, [role]);
 
   const heroStats = useMemo(() => {
     if (role === 'INSTRUCTOR') {
@@ -280,17 +281,46 @@ export default function HomePage() {
     ];
   }, [role]);
 
-  const fieldChips = [
-    '전체',
-    '공동체',
-    '환경·생태',
-    '사진·영상',
-    '요리·식문화',
-    '정리·돌봄',
-    '예술·공예',
-    '숲·생태',
-    '건강·체육',
-    '기타',
+  const fieldChips = ['전체', ...FIELD_CATEGORIES.map((category) => category.label)];
+  const guestHighlights = [
+    {
+      icon: '🤝',
+      title: '가치 있는 연결',
+      description: '필요한 곳에 검증된 인력을 매칭해 지역 안에서 믿을 수 있는 협업의 시작점을 만듭니다.',
+    },
+    {
+      icon: '🌱',
+      title: '지속 가능한 성장',
+      description: '지역을 잘 아는 로컬 전문가와 기관, 주민이 함께하며 지역 안의 선순환을 차곡차곡 키워갑니다.',
+    },
+    {
+      icon: '🛡️',
+      title: '신뢰받는 데이터',
+      description: '센터의 확인과 운영 기준을 바탕으로 더 안전하고 투명한 연결 흐름을 설계합니다.',
+    },
+  ];
+  const guestGuideItems = [
+    {
+      icon: '🔒',
+      title: '개인정보 보호',
+      body: '개인 전화번호는 외부에 노출되지 않으며, 타 기관 문의 시 센터 확인 후 중계 절차를 거칩니다.',
+    },
+    {
+      icon: '✏️',
+      title: '자율적 정보 관리',
+      body: '가입 후에는 본인 정보를 직접 수정할 수 있고, SNS 노출 여부도 스스로 선택할 수 있습니다.',
+    },
+    {
+      icon: '🖼️',
+      title: '프로필 사진 등록',
+      body: '본인을 잘 나타내는 사진 1장을 함께 업로드하면 신뢰도 높은 강사 프로필을 완성할 수 있습니다.',
+    },
+  ];
+  const guestJourney = [
+    { icon: '🏢', label: '기관 문의' },
+    { icon: '🔎', label: '센터 확인' },
+    { icon: '💬', label: '의사 타진' },
+    { icon: '🫶', label: '연결 완료' },
   ];
 
   return (
@@ -349,51 +379,153 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#0f766e_0%,#065f46_50%,#022c22_100%)] px-4 py-16 text-white md:py-24">
-        <div className="absolute -right-16 top-0 h-72 w-72 rounded-full bg-white/5" />
-        <div className="absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-white/5" />
+      {role === 'GUEST' ? (
+        <>
+          <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top,#f9fdf9_0%,#f2f8f4_58%,#ecf5f0_100%)] px-4 pb-16 pt-16 md:pb-20 md:pt-20">
+            <div className="absolute left-1/2 top-12 h-56 w-56 -translate-x-1/2 rounded-full bg-emerald-100/70 blur-3xl" />
+            <div className="absolute -left-16 bottom-10 h-56 w-56 rounded-full bg-[#d7efe3] blur-3xl" />
+            <div className="absolute -right-10 top-20 h-64 w-64 rounded-full bg-[#e2f4eb] blur-3xl" />
 
-        <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div>
-            <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-100">
-              {heroCopy.badge}
-            </div>
-            <h1 className="mt-6 whitespace-pre-line text-4xl font-black leading-tight md:text-6xl">
-              {heroCopy.title}
-            </h1>
-            <p className="mt-5 max-w-3xl text-base leading-8 text-emerald-100 md:text-lg">
-              {heroCopy.description}
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 md:text-base">
-              {heroCopy.secondary}
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href={heroCopy.primaryHref} className="rounded-2xl bg-white px-7 py-3.5 text-center font-bold text-emerald-800 hover:bg-emerald-50">
-                {heroCopy.primaryLabel}
-              </Link>
-              <Link href={heroCopy.secondaryHref} className="rounded-2xl border border-white/20 bg-white/10 px-7 py-3.5 text-center font-semibold hover:bg-white/20">
-                {heroCopy.secondaryLabel}
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
-            {heroStats.map((item) => (
-              <div key={item.label} className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-sm">
-                <p className="text-sm font-semibold text-emerald-100">{item.label}</p>
-                <h2 className="mt-3 text-3xl font-black text-white">{item.value}</h2>
-                <p className="mt-3 text-sm leading-7 text-emerald-100">{item.caption}</p>
+            <div className="relative mx-auto max-w-5xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-emerald-700">{heroCopy.badge}</p>
+              <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-emerald-100 bg-white/90 px-5 py-3 shadow-sm shadow-emerald-100/60">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-700 text-xl font-black text-white">이</div>
+                <span className="text-2xl font-black tracking-tight text-emerald-950 md:text-4xl">양양 이음터</span>
               </div>
-            ))}
+              <h1 className="mx-auto mt-10 max-w-4xl whitespace-pre-line text-3xl font-black leading-tight text-emerald-950 md:text-5xl">
+                {heroCopy.title}
+              </h1>
+              <p className="mx-auto mt-6 max-w-4xl text-base leading-8 text-gray-700 md:text-xl">
+                {heroCopy.description}
+              </p>
+              <p className="mx-auto mt-4 max-w-4xl text-sm leading-7 text-gray-600 md:text-lg">
+                {heroCopy.secondary}
+              </p>
+              <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href={heroCopy.primaryHref} className="rounded-2xl bg-emerald-700 px-7 py-3.5 text-center font-bold text-white shadow-lg shadow-emerald-200 transition hover:-translate-y-0.5 hover:bg-emerald-800">
+                  {heroCopy.primaryLabel}
+                </Link>
+                <Link href={heroCopy.secondaryHref} className="rounded-2xl border border-emerald-200 bg-white px-7 py-3.5 text-center font-semibold text-emerald-800 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50">
+                  {heroCopy.secondaryLabel}
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative mx-auto mt-14 grid max-w-6xl gap-5 md:grid-cols-3">
+              {guestHighlights.map((item) => (
+                <article key={item.title} className="rounded-[30px] border border-emerald-100 bg-white/85 p-8 text-left shadow-[0_20px_50px_rgba(5,95,70,0.08)] backdrop-blur">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#eff8f3] text-3xl shadow-inner shadow-emerald-50">
+                    {item.icon}
+                  </div>
+                  <h2 className="mt-6 text-2xl font-black text-emerald-950">{item.title}</h2>
+                  <p className="mt-4 text-sm leading-7 text-gray-600 md:text-base">{item.description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="mx-auto max-w-6xl px-4 py-12">
+            <div className="rounded-[36px] border border-emerald-100 bg-white p-8 shadow-[0_24px_60px_rgba(16,185,129,0.08)] md:p-10">
+              <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Iumteo Guide</p>
+                  <h2 className="mt-3 text-3xl font-black text-gray-900">이음터 안내</h2>
+                  <p className="mt-3 text-sm leading-7 text-gray-600 md:text-base">
+                    양양 이음터는 지역 전문가와 기관, 주민이 안심하고 연결될 수 있도록 센터 확인을 거친 운영 원칙을 안내합니다.
+                  </p>
+
+                  <div className="mt-7 space-y-4">
+                    {guestGuideItems.map((item) => (
+                      <div key={item.title} className="rounded-3xl bg-[#f7fbf8] px-5 py-4">
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">
+                            {item.icon}
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-gray-900">{item.title}</h3>
+                            <p className="mt-1 text-sm leading-6 text-gray-600">{item.body}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900">
+                    <span className="font-bold">인증 마크 제도(준비 중)</span> 추후 행정 서류 제출을 통한 센터 인증 마크 제도가 도입될 예정입니다.
+                  </div>
+                </div>
+
+                <div className="rounded-[32px] bg-[linear-gradient(180deg,#f4fbf7_0%,#eef7f2_100%)] p-6 md:p-8">
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Connection Flow</p>
+                  <h3 className="mt-3 text-2xl font-black text-gray-900">기관 의뢰부터 연결 완료까지</h3>
+                  <p className="mt-3 text-sm leading-7 text-gray-600">
+                    기관 문의가 접수되면 센터가 내용을 확인하고, 적합한 강사님께 의사를 타진한 뒤 연결을 진행합니다.
+                  </p>
+
+                  <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                    {guestJourney.map((item, index) => (
+                      <div key={item.label} className="rounded-3xl border border-white/70 bg-white/80 px-5 py-5 shadow-sm">
+                        <div className="flex items-center justify-between">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-2xl">
+                            {item.icon}
+                          </div>
+                          <span className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-600">0{index + 1}</span>
+                        </div>
+                        <p className="mt-4 text-base font-bold text-gray-900">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      ) : (
+        <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#0f766e_0%,#065f46_50%,#022c22_100%)] px-4 py-16 text-white md:py-24">
+          <div className="absolute -right-16 top-0 h-72 w-72 rounded-full bg-white/5" />
+          <div className="absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-white/5" />
+
+          <div className="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+            <div>
+              <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-100">
+                {heroCopy.badge}
+              </div>
+              <h1 className="mt-6 whitespace-pre-line text-4xl font-black leading-tight md:text-6xl">
+                {heroCopy.title}
+              </h1>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-emerald-100 md:text-lg">
+                {heroCopy.description}
+              </p>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 md:text-base">
+                {heroCopy.secondary}
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href={heroCopy.primaryHref} className="rounded-2xl bg-white px-7 py-3.5 text-center font-bold text-emerald-800 hover:bg-emerald-50">
+                  {heroCopy.primaryLabel}
+                </Link>
+                <Link href={heroCopy.secondaryHref} className="rounded-2xl border border-white/20 bg-white/10 px-7 py-3.5 text-center font-semibold hover:bg-white/20">
+                  {heroCopy.secondaryLabel}
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+              {heroStats.map((item) => (
+                <div key={item.label} className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-sm">
+                  <p className="text-sm font-semibold text-emerald-100">{item.label}</p>
+                  <h2 className="mt-3 text-3xl font-black text-white">{item.value}</h2>
+                  <p className="mt-3 text-sm leading-7 text-emerald-100">{item.caption}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Quick Access</p>
           <h2 className="mt-2 text-2xl font-black text-gray-900">자주 쓰는 메뉴를 한곳에 모았습니다</h2>
-          <p className="mt-2 text-sm text-gray-500">역할별로 가장 많이 쓰는 기능을 먼저 배치해 MVP 흐름이 바로 이어지도록 구성했습니다.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {quickActions.map((item) => (
@@ -407,16 +539,25 @@ export default function HomePage() {
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Instructor Directory</p>
-              <h2 className="mt-2 text-2xl font-black text-gray-900">강사찾기</h2>
-              <p className="mt-2 text-sm text-gray-500">양양에서 활동하는 강사님을 공개 목록으로 살펴보고, 상세 페이지에서 문의를 이어가거나 공개 동의한 인스타그램 정보를 확인할 수 있습니다.</p>
+              <h2 className="mt-2 text-2xl font-black text-gray-900">{role === 'GUEST' ? '양양 강사 정보' : '강사찾기'}</h2>
+              <p className="mt-2 text-sm text-gray-500">
+                {role === 'GUEST'
+                  ? '우리 지역 활동가부터 분야별 전문가까지, 양양 안에서 함께할 파트너를 한눈에 살펴보세요.'
+                  : '양양에서 활동하는 강사님을 공개 목록으로 살펴보고, 상세 페이지에서 문의를 이어가거나 공개 동의한 인스타그램 정보를 확인할 수 있습니다.'}
+              </p>
             </div>
             <Link href="/instructors" className="text-sm font-bold text-emerald-700 hover:text-emerald-900">
               전체 보기 →
             </Link>
           </div>
 
-          <div className="mb-6 rounded-2xl border border-amber-100 bg-[#fffdf7] px-5 py-4 text-sm leading-7 text-gray-600 shadow-sm">
-            분야와 지역을 먼저 훑어본 뒤, 적합한 강사님을 찾으면 상세 페이지에서 문의를 남겨보세요. 강사님이 공개에 동의한 경우 인스타그램 주소와 연동 버튼도 함께 확인할 수 있어 프로필과 활동 분위기를 더 자연스럽게 살펴볼 수 있습니다.
+          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-100 bg-[#fffdf7] px-5 py-4 text-sm leading-7 text-gray-600 shadow-sm">
+            <span className="mt-0.5 text-base">💡</span>
+            <p>
+              {role === 'GUEST'
+                ? '카드를 눌러 강사님의 상세 약력을 확인하고, 전체 강사 보기에서 분야별 탐색을 이어가보세요. 강사 연결 요청은 센터 확인 절차를 거쳐 진행됩니다.'
+                : '분야와 지역을 먼저 훑어본 뒤, 적합한 강사님을 찾으면 상세 페이지에서 문의를 남겨보세요. 강사님이 공개에 동의한 경우 인스타그램 주소와 연동 버튼도 함께 확인할 수 있어 프로필과 활동 분위기를 더 자연스럽게 살펴볼 수 있습니다.'}
+            </p>
           </div>
 
           <div className="mb-8 flex flex-wrap gap-2">
@@ -435,7 +576,7 @@ export default function HomePage() {
           </div>
 
           {instructors.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {instructors.map((instructor, index) => (
                 <InstructorCard key={instructor.id || `${instructor.name}-${index}`} instructor={instructor} />
               ))}

@@ -7,19 +7,17 @@ export const registerMemberTypeSchema = z.enum(['USER', 'INSTRUCTOR']);
 export type RegisterMemberType = z.infer<typeof registerMemberTypeSchema>;
 
 export const INSTRUCTOR_FIELD_OPTIONS = [
-  '농촌,공동체,정책',
-  '환경,생태',
-  '사진,아카이브,영상',
-  '미술,공예,예술',
-  '요리,식문화',
-  '정리,실버,복지,치유',
-  '디지털,AI,문해',
-  '레크레이션,진행',
-  '세무,회계',
-  '인문,철학',
-  '마케팅,로컬브랜딩',
-  '건강,스포츠',
   '기타',
+  '농촌·공동체·정책',
+  '디지털·AI·문해',
+  '레크레이션·진행',
+  '마케팅·로컬브랜딩',
+  '미술·공예·예술',
+  '사진·아카이브·영상',
+  '세무·회계',
+  '요리·식문화',
+  '정리·실버·복지·치유',
+  '환경·생태',
 ] as const;
 
 export const INSTAGRAM_VISIBILITY_OPTIONS = ['공개', '미공개'] as const;

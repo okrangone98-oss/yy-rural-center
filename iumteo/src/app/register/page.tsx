@@ -6,7 +6,7 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { registerPayloadSchema, type RegisterPayload, type RegisterMemberType } from '@/lib/domain';
+import { INSTRUCTOR_FIELD_OPTIONS, registerPayloadSchema, type RegisterPayload, type RegisterMemberType } from '@/lib/domain';
 import { getAppPath } from '@/lib/app-url';
 import { compressImageForProfile, getImageFileFromClipboard, uploadProfilePhoto } from '@/lib/profile-photo-client';
 
@@ -58,22 +58,6 @@ function RoleCard({
     </button>
   );
 }
-
-const INSTRUCTOR_FIELD_OPTIONS = [
-  '농촌,공동체,정책',
-  '환경,생태',
-  '사진,아카이브,영상',
-  '미술,공예,예술',
-  '요리,식문화',
-  '정리,실버,복지,치유',
-  '디지털,AI,문해',
-  '레크레이션,진행',
-  '세무,회계',
-  '인문,철학',
-  '마케팅,로컬브랜딩',
-  '건강,스포츠',
-  '기타',
-] as const;
 
 export default function RegisterPage() {
   const router = useRouter();
