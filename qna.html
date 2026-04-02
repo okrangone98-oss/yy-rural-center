@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 
 <head>
   <meta charset="UTF-8" />
-  <title>이음터 100% 활용하기: 사용자 가이드 | 양양 강사 이음터</title>
+  <title>양양군 농촌활성화지원센터 Q&A</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,7 +20,7 @@
         "Segoe UI", sans-serif;
       line-height: 1.6;
       color: #222;
-      background-color: #f0f4f2;
+      background-color: #f5f5f5;
     }
 
     a {
@@ -86,6 +86,7 @@
       color: #fff;
     }
 
+    /* 드롭다운 메뉴 UI */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -153,464 +154,147 @@
     }
 
     main {
-      padding: 0 0 60px;
+      padding: 40px 0 60px;
     }
 
-    /* =================== HERO / YOUNGJA =================== */
-    .guide-hero {
-      background: linear-gradient(135deg, #0b7c5b 0%, #1a9e78 50%, #0f8a66 100%);
-      padding: 48px 0 40px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .guide-hero::before {
-      content: '';
-      position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 300px;
-      height: 300px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
-    }
-
-    .guide-hero::after {
-      content: '';
-      position: absolute;
-      bottom: -80px;
-      left: -40px;
-      width: 200px;
-      height: 200px;
-      background: rgba(255,255,255,0.04);
-      border-radius: 50%;
-    }
-
-    .hero-inner {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .youngja-avatar-wrap {
-      flex-shrink: 0;
-    }
-
-    .youngja-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(12px);
-      border: 2px solid rgba(255,255,255,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.8rem;
-      transition: all 0.4s ease;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    }
-
-    .hero-text {
-      flex: 1;
-    }
-
-    .hero-text h1 {
-      font-size: 1.5rem;
+    .page-title {
+      font-size: 1.6rem;
       font-weight: 700;
-      color: #fff;
-      margin-bottom: 6px;
-      line-height: 1.3;
-    }
-
-    .hero-text h1 span {
-      font-size: 0.85em;
-      opacity: 0.85;
-      display: block;
-      font-weight: 400;
-    }
-
-    /* Glassmorphism bubble */
-    .youngja-bubble {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 16px;
-      padding: 14px 18px;
-      color: #fff;
-      font-size: 0.92rem;
-      line-height: 1.6;
-      position: relative;
-      margin-top: 10px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-    }
-
-    .youngja-bubble::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: 24px;
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-bottom: 8px solid rgba(255,255,255,0.3);
-    }
-
-    /* =================== GUIDE SECTION =================== */
-    .guide-section {
-      padding: 32px 0 0;
-    }
-
-    .section-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #0b7c5b;
       margin-bottom: 8px;
     }
 
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 20px;
-    }
-
-    /* Radio Cards */
-    .radio-group {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-
-    .radio-card {
-      cursor: pointer;
-      display: block;
-    }
-
-    .radio-card input[type="radio"] {
-      display: none;
-    }
-
-    .radio-card-inner {
+    .page-header {
       background: #fff;
-      border: 2px solid #e5e5e5;
-      border-radius: 16px;
-      padding: 18px 14px;
-      text-align: center;
-      transition: all 0.25s ease;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-
-    .radio-card:hover .radio-card-inner {
-      border-color: #0b7c5b;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(11,124,91,0.12);
-    }
-
-    .radio-card input[type="radio"]:checked + .radio-card-inner {
-      border-color: #0b7c5b;
-      background: linear-gradient(135deg, #f0faf5, #e8f7f0);
-      box-shadow: 0 8px 24px rgba(11,124,91,0.15);
-      transform: translateY(-2px);
-    }
-
-    .radio-card-icon {
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .radio-card-title {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #1a1a1a;
-      line-height: 1.35;
-    }
-
-    .radio-card-sub {
-      font-size: 0.78rem;
-      color: #888;
-    }
-
-    /* =================== GUIDE RESULT =================== */
-    .guide-result {
-      display: none;
-      animation: slideDown 0.4s ease;
-    }
-
-    .guide-result.visible {
-      display: block;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .steps-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px 20px;
       border: 1px solid #e5e5e5;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-      margin-bottom: 16px;
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
     }
 
-    .steps-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #0b7c5b;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .page-header .page-subtitle {
+      margin-bottom: 0;
     }
 
-    .steps-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .step-item {
-      display: flex;
-      gap: 16px;
-      position: relative;
-      animation: fadeInStep 0.4s ease both;
-    }
-
-    .step-item:nth-child(1) { animation-delay: 0.05s; }
-    .step-item:nth-child(2) { animation-delay: 0.1s; }
-    .step-item:nth-child(3) { animation-delay: 0.15s; }
-    .step-item:nth-child(4) { animation-delay: 0.2s; }
-    .step-item:nth-child(5) { animation-delay: 0.25s; }
-
-    @keyframes fadeInStep {
-      from { opacity: 0; transform: translateX(-8px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    .step-left {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-shrink: 0;
-      width: 36px;
-    }
-
-    .step-num {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #0b7c5b;
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .step-line {
-      width: 2px;
-      flex: 1;
-      background: #e0ede8;
-      margin: 4px 0;
-      min-height: 20px;
-    }
-
-    .step-item:last-child .step-line {
-      display: none;
-    }
-
-    .step-body {
-      padding-bottom: 20px;
-      flex: 1;
-    }
-
-    .step-item:last-child .step-body {
-      padding-bottom: 0;
-    }
-
-    .step-title {
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: #1a1a1a;
-      margin-bottom: 2px;
-    }
-
-    .step-desc {
-      font-size: 0.83rem;
-      color: #666;
-      line-height: 1.5;
-    }
-
-    .step-badge {
-      display: inline-block;
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #0b7c5b11;
-      color: #0b7c5b;
-      margin-top: 4px;
-      font-weight: 600;
-    }
-
-    /* =================== ACCORDION SECTION =================== */
-    .detail-guide-section {
-      padding: 8px 0 0;
-    }
-
-    .accordion-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .acc-tab {
-      padding: 8px 20px;
-      border-radius: 999px;
-      border: 2px solid #e0e0e0;
-      background: #fff;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    .page-subtitle {
+      font-size: 0.95rem;
       color: #555;
+      margin-bottom: 24px;
+      word-break: keep-all;
     }
 
-    .acc-tab.active {
-      background: #0b7c5b;
-      border-color: #0b7c5b;
-      color: #fff;
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: flex-start;
     }
 
-    .acc-panel {
-      display: none;
-    }
-
-    .acc-panel.active {
-      display: block;
-      animation: slideDown 0.3s ease;
-    }
-
-    .acc-item {
+    .card {
       background: #fff;
-      border: 1px solid #ececec;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .acc-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      cursor: pointer;
-      user-select: none;
-      transition: background 0.2s;
-    }
-
-    .acc-header:hover {
-      background: #f7faf8;
-    }
-
-    .acc-icon {
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-
-    .acc-header-text {
-      flex: 1;
-    }
-
-    .acc-header-title {
-      font-weight: 700;
+      border-radius: 16px;
+      padding: 18px 20px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
       font-size: 0.9rem;
-      color: #1a1a1a;
     }
 
-    .acc-header-sub {
-      font-size: 0.78rem;
-      color: #888;
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
     }
 
-    .acc-chevron {
-      font-size: 0.8rem;
-      color: #aaa;
-      transition: transform 0.2s;
-      flex-shrink: 0;
+    .card+.card {
+      margin-top: 16px;
     }
 
-    .acc-item.open .acc-chevron {
-      transform: rotate(180deg);
-    }
-
-    .acc-body {
-      display: none;
-      padding: 0 16px 16px;
-      font-size: 0.85rem;
-      color: #555;
-      line-height: 1.65;
-    }
-
-    .acc-item.open .acc-body {
-      display: block;
-      animation: slideDown 0.25s ease;
-    }
-
-    .acc-body ul {
+    .list {
       list-style: none;
       margin-top: 4px;
     }
 
-    .acc-body ul li {
-      padding: 3px 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
+    .list li {
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
     }
 
-    .acc-body ul li::before {
-      content: '›';
+    .list li:last-child {
+      border-bottom: none;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: #0b7c5b;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #096149;
+    }
+
+    .btn-ghost {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #0b7c5b11;
       color: #0b7c5b;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 1px;
+      margin-right: 6px;
     }
 
-    /* =================== FAQ SECTION =================== */
-    .faq-section {
-      padding: 8px 0 0;
+    .faq-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0 12px;
+      flex-wrap: wrap;
     }
 
-    .faq-grid {
-      display: grid;
-      grid-template-columns: 1fr;
+    .faq-filter {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .faq-filter.active {
+      background: #0b7c5b;
+      color: #fff;
+      border-color: #0b7c5b;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
+      margin-top: 8px;
     }
 
     details.faq-item {
       border: 1px solid #ececec;
       border-radius: 12px;
-      padding: 0;
+      padding: 10px 12px;
       background: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03);
     }
 
     details.faq-item summary {
@@ -618,156 +302,25 @@
       font-weight: 600;
       color: #1f2a26;
       list-style: none;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transition: background 0.2s;
-      font-size: 0.9rem;
     }
 
-    details.faq-item summary::-webkit-details-marker { display: none; }
-
-    details.faq-item[open] summary {
-      background: #f7faf8;
-      border-bottom: 1px solid #eee;
+    details.faq-item summary::-webkit-details-marker {
+      display: none;
     }
 
-    details.faq-item summary::before {
-      content: 'Q';
-      font-weight: 700;
-      color: #0b7c5b;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-    }
-
-    details.faq-item summary::after {
-      content: '▾';
-      margin-left: auto;
-      color: #aaa;
-      font-size: 0.75rem;
-      transition: transform 0.2s;
-      flex-shrink: 0;
-    }
-
-    details.faq-item[open] summary::after {
-      transform: rotate(180deg);
+    .faq-meta {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: #6b6b6b;
     }
 
     .faq-answer {
-      padding: 12px 16px 14px;
-      font-size: 0.85rem;
-      color: #444;
-      line-height: 1.7;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: #333;
+      line-height: 1.6;
       white-space: pre-line;
     }
-
-    .faq-answer strong {
-      color: #0b7c5b;
-    }
-
-    .faq-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #0b7c5b11;
-      color: #0b7c5b;
-      margin-right: 6px;
-      font-weight: 600;
-    }
-
-    /* =================== CONTACT CARD =================== */
-    .contact-card {
-      background: linear-gradient(135deg, #0b7c5b, #1a9e78);
-      border-radius: 16px;
-      padding: 24px 20px;
-      color: #fff;
-      margin-top: 24px;
-    }
-
-    .contact-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .contact-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.88rem;
-      opacity: 0.92;
-    }
-
-    .contact-list li {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .contact-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
-    .btn-glass {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 9px 18px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.35);
-      backdrop-filter: blur(8px);
-      color: #fff;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .btn-glass:hover {
-      background: rgba(255,255,255,0.28);
-    }
-
-    /* =================== POLICY HIGHLIGHT =================== */
-    .policy-banner {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-left: 4px solid #0b7c5b;
-      border-radius: 12px;
-      padding: 14px 18px;
-      font-size: 0.85rem;
-      color: #444;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-
-    .policy-banner-icon { font-size: 1.3rem; flex-shrink: 0; }
-
-    .policy-banner strong { color: #0b7c5b; }
-
-    /* =================== SHARED =================== */
-    .card-wrap {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.03);
-    }
-
-    .section-gap { margin-top: 28px; }
 
     footer {
       padding: 16px 0 24px;
@@ -783,7 +336,9 @@
     }
 
     @media (max-width: 768px) {
-      .mobile-menu-btn { display: none !important; }
+      .mobile-menu-btn {
+        display: none !important;
+      }
 
       .nav {
         flex-direction: column;
@@ -834,7 +389,9 @@
         border: 1px solid #f0f0f0;
       }
 
-      .dropdown.is-open .dropdown-content { display: block; }
+      .dropdown.is-open .dropdown-content {
+        display: block;
+      }
 
       .nav-community-link {
         font-size: 0 !important;
@@ -847,15 +404,15 @@
         justify-content: center;
       }
 
-      .nav-community-link svg { width: 18px; height: 18px; display: block; }
+      .nav-community-link svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
 
-      .radio-group { grid-template-columns: 1fr; }
-
-      .hero-text h1 { font-size: 1.2rem; }
-
-      .youngja-avatar { width: 72px; height: 72px; font-size: 2.2rem; }
-
-      .accordion-tabs { flex-wrap: wrap; }
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 
@@ -981,512 +538,167 @@
   </script>
 
   <main>
-    <!-- ===== HERO ===== -->
-    <div class="guide-hero">
-      <div class="container">
-        <div class="hero-inner">
-          <div class="youngja-avatar-wrap">
-            <div class="youngja-avatar" id="youngja-avatar">👩‍💼</div>
-          </div>
-          <div class="hero-text">
-            <h1>
-              이음터 100% 활용하기
-              <span>양양 강사 이음터 · 사용자 가이드</span>
-            </h1>
-            <div class="youngja-bubble" id="youngja-bubble">
-              안녕하세요! 저는 이음터 디자인실장 <strong>영자</strong>예요 😊<br>
-              아래에서 나의 상황을 선택하면, 딱 맞는 이용 방법을 알려드릴게요!
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="container">
-
-      <!-- ===== INTERACTIVE GUIDE ===== -->
-      <div class="guide-section">
-        <div class="section-label">STEP 1 · 나는 누구일까요?</div>
-        <div class="section-title">저의 상황을 선택해 주세요</div>
-
-        <div class="radio-group">
-          <label class="radio-card">
-            <input type="radio" name="userType" value="user">
-            <div class="radio-card-inner">
-              <div class="radio-card-icon">🔍</div>
-              <div class="radio-card-title">좋은 강사님을<br>찾고 있어요!</div>
-              <div class="radio-card-sub">이용자 / 기관</div>
-            </div>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="userType" value="teacher">
-            <div class="radio-card-inner">
-              <div class="radio-card-icon">🧑‍🏫</div>
-              <div class="radio-card-title">멋진 프로그램을<br>가진 강사입니다!</div>
-              <div class="radio-card-sub">강사</div>
-            </div>
-          </label>
-          <label class="radio-card">
-            <input type="radio" name="userType" value="visitor">
-            <div class="radio-card-inner">
-              <div class="radio-card-icon">👀</div>
-              <div class="radio-card-title">센터 소식이<br>궁금해요!</div>
-              <div class="radio-card-sub">방문자</div>
-            </div>
-          </label>
-        </div>
-
-        <!-- 이용자 가이드 -->
-        <div class="guide-result" id="guide-user">
-          <div class="steps-card">
-            <h3>🔍 이용자 / 기관을 위한 강사 매칭 가이드</h3>
-            <div class="steps-list">
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">강사 추천 요청 또는 직접 검색</div>
-                  <div class="step-desc">홈페이지 '강사 이음터' 탭에서 분야별로 강사를 탐색하거나, 센터에 필요한 강사 유형을 문의해 주세요.</div>
-                  <span class="step-badge">센터 추천 또는 자율 검색 모두 가능</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">활동 문의 전송</div>
-                  <div class="step-desc">마음에 드는 강사의 프로필 페이지에서 '문의하기' 버튼을 눌러 활동 일시, 내용, 대상 등의 정보를 센터로 보내주세요.</div>
-                  <span class="step-badge">강사 연락처는 센터가 관리 · 블라인드 처리</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">센터 검토 및 확인</div>
-                  <div class="step-desc">이음터 담당자가 문의 내용을 확인하고 해당 강사의 일정 및 조건을 검토합니다.</div>
-                  <span class="step-badge">영업일 기준 1~2일 내 회신</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">4</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">강사 연결</div>
-                  <div class="step-desc">일정이 확정되면 센터를 통해 강사 정보(연락처 포함)가 안전하게 전달됩니다.</div>
-                  <span class="step-badge">개인정보 보호 후 안전 연결</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">5</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">매칭 성공!</div>
-                  <div class="step-desc">강사와 직접 최종 일정을 조율하여 활동을 시작하세요. 수수료는 전혀 없습니다 🎉</div>
-                  <span class="step-badge">중개 수수료 0원</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <a href="index.html#teachers" class="btn-glass" style="background:#0b7c5b; border-color:#0b7c5b; display:inline-flex; text-decoration:none;">강사 목록 보러 가기 →</a>
-        </div>
-
-        <!-- 강사 가이드 -->
-        <div class="guide-result" id="guide-teacher">
-          <div class="steps-card">
-            <h3>🧑‍🏫 강사를 위한 이음터 등록 가이드</h3>
-            <div class="steps-list">
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">프로필 등록 신청</div>
-                  <div class="step-desc">'강사 이음터 → 강사 정보 등록' 메뉴에서 분야, 소개, 활동 지역, 사진 등을 입력하고 제출합니다.</div>
-                  <span class="step-badge">온라인 폼 작성 · 5분 소요</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">센터 승인 검토</div>
-                  <div class="step-desc">담당자가 제출하신 내용을 확인하고 양양 지역 관련성 및 활동 가능 여부를 검토합니다.</div>
-                  <span class="step-badge">영업일 기준 2~3일</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">강사 목록 노출</div>
-                  <div class="step-desc">승인이 완료되면 홈페이지 강사 목록에 프로필이 게시됩니다. 연락처는 공개되지 않습니다.</div>
-                  <span class="step-badge">연락처 블라인드 · 정보 보호</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">4</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">문의 접수</div>
-                  <div class="step-desc">이용자가 문의를 보내면 센터에서 강사님께 별도로 연락드립니다. 원하지 않는 문의는 거절하실 수 있어요.</div>
-                  <span class="step-badge">강사 의사 존중 · 강제 연결 없음</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">5</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">매칭 성공!</div>
-                  <div class="step-desc">활동이 성사되면 이음터를 통해 새로운 현장과 인연을 만들어가세요. 수수료는 없습니다 🎉</div>
-                  <span class="step-badge">중개 수수료 0원</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <a href="admin_iumteo.html" class="btn-glass" style="background:#0b7c5b; border-color:#0b7c5b; display:inline-flex; text-decoration:none;">강사 등록하러 가기 →</a>
-        </div>
-
-        <!-- 방문자 가이드 -->
-        <div class="guide-result" id="guide-visitor">
-          <div class="steps-card">
-            <h3>👀 센터 소식 · 주요 채널 안내</h3>
-            <div class="steps-list">
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">홈페이지에서 주요사업 확인</div>
-                  <div class="step-desc">연도별 프로그램, 강사 활동, 교육 영상 등을 홈페이지 메인에서 탐색하실 수 있습니다.</div>
-                  <span class="step-badge">2024 · 2025 · 2026 연도별 정리</span>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">공지사항 & 아카이브</div>
-                  <div class="step-desc">최신 공지사항은 '공지사항' 메뉴에서, 활동 사진과 영상은 '아카이브' 메뉴에서 확인하세요.</div>
-                </div>
-              </div>
-              <div class="step-item">
-                <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
-                <div class="step-body">
-                  <div class="step-title">센터 채널 구독</div>
-                  <div class="step-desc">litt.ly/yyfarmct 에서 네이버 블로그, 카카오, 인스타그램 등 센터의 모든 소셜 채널을 한 곳에서 확인할 수 있어요.</div>
-                  <span class="step-badge">통합 채널 링크</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <a href="notice.html" class="btn-glass" style="background:#0b7c5b; border-color:#0b7c5b; display:inline-flex; text-decoration:none;">공지사항 보기 →</a>
-        </div>
+      <div class="page-header">
+        <h1 class="page-title">Q&A / 자주 묻는 질문</h1>
+        <p class="page-subtitle">자주 묻는 질문들을 모았습니다. 아래 FAQ를 먼저 확인해 보세요!</p>
       </div>
 
-      <!-- ===== DETAIL ACCORDION ===== -->
-      <div class="section-gap detail-guide-section">
-        <div class="section-label">STEP 2 · 상세 이용 안내</div>
-        <div class="section-title">역할별 자세한 프로세스</div>
+      <div class="grid">
+        <section>
+          <div class="card">
+            <h2>자주 묻는 질문</h2>
+            <div class="faq-toolbar" id="faq-filters"></div>
+            <div class="faq-list" id="faq-list"></div>
+          </div>
 
-        <div class="accordion-tabs">
-          <button class="acc-tab active" data-tab="tab-teacher">🧑‍🏫 강사 모드</button>
-          <button class="acc-tab" data-tab="tab-user">🔍 이용자 모드</button>
-        </div>
-
-        <!-- 강사 모드 -->
-        <div class="acc-panel active" id="tab-teacher">
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">📝</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">프로필 등록 방법</div>
-                <div class="acc-header-sub">어떤 정보를 입력해야 하나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              등록 폼에서 아래 항목을 작성합니다:
-              <ul>
-                <li>이름, 활동 분야(최대 3개 선택)</li>
-                <li>한 줄 소개 + 상세 자기소개</li>
-                <li>활동 가능 지역 (양양 내 동/면 등)</li>
-                <li>프로필 사진 업로드 (권장 1:1 비율)</li>
-                <li>연락처 (비공개 · 센터만 확인 가능)</li>
-              </ul>
-            </div>
+          <div class="card">
+            <h2>일반 문의 안내</h2>
+            <p style="font-size:0.85rem; color:#666; margin-bottom:8px;">
+              전화 또는 이메일로 문의하실 수 있습니다.
+            </p>
+            <ul class="list">
+              <li>전화: 033-673-0221</li>
+              <li>이메일: yyfarmct@naver.com</li>
+              <li>운영시간: 월~금 09:00~18:00 (공휴일 제외)</li>
+            </ul>
+            <a href="mailto:yyfarmct@naver.com?subject=[QnA]%20양양군%20농촌활성화지원센터%20문의" class="btn btn-ghost"
+              style="margin-top:10px;">
+              이메일로 문의하기
+            </a>
+            <p style="font-size:0.8rem; color:#777; margin-top:10px;">
+              센터 채널 및 소식은 아래 링크에서 확인하실 수 있습니다.
+            </p>
+            <a href="https://litt.ly/yyfarmct" target="_blank" rel="noopener" class="btn btn-ghost"
+              style="margin-top:6px;">
+              센터 채널 & 소식 모아보기
+            </a>
           </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">✅</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">센터 승인 절차</div>
-                <div class="acc-header-sub">승인까지 얼마나 걸리나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              제출 후 영업일 기준 2~3일 내에 담당자가 검토합니다. 보완이 필요한 경우 입력하신 연락처로 개별 안내드립니다. 승인 완료 시 별도 알림이 제공될 예정입니다.
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">🔒</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">강사 정보 보호 정책</div>
-                <div class="acc-header-sub">연락처가 외부에 노출되나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              <strong>아니요, 절대 공개되지 않습니다.</strong><br><br>
-              강사님의 연락처(전화번호, 이메일)는 이음터 시스템 내에서 블라인드 처리되며, 이용자에게는 표시되지 않습니다. 매칭이 확정된 경우에만 센터를 통해 안전하게 전달됩니다.
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">💬</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">문의 접수 및 처리</div>
-                <div class="acc-header-sub">문의가 오면 어떻게 되나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              이용자가 문의를 보내면 센터 담당자가 먼저 내용을 검토합니다. 이후 강사님께 개별 연락하여 수락 여부를 확인합니다. 원하지 않는 문의는 거절하실 수 있으며, 강제로 연결되는 경우는 없습니다.
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">💰</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">수수료 및 비용</div>
-                <div class="acc-header-sub">이음터 이용에 비용이 드나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              <strong>중개 수수료는 0원입니다.</strong><br><br>
-              이음터는 양양군 농촌활성화지원센터가 운영하는 공공 플랫폼으로, 강사 등록 및 매칭에 어떠한 수수료도 받지 않습니다. 강사 활동비는 이용자와 강사 간 직접 협의하시면 됩니다.
-            </div>
-          </div>
-        </div>
-
-        <!-- 이용자 모드 -->
-        <div class="acc-panel" id="tab-user">
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">🔍</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">강사 검색 및 추천 요청</div>
-                <div class="acc-header-sub">어떻게 강사를 찾을 수 있나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              두 가지 방법을 활용하세요:
-              <ul>
-                <li>홈페이지 '강사 이음터'에서 분야별 필터로 직접 탐색</li>
-                <li>센터(033-673-0221)에 필요한 분야와 조건을 말씀해 주시면 담당자가 적합한 강사를 추천해 드립니다</li>
-              </ul>
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">📩</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">활동 문의 전송 방법</div>
-                <div class="acc-header-sub">문의할 때 어떤 정보를 적어야 하나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              강사 프로필 페이지의 '문의하기' 버튼을 누른 뒤 아래 내용을 포함해 주세요:
-              <ul>
-                <li>희망 활동 일시 및 장소</li>
-                <li>활동 내용 및 주제</li>
-                <li>참여 대상 및 인원</li>
-                <li>담당자 연락처</li>
-              </ul>
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">⏱️</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">매칭 소요 시간</div>
-                <div class="acc-header-sub">강사 연결까지 얼마나 걸리나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              문의 접수 후 영업일 기준 1~2일 내에 담당자가 검토하고 강사 측에 확인합니다. 강사 수락 후 센터를 통해 연락처를 전달받으며, 전체 프로세스는 3~5일 정도 소요됩니다.
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">🤝</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">강사에게 직접 연락 가능한가요?</div>
-                <div class="acc-header-sub">연락처를 바로 알 수 없나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              이음터는 강사 정보 보호를 위해 연락처를 직접 공개하지 않습니다. 반드시 센터를 통해 문의하시면, 매칭이 확정된 후 안전하게 연결해 드립니다. 이는 강사님의 개인정보를 보호하기 위한 정책입니다.
-            </div>
-          </div>
-          <div class="acc-item">
-            <div class="acc-header">
-              <div class="acc-icon">💰</div>
-              <div class="acc-header-text">
-                <div class="acc-header-title">이용 비용 및 수수료</div>
-                <div class="acc-header-sub">이음터 이용에 비용이 드나요?</div>
-              </div>
-              <div class="acc-chevron">▾</div>
-            </div>
-            <div class="acc-body">
-              <strong>이음터 서비스 자체는 무료입니다.</strong><br><br>
-              플랫폼 이용, 강사 검색, 문의 전송 모두 무료입니다. 강사 활동비(강의료)는 강사와 기관 간에 별도로 협의하시면 됩니다.
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
-
-      <!-- ===== POLICY BANNERS ===== -->
-      <div class="section-gap">
-        <div class="section-label">핵심 정책</div>
-        <div class="section-title">이음터가 지키는 약속</div>
-
-        <div class="policy-banner">
-          <div class="policy-banner-icon">🔒</div>
-          <div>
-            <strong>강사 연락처 블라인드 정책</strong><br>
-            강사의 전화번호와 이메일은 플랫폼에 공개되지 않습니다. 모든 연결은 이음터 센터를 통해 이루어지며, 매칭 확정 후에만 안전하게 전달됩니다.
-          </div>
-        </div>
-        <div class="policy-banner">
-          <div class="policy-banner-icon">💰</div>
-          <div>
-            <strong>중개 수수료 0원</strong><br>
-            이음터는 공공 플랫폼으로 강사와 이용자 모두에게 어떠한 중개 수수료도 받지 않습니다.
-          </div>
-        </div>
-        <div class="policy-banner">
-          <div class="policy-banner-icon">🤝</div>
-          <div>
-            <strong>강사 의사 존중</strong><br>
-            강사는 모든 문의에 대해 수락·거절을 자유롭게 결정할 수 있습니다. 강제 매칭은 존재하지 않습니다.
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== HARDCODED FAQ ===== -->
-      <div class="section-gap faq-section">
-        <div class="section-label">FAQ</div>
-        <div class="section-title">자주 묻는 질문</div>
-
-        <div class="faq-grid">
-          <details class="faq-item">
-            <summary><span class="faq-tag">강사</span>강사로 등록하려면 어떻게 하나요?</summary>
-            <div class="faq-answer">상단 메뉴의 '강사 이음터 → 강사 정보 등록'을 클릭하면 등록 폼으로 이동합니다. 이름, 활동 분야, 소개, 사진, 연락처 등을 입력하고 제출하면 센터 검토 후 목록에 게시됩니다. 등록은 온라인으로만 가능하며 약 5분 소요됩니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">강사</span>등록한 내 연락처가 외부에 노출되나요?</summary>
-            <div class="faq-answer"><strong>아니요, 절대 공개되지 않습니다.</strong> 강사의 연락처는 이음터 내에서 블라인드 처리됩니다. 이용자가 강사 프로필을 볼 때 연락처는 표시되지 않으며, 매칭이 확정된 경우에만 센터를 통해 안전하게 전달됩니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">강사</span>강사 등록 후 승인까지 얼마나 걸리나요?</summary>
-            <div class="faq-answer">제출 후 영업일 기준 2~3일 내에 검토가 완료됩니다. 보완이 필요한 경우 입력하신 연락처로 개별 연락드립니다. 승인 완료 즉시 홈페이지 강사 목록에 프로필이 노출됩니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">이용자</span>원하는 강사를 찾지 못했을 때 어떻게 하나요?</summary>
-            <div class="faq-answer">센터로 직접 문의해 주세요. 담당자가 필요하신 분야와 조건에 맞는 강사를 추천해 드립니다. 전화: 033-673-0221 / 이메일: yyfarmct@naver.com</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">이용자</span>강사에게 직접 연락하면 안 되나요?</summary>
-            <div class="faq-answer">이음터 강사의 연락처는 플랫폼에 공개되지 않습니다. 강사의 개인정보 보호를 위해 반드시 이음터(센터)를 통해 문의해 주세요. 매칭 확정 후 안전하게 연락처를 전달해 드립니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">공통</span>이음터 이용에 비용이 드나요?</summary>
-            <div class="faq-answer"><strong>이음터 서비스 자체는 완전히 무료입니다.</strong> 강사 등록, 강사 검색, 문의 전송, 매칭 모두 수수료가 없습니다. 강사 활동비(강의료)는 강사와 기관이 별도로 협의하시면 됩니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">강사</span>원하지 않는 문의는 거절할 수 있나요?</summary>
-            <div class="faq-answer">네, 가능합니다. 이음터는 강사의 의사를 최우선으로 존중합니다. 센터에서 연락드렸을 때 거절 의사를 표시하시면 해당 문의는 처리되지 않습니다. 강제 매칭은 없습니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">이용자</span>문의 후 연결까지 얼마나 걸리나요?</summary>
-            <div class="faq-answer">문의 접수 후 영업일 기준 1~2일 내에 담당자가 검토하고 강사 측에 확인합니다. 강사 수락 후 연락처를 전달하므로 전체 소요 시간은 3~5일 정도입니다. 급한 경우 전화(033-673-0221)로 직접 문의하시면 더 빠르게 처리됩니다.</div>
-          </details>
-          <details class="faq-item">
-            <summary><span class="faq-tag">공통</span>이음터는 어떤 분야의 강사를 연결해 주나요?</summary>
-            <div class="faq-answer">양양 지역을 기반으로 활동하는 다양한 분야의 강사를 연결합니다. 농촌체험, 공예, 요리, 건강·웰니스, 예술·문화, 생태·환경 등 지역 특색을 살린 프로그램 강사를 만나보세요.</div>
-          </details>
-        </div>
-      </div>
-
-      <!-- ===== CONTACT ===== -->
-      <div class="contact-card section-gap">
-        <h3>📞 더 궁금한 것이 있으신가요?</h3>
-        <ul class="contact-list">
-          <li>📱 전화: 033-673-0221</li>
-          <li>✉️ 이메일: yyfarmct@naver.com</li>
-          <li>⏰ 운영시간: 월~금 09:00~18:00 (공휴일 제외)</li>
-        </ul>
-        <div class="contact-actions">
-          <a href="mailto:yyfarmct@naver.com?subject=[이음터]%20문의합니다" class="btn-glass">✉️ 이메일 문의</a>
-          <a href="https://litt.ly/yyfarmct" target="_blank" rel="noopener" class="btn-glass">🔗 센터 채널 보기</a>
-        </div>
-      </div>
-
     </div>
   </main>
 
   <footer>
     <div class="container">
-      <div>© <span id="year"></span> 양양군 농촌활성화지원센터 · 강사 이음터</div>
+      <div>© <span id="year"></span> 양양군 농촌활성화지원센터 Q&A</div>
     </div>
   </footer>
 
   <script>
+    const FAQ_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1574025619&single=true&output=csv";
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          if (inQuotes && text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (c === "," && !inQuotes) {
+          row.push(field); field = "";
+        } else if ((c === "\n" || c === "\r") && !inQuotes) {
+          if (field !== "" || row.length > 0) { row.push(field); rows.push(row); row = []; field = ""; }
+        } else {
+          field += c;
+        }
+      }
+      if (field !== "" || row.length > 0) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function normalizeHeader(h) {
+      return (h || "").toString().trim().replace(/\s+/g, "");
+    }
+
+    function isActive(val) {
+      const v = (val || "").toString().trim();
+      return v === "" || v === "활성" || v.toLowerCase() === "active";
+    }
+
+    async function loadFAQ() {
+      const wrap = document.getElementById("faq-list");
+      const filterWrap = document.getElementById("faq-filters");
+      if (!wrap || !filterWrap) return;
+
+      try {
+        const res = await fetch(FAQ_CSV_URL);
+        if (!res.ok) throw new Error("FAQ CSV fetch failed");
+        const rows = parseCSV(await res.text());
+        if (!rows.length) return;
+
+        const headers = rows[0].map(normalizeHeader);
+        const idx = {
+          q: headers.findIndex(h => h.includes("질문") || h.includes("question")),
+          a: headers.findIndex(h => h.includes("답변") || h.includes("answer")),
+          c: headers.findIndex(h => h.includes("카테고리") || h.includes("category")),
+          s: headers.findIndex(h => h.includes("상태") || h.includes("status")),
+          o: headers.findIndex(h => h.includes("순서") || h.includes("order") || h.includes("정렬"))
+        };
+
+        const items = rows.slice(1)
+          .map(r => ({
+            q: (r[idx.q] || "").trim(),
+            a: (r[idx.a] || "").trim(),
+            c: (r[idx.c] || "").trim() || "기타",
+            s: (r[idx.s] || "").trim(),
+            o: Number((r[idx.o] || "").toString().trim()) || 9999
+          }))
+          .filter(r => r.q && r.a && isActive(r.s))
+          .sort((a, b) => a.o - b.o);
+
+        const categories = Array.from(new Set(items.map(i => i.c)));
+        filterWrap.innerHTML = "";
+        const allBtn = document.createElement("button");
+        allBtn.className = "faq-filter active";
+        allBtn.textContent = "전체";
+        allBtn.dataset.filter = "전체";
+        filterWrap.appendChild(allBtn);
+        categories.forEach(cat => {
+          const btn = document.createElement("button");
+          btn.className = "faq-filter";
+          btn.textContent = cat;
+          btn.dataset.filter = cat;
+          filterWrap.appendChild(btn);
+        });
+
+        function render(filter) {
+          wrap.innerHTML = "";
+          const target = (filter && filter !== "전체")
+            ? items.filter(i => i.c === filter)
+            : items;
+
+          target.forEach(i => {
+            const el = document.createElement("details");
+            el.className = "faq-item";
+            el.innerHTML = `
+            <summary>${i.q}</summary>
+            <div class="faq-meta">카테고리: ${i.c}</div>
+            <div class="faq-answer">${i.a}</div>
+          `;
+            wrap.appendChild(el);
+          });
+        }
+
+        filterWrap.addEventListener("click", (e) => {
+          const btn = e.target.closest(".faq-filter");
+          if (!btn) return;
+          filterWrap.querySelectorAll(".faq-filter").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          render(btn.dataset.filter);
+        });
+
+        render("전체");
+      } catch (err) {
+        wrap.innerHTML = "<div style='color:#777;font-size:.85rem;'>FAQ 데이터를 불러오지 못했습니다.</div>";
+        console.error(err);
+      }
+    }
+
     document.getElementById("year").textContent = new Date().getFullYear();
-
-    // ===== Radio Guide =====
-    const avatarEl = document.getElementById('youngja-avatar');
-    const bubbleEl = document.getElementById('youngja-bubble');
-
-    const guideMessages = {
-      user: { avatar: '😄', msg: '강사님을 찾고 계시군요! 아래 단계별 가이드를 따라가 보세요 👇' },
-      teacher: { avatar: '🎉', msg: '멋진 강사님이시네요! 이음터에서 새로운 인연을 만들어 보세요 👇' },
-      visitor: { avatar: '👋', msg: '센터 소식이 궁금하시군요! 아래에서 관련 안내를 확인해 보세요 👇' }
-    };
-
-    document.querySelectorAll('input[name="userType"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        const val = radio.value;
-        // Hide all guides
-        document.querySelectorAll('.guide-result').forEach(el => el.classList.remove('visible'));
-        // Show selected
-        const target = document.getElementById('guide-' + val);
-        if (target) {
-          target.classList.add('visible');
-          target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        // Update youngja
-        const info = guideMessages[val];
-        if (info) {
-          avatarEl.textContent = info.avatar;
-          bubbleEl.innerHTML = info.msg;
-        }
-      });
-    });
-
-    // ===== Accordion Tabs =====
-    document.querySelectorAll('.acc-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetId = tab.dataset.tab;
-        document.querySelectorAll('.acc-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.acc-panel').forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const panel = document.getElementById(targetId);
-        if (panel) panel.classList.add('active');
-      });
-    });
-
-    // ===== Accordion Items =====
-    document.querySelectorAll('.acc-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const item = header.closest('.acc-item');
-        item.classList.toggle('open');
-      });
-    });
+    loadFAQ();
   </script>
 </body>
 
