@@ -136,41 +136,28 @@ async function findGasUserByIdentifier(identifier: string, loginRole?: string) {
   const trimmed = String(identifier || '').trim();
   if (!trimmed) return null;
 
-  const isEmail = isEmailIdentifier(trimmed);
-  const normalized = isEmail ? normalizeEmail(trimmed) : normalizePhone(trimmed);
-  if (!normalized) return null;
+  // GAS v7.1은 이메일 파라미터에 전화번호를 넣어도 findInstructorByEmail_에서 자동 매칭해줌
+  const gasUser = await loadGasUserByEmail(trimmed, loginRole);
+  
+  if (!gasUser) return null;
 
-  const [instructors, members] = await Promise.all([
-    fetchGasRecords('getInstructors', true),
-    fetchGasRecords('getMembers'),
-  ]);
+  // 로그인 역할(Tab)과 실제 가입된 역할이 다른 경우 체크
+  if (loginRole) {
+    const isInstructorLogin = loginRole === 'INSTRUCTOR';
+    const isUserLogin = loginRole === 'USER';
 
-  const matchFn = (record: CsvRecord) => isEmail
-    ? getRecordEmail(record) === normalized
-    : getRecordPhone(record) === normalized;
+    // 강사 탭에서 일반회원으로 로그인 시도 시
+    if (isInstructorLogin && gasUser.role === 'USER') {
+      throw new Error('일반회원 계정입니다. "일반회원 로그인" 탭을 선택해 주세요.');
+    }
 
-  const foundInstructor = instructors.find(matchFn);
-  const foundMember = members.find(matchFn);
-
-  if (!loginRole) {
-    if (foundInstructor) return toAuthUser(foundInstructor, 'INSTRUCTOR');
-    if (foundMember) return toAuthUser(foundMember, 'USER');
-    return null; // Both null
+    // 일반회원 탭에서 강사/관리자로 로그인 시도 시
+    if (isUserLogin && (gasUser.role === 'INSTRUCTOR' || gasUser.role === 'ADMIN')) {
+      throw new Error('강사 또는 관리자 계정입니다. "강사 로그인" 탭을 선택해 주세요.');
+    }
   }
 
-  if (loginRole === 'INSTRUCTOR') {
-    if (foundInstructor) return toAuthUser(foundInstructor, 'INSTRUCTOR');
-    if (foundMember) throw new Error('일반회원으로 등록된 계정입니다. "일반회원 로그인" 탭을 선택해 주세요.');
-    return null;
-  }
-
-  if (loginRole === 'USER') {
-    if (foundMember) return toAuthUser(foundMember, 'USER');
-    if (foundInstructor) throw new Error('강사로 등록 또는 승인 대기 중인 계정입니다. "강사 로그인" 탭을 선택해 주세요.');
-    return null;
-  }
-
-  return null;
+  return gasUser;
 }
 
 declare module 'next-auth' {
