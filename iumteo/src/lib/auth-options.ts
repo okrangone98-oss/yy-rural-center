@@ -41,8 +41,8 @@ const PHONE_ALIASES = [
 
 const NAME_ALIASES = ['이용자명', '이름', '성명', '강사명', 'Name', 'name'];
 const ORG_ALIASES = ['소속', '기관', 'Org', 'org'];
-const ROLE_ALIASES = ['role', 'Role', '회원유형', '사용자유형', '권한', '_role'];
-const PASSWORD_ALIASES = ['비밀번호', 'Password_Hash', 'password', 'Password'];
+const ROLE_ALIASES = ['role', 'Role', '회원유형', '사용자유형', '권한', '권한(USER)', '_role'];
+const PASSWORD_ALIASES = ['비밀번호', '사용자비번', 'Password_Hash', 'password', 'Password'];
 
 function isEmailIdentifier(value: string) {
   return value.includes('@');
@@ -232,8 +232,8 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const adminId = process.env.IUMTEO_ADMIN_ID || '';
-        const adminPassword = process.env.IUMTEO_ADMIN_PASSWORD || '';
+        const adminId = process.env.IUMTEO_ADMIN_ID || process.env.ADMIN_USERNAME || '';
+        const adminPassword = process.env.IUMTEO_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || '';
 
         if (adminId && adminPassword && identifier === adminId && password === adminPassword) {
           return {
