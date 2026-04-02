@@ -1817,23 +1817,27 @@
     /* 반응형 */
     @media (max-width:768px) {
       .mobile-menu-btn {
-        display: none !important;
+        display: flex !important;
       }
 
       .nav {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-wrap: wrap;
+        align-items: center;
         padding-top: 14px;
         padding-bottom: 14px;
       }
 
       .nav-links {
-        display: flex !important;
+        display: none;
         flex-wrap: wrap;
         width: 100%;
         gap: 8px 10px;
         margin-top: 12px;
         justify-content: flex-start;
+      }
+
+      .nav-links.is-mobile-open {
+        display: flex;
       }
 
       .nav-links a:not(.nav-community-link),
@@ -1935,8 +1939,9 @@
 
       .hero-top-frame {
         border-radius: 0;
-        overflow-x: hidden;
-        overflow-y: visible;
+        border: none;
+        box-shadow: none;
+        overflow: hidden;
         aspect-ratio: auto;
         height: auto;
         min-height: 0;
@@ -1945,24 +1950,40 @@
       .hero-top-inner {
         width: 100%;
         height: auto;
+        overflow: hidden;
       }
 
       .hero-top-image {
-        width: 100%;
+        width: 180%;
         max-width: none;
         height: auto;
+        margin-left: -15%;
+      }
+
+      .hero-hotspot,
+      .hero-video-thumb {
+        display: none;
       }
 
       .hero-top+section {
-        padding-top: 32px;
+        padding-top: 24px;
       }
 
       .hero {
-        min-height: 65vh;
+        min-height: 55vh;
+      }
+
+      .hero-inner {
+        padding: 48px 16px;
       }
 
       .hero-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        line-height: 1.3;
+      }
+
+      .hero-subtitle {
+        font-size: 0.95rem;
       }
 
       .about-grid,
@@ -2149,7 +2170,7 @@
       </div>
       <nav class="nav-links">
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='#about'">홈</span>
+          <span class="dropdown-trigger" data-href="#about">홈</span>
           <div class="dropdown-content">
             <a href="#about"><span>🏢</span> 센터 소개</a>
             <div class="nested-dropdown nested-dropdown-trigger">
@@ -2168,7 +2189,7 @@
         </div>
 
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='#teachers'">강사 이음터</span>
+          <span class="dropdown-trigger" data-href="#teachers">강사 이음터</span>
           <div class="dropdown-content">
             <a href="https://app.yycenter.kr"><span>✨</span> 양양 강사 이음터</a>
             <a href="#teachers"
@@ -2224,7 +2245,7 @@
         });
       }
 
-      // 모바일 드롭다운 메뉴 토글
+      // 드롭다운 메뉴 토글 (모바일: 토글, 데스크톱: data-href 이동)
       const dropdowns = document.querySelectorAll('.nav-links .dropdown');
       dropdowns.forEach(dropdown => {
         const trigger = dropdown.querySelector('.dropdown-trigger');
@@ -2232,7 +2253,12 @@
           trigger.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
               e.preventDefault();
+              // 다른 열린 드롭다운 닫기
+              dropdowns.forEach(d => { if (d !== dropdown) d.classList.remove('is-open'); });
               dropdown.classList.toggle('is-open');
+            } else {
+              const href = trigger.getAttribute('data-href');
+              if (href) location.href = href;
             }
           });
         }
@@ -2243,6 +2269,7 @@
         link.addEventListener('click', () => {
           if (window.innerWidth <= 768) {
             navLinks.classList.remove('is-mobile-open');
+            dropdowns.forEach(d => d.classList.remove('is-open'));
           }
         });
       });
