@@ -6,38 +6,33 @@
 
 window.SHEET_CONFIG = {
   teachers: {
-    // Apps Script Web App URL for form submissions
     submitUrl: "https://script.google.com/macros/s/AKfycbx_aMmZsinjDb-cQIJeuX02l3hFUsFlEi0UlZtebYDwUigN_8mfpCZNC3RO6LZEl6uxpg/exec",
-    // 운영 원본 강사DB
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv",
-    // fallback (sample) url
-    fallbackUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv"
+    csvUrl: "/iumteo/api/proxy/csv?sheet=강사DB",
+    fallbackUrl: "/iumteo/api/proxy/csv?sheet=강사DB"
   },
   notices: {
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv",
+    csvUrl: "/iumteo/api/proxy/csv?sheet=공지사항",
   },
   popup: {
-    // 대표님께서 새로 만든 [팝업관리] 탭의 CSV 배포 URL
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1717968452&single=true&output=csv"
+    csvUrl: "/iumteo/api/proxy/csv?sheet=팝업관리"
   },
   videos: {
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=227098310&single=true&output=csv"
+    csvUrl: "/iumteo/api/proxy/csv?sheet=영상관리"
   },
   programs: {
-    "2024": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=494267727&single=true&output=csv",
-    "2025": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=10875331&single=true&output=csv",
-    "2026": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1746803437&single=true&output=csv"
+    "2024": "/iumteo/api/proxy/csv?sheet=2024사업",
+    "2025": "/iumteo/api/proxy/csv?sheet=2025사업",
+    "2026": "/iumteo/api/proxy/csv?sheet=2026사업"
   },
   pd: {
-    "2025": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1571351887&single=true&output=csv",
-    "2026": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1600189727&single=true&output=csv"
+    "2025": "/iumteo/api/proxy/csv?sheet=2025_PD",
+    "2026": "/iumteo/api/proxy/csv?sheet=2026_PD"
   },
-  // 이용자DB 탭 (통합시트 내 이용자 가입자 목록)
   users: {
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=846647310&single=true&output=csv"
+    csvUrl: "/iumteo/api/proxy/csv?sheet=이용자DB"
   },
   inquiries: {
-    csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv"
+    csvUrl: "/iumteo/api/proxy/csv?sheet=문의내역"
   }
 };
 
