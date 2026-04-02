@@ -3,7 +3,11 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
 import { findChatRoomsByInquiryIds } from '@/lib/chat-store';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
-import { parseCsv, rowsToRecords, pickByAliases } from '@/lib/sheets';
+import { pickByAliases, normalizeEmail, type CsvRecord } from '@/lib/sheets';
+
+function normalizeKey(value: string) {
+  return value.trim().toLowerCase();
+}
 
 import { assertGasSuccess, gasGet, type GasEnvelope } from '@/lib/gas-api';
 

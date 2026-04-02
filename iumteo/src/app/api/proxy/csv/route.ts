@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { getRequiredSession } from '@/lib/rbac';
 
 const SPREADSHEET_ID = '1PMi4ajeKeY_aY5Sh9zBy4kWw8tz7pwQoH9uOLa1A6ag';
 
@@ -13,12 +12,11 @@ export async function GET(request: Request) {
     }
 
     try {
-        const auth = new google.auth.JWT(
-            process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-            undefined,
-            process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            ['https://www.googleapis.com/auth/spreadsheets.readonly']
-        );
+        const auth = new google.auth.JWT({
+            email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+        });
 
         const sheets = google.sheets({ version: 'v4', auth });
         const response = await sheets.spreadsheets.values.get({

@@ -127,8 +127,8 @@ export async function GET(request: Request) {
     const gasRes = await fetch(
       url,
       emailParam || isAdmin
-        ? { cache: 'no-store' }
-        : { next: { revalidate: 300 } },
+        ? { cache: 'no-store', headers: { 'X-Api-Key': GAS_API_KEY } }
+        : { next: { revalidate: 300 }, headers: { 'X-Api-Key': GAS_API_KEY } },
     );
     const result = await gasRes.json();
 

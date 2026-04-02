@@ -203,7 +203,7 @@ function getInstructorInstagram(record: GenericRecord) {
 }
 
 function getInstructorInstagramOpen(record: GenericRecord) {
-  return findField(record, ['인스타그램공개여부', 'instagramOpen']) || '미공개';
+  return findField(record, ['인스타그램공개여부', '인스타그램공개', 'instagramOpen']) || '미공개';
 }
 
 function getInstructorPortfolioLink(record: GenericRecord) {
@@ -215,7 +215,7 @@ function getInstructorProfilePhoto(record: GenericRecord) {
 }
 
 function getInstructorUpdatedAt(record: GenericRecord) {
-  return findField(record, ['수정일', 'Updated_At', 'updatedAt']);
+  return findField(record, ['수정일시', '수정일', 'Updated_At', 'updatedAt']);
 }
 
 function getInstructorStatus(record: InstructorProfile) {

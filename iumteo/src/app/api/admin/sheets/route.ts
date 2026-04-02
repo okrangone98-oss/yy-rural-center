@@ -108,7 +108,7 @@ function categorizeInquiryStatus(record: CsvRecord) {
   return 'pending';
 }
 
-async function fetchGasSheetRecords(action: 'getInstructors' | 'getMembers' | 'getInquiries', limit: number, includeAll = false) {
+async function fetchGasSheetRecords(action: 'getInstructors' | 'getInquiries', limit: number, includeAll = false) {
   const params = new URLSearchParams({ action });
   if (includeAll) {
     params.set('includeAll', 'Y');
@@ -128,6 +128,28 @@ async function fetchGasSheetRecords(action: 'getInstructors' | 'getMembers' | 'g
   };
 }
 
+async function fetchMembersWithFallback(limit: number) {
+  // getMembers is not a supported GAS GET action — fall back to CSV export
+  const csvUrl = process.env.CSV_MEMBER_DB_URL;
+  if (!csvUrl) {
+    return { source: 'csv-fallback' as const, rowCount: 0, rows: [] as CsvRecord[], allRows: [] as CsvRecord[] };
+  }
+
+  const response = await fetch(csvUrl, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`회원 CSV 로드 실패: ${response.status} ${response.statusText}`);
+  }
+
+  const text = await response.text();
+  const rows = rowsToRecords(parseCsv(text));
+  return {
+    source: 'csv-fallback' as const,
+    rowCount: rows.length,
+    rows: rows.slice(0, limit),
+    allRows: rows,
+  };
+}
+
 
 export async function GET(request: Request) {
   try {
@@ -140,7 +162,7 @@ export async function GET(request: Request) {
     const limit = parseLimit(searchParams.get('limit'));
 
     const instructorSource = await fetchGasSheetRecords('getInstructors', limit, true);
-    const memberSource = await fetchGasSheetRecords('getMembers', limit);
+    const memberSource = await fetchMembersWithFallback(limit);
     const inquirySource = await fetchGasSheetRecords('getInquiries', limit);
 
     const instructorDb = instructorSource.allRows;
