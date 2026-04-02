@@ -14,9 +14,7 @@ import { getRequiredSession } from '@/lib/rbac';
 import { normalizeEmail, pickByAliases, rowsToRecords, parseCsv, type CsvRecord } from '@/lib/sheets';
 
 const MONTHLY_LIMIT = 20;
-const CSV_INQUIRY_DB_URL =
-  process.env.CSV_INQUIRY_DB_URL ||
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv';
+
 
 function sanitizeInquiryId(inquiryId: string) {
   return inquiryId.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -38,25 +36,11 @@ function normalizeInquiry(record: CsvRecord, index: number) {
 }
 
 async function fetchInquiryRows() {
-  try {
-    const result = assertGasSuccess(
-      await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInquiries' })),
-      'getInquiries',
-    );
-    return Array.isArray(result.data) ? result.data : [];
-  } catch (fetchError) {
-    const message = fetchError instanceof Error ? fetchError.message : '';
-    if (!message.toLowerCase().includes('unknown action') && !message.includes('최신')) {
-      throw fetchError;
-    }
-
-    const response = await fetch(`${CSV_INQUIRY_DB_URL}&t=${Date.now()}`, { cache: 'no-store' });
-    if (!response.ok) {
-      throw new Error('문의 이력을 불러오지 못했습니다.');
-    }
-
-    return rowsToRecords(parseCsv(await response.text()));
-  }
+  const result = assertGasSuccess(
+    await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInquiries' })),
+    'getInquiries',
+  );
+  return Array.isArray(result.data) ? result.data : [];
 }
 
 function calculateQuota(
@@ -168,7 +152,7 @@ export async function GET(request: Request) {
   if (error) return error;
 
   try {
-    if (!isGasConfigured() && !CSV_INQUIRY_DB_URL) {
+    if (!isGasConfigured()) {
       return NextResponse.json(
         { success: false, message: '문의 조회 설정이 아직 완료되지 않았습니다. 관리자 환경변수를 확인해 주세요.' },
         { status: 503 },

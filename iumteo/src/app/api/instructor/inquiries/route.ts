@@ -9,59 +9,22 @@ import { assertGasSuccess, gasGet, type GasEnvelope } from '@/lib/gas-api';
 
 export const dynamic = 'force-dynamic';
 
-const CSV_INQUIRY_DB_URL =
-  process.env.CSV_INQUIRY_DB_URL ||
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv';
 
-const CSV_INSTRUCTOR_DB_URL =
-  process.env.CSV_INSTRUCTOR_DB_URL ||
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv';
-
-type CsvRecord = Record<string, string>;
-
-function normalizeEmail(value: string) {
-  return value.trim().toLowerCase();
-}
-
-function normalizeKey(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, '');
-}
-
-async function fetchCsv(url: string): Promise<CsvRecord[]> {
-  const response = await fetch(`${url}&t=${Date.now()}`, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`CSV fetch failed: ${response.status}`);
-  }
-
-  return rowsToRecords(parseCsv(await response.text()));
-}
 
 async function fetchInquiryRows(): Promise<CsvRecord[]> {
-  try {
-    const result = assertGasSuccess(
-      await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInquiries' })),
-      'getInquiries',
-    );
-    return Array.isArray(result.data) ? result.data : [];
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message.toLowerCase() : '';
-    if (!errorMsg.includes('unknown action') && !errorMsg.includes('지원하지 않습')) throw err;
-    return fetchCsv(CSV_INQUIRY_DB_URL);
-  }
+  const result = assertGasSuccess(
+    await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInquiries' })),
+    'getInquiries',
+  );
+  return Array.isArray(result.data) ? result.data : [];
 }
 
 async function fetchInstructorRows(): Promise<CsvRecord[]> {
-  try {
-    const result = assertGasSuccess(
-      await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInstructors', cacheBust: String(Date.now()) })),
-      'getInstructors',
-    );
-    return Array.isArray(result.data) ? result.data : [];
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message.toLowerCase() : '';
-    if (!errorMsg.includes('unknown action') && !errorMsg.includes('지원하지 않습')) throw err;
-    return fetchCsv(CSV_INSTRUCTOR_DB_URL);
-  }
+  const result = assertGasSuccess(
+    await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInstructors', cacheBust: String(Date.now()) })),
+    'getInstructors',
+  );
+  return Array.isArray(result.data) ? result.data : [];
 }
 
 function getInstructorName(record: CsvRecord) {

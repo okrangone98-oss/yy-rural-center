@@ -5,9 +5,7 @@ import { findChatRoomsByInquiryIds } from '@/lib/chat-store';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import { parseCsv, pickByAliases, rowsToRecords, type CsvRecord } from '@/lib/sheets';
 
-const CSV_INQUIRY_DB_URL =
-  process.env.CSV_INQUIRY_DB_URL ||
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv';
+
 
 function normalizeInquiry(record: CsvRecord) {
   return {
@@ -38,22 +36,8 @@ export async function GET() {
     )
       .then((result) => assertGasSuccess(result, 'getInquiries'))
       .then((result) => (Array.isArray(result.data) ? result.data : []))
-      .catch(async (fetchError) => {
-        const message = fetchError instanceof Error ? fetchError.message : '';
-        if (!message.includes('지원하지 않습니다')) {
-          throw fetchError;
-        }
-
-        const response = await fetch(`${CSV_INQUIRY_DB_URL}&t=${Date.now()}`, { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error('문의 내역을 불러오지 못했습니다.');
-        }
-
-        return rowsToRecords(parseCsv(await response.text())).map((record, index) => ({
-          ...record,
-          rowIndex: String(index + 2),
-          inquiryId: `sheet-${index + 2}`,
-        }));
+      .catch((fetchError) => {
+        throw fetchError;
       });
 
     const email = String(session.user.email || '').trim().toLowerCase();
