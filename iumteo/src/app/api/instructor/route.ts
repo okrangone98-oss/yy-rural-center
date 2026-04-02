@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth-options';
+import { resolveProfilePhotoPublicUrl } from '@/lib/firebase-storage';
 
 const GAS_API_URL = process.env.GAS_API_URL || '';
 const GAS_API_KEY = process.env.GAS_API_KEY || '';
@@ -14,9 +15,9 @@ const ORG_KEYS = ['org', '소속', '기관'] as const;
 const FIELD_KEYS = ['field', '강의분야', '분야', '상세내용', '활동내용', '전문분야'] as const;
 const AREA_KEYS = ['area', '활동지역', '활동 지역'] as const;
 const INTRO_KEYS = ['intro', '소개', '강의주제', '내용', '프로그램'] as const;
-const PROFILE_PHOTO_KEYS = ['profilePhoto', '프로필사진', 'photo'] as const;
+const PROFILE_PHOTO_KEYS = ['profilePhoto', 'Profile_Photo', 'profile_photo', '프로필사진', 'photo'] as const;
 const INSTA_KEYS = ['insta', '인스타그램주소', '인스타그램', 'SNS'] as const;
-const INSTAGRAM_PUBLIC_KEYS = ['instaPublic', '인스타그램공개', '인스타공개여부', '공개'] as const;
+const INSTAGRAM_PUBLIC_KEYS = ['instaPublic', 'instagramOpen', '인스타그램공개여부', '인스타그램공개', '인스타공개여부', '공개'] as const;
 const ROLE_KEYS = ['role', '직위', '직함', '역할'] as const;
 const ADDRESS_KEYS = ['address', '주소', '거주지'] as const;
 const TARGET_KEYS = ['target', '대상'] as const;
@@ -68,7 +69,9 @@ function normalizeInstructorRecord(record: Record<string, unknown>) {
   const area = String(pickFirstValue(record, AREA_KEYS) || '').trim();
   const intro = String(pickFirstValue(record, INTRO_KEYS) || '').trim();
   const email = String(pickFirstValue(record, EMAIL_KEYS) || '').trim();
-  const profilePhoto = String(pickFirstValue(record, PROFILE_PHOTO_KEYS) || '').trim();
+  const profilePhoto = resolveProfilePhotoPublicUrl(
+    String(pickFirstValue(record, PROFILE_PHOTO_KEYS) || '').trim(),
+  );
   const insta = String(pickFirstValue(record, INSTA_KEYS) || '').trim();
   const instaPublic = String(pickFirstValue(record, INSTAGRAM_PUBLIC_KEYS) || '').trim();
   const role = String(pickFirstValue(record, ROLE_KEYS) || '').trim();
@@ -148,8 +151,6 @@ export async function GET(request: Request) {
         '전화번호': '*** (센터 문의)',
         '이메일': '*** (센터 문의)',
         '사용자비번': '********',
-        '프로필사진': '',
-        profilePhoto: '',
       };
     };
 

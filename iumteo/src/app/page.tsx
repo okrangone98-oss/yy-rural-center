@@ -16,6 +16,9 @@ type PublicInstructor = {
   area?: string;
   org?: string;
   profilePhoto?: string;
+  photo?: string;
+  Profile_Photo?: string;
+  profile_photo?: string;
 };
 
 type NoticeItem = {
@@ -34,29 +37,44 @@ function InstructorCard({ instructor }: { instructor: PublicInstructor }) {
     <button
       type="button"
       onClick={() => router.push(`/teacher/${encodeURIComponent(name)}`)}
-      className="group flex flex-col items-center gap-3 rounded-3xl border border-emerald-100 bg-white p-5 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
+      className="group flex w-full flex-col gap-4 rounded-[28px] border border-emerald-100 bg-white p-5 text-left shadow-[0_14px_40px_rgba(16,185,129,0.08)] transition-all hover:-translate-y-1 hover:border-emerald-200 hover:shadow-[0_20px_46px_rgba(16,185,129,0.14)]"
     >
-      <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-100 bg-emerald-50">
-        {instructor.profilePhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={instructor.profilePhoto}
-            alt={name}
-            className="h-full w-full object-cover"
-            onError={(event) => {
-              event.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=80`;
-            }}
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-2xl font-black text-emerald-700">
-            {name.slice(0, 1)}
+      <div className="flex items-center gap-4">
+        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-emerald-100 bg-emerald-50 shadow-inner">
+          {instructor.profilePhoto ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={instructor.profilePhoto}
+              alt={name}
+              className="h-full w-full object-cover"
+              onError={(event) => {
+                event.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=10b981&color=fff&size=80`;
+              }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-2xl font-black text-emerald-700">
+              {name.slice(0, 1)}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-lg font-black text-gray-900 group-hover:text-emerald-700">{name}</p>
+            {instructor.field ? (
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                {instructor.field}
+              </span>
+            ) : null}
           </div>
-        )}
+          {instructor.org ? <p className="mt-1 line-clamp-1 text-sm text-gray-600">{instructor.org}</p> : null}
+          {instructor.area ? <p className="mt-2 text-xs font-medium text-gray-500">활동 지역 {instructor.area}</p> : null}
+        </div>
       </div>
-      <div className="space-y-1">
-        <p className="font-bold text-gray-900 group-hover:text-emerald-700">{name}</p>
-        {instructor.field ? <p className="text-sm text-emerald-700">{instructor.field}</p> : null}
-        {instructor.area ? <p className="text-xs text-gray-500">{instructor.area}</p> : null}
+
+      <div className="flex items-center justify-between rounded-2xl bg-[#f7fbf8] px-4 py-3">
+        <p className="text-sm text-gray-500">카드를 눌러 상세 약력과 문의 정보를 확인해보세요.</p>
+        <span className="text-sm font-bold text-emerald-700">상세 보기 →</span>
       </div>
     </button>
   );
@@ -78,9 +96,8 @@ function QuickCard({
   return (
     <Link
       href={href}
-      className={`group rounded-3xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg ${
-        highlight ? 'border-emerald-200 bg-emerald-50' : 'border-gray-100 bg-white'
-      }`}
+      className={`group rounded-3xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg ${highlight ? 'border-emerald-200 bg-emerald-50' : 'border-gray-100 bg-white'
+        }`}
     >
       <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-2xl ${highlight ? 'bg-emerald-100' : 'bg-gray-50'}`}>
         {icon}
@@ -105,6 +122,9 @@ export default function HomePage() {
   const { data: session, status } = useSession();
   const [instructors, setInstructors] = useState<PublicInstructor[]>([]);
   const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [directorySearch, setDirectorySearch] = useState('');
+  const [directoryField, setDirectoryField] = useState('전체');
+  const [instructorPage, setInstructorPage] = useState(1);
 
   const role = session?.user?.role;
   const isLoggedIn = status === 'authenticated';
@@ -119,10 +139,11 @@ export default function HomePage() {
         setInstructors(
           json.data
             .filter((item: PublicInstructor) => item.name)
-            .slice(0, 6)
             .map((item: PublicInstructor) => ({
               ...item,
-              profilePhoto: resolveProfilePhotoPublicUrl(item.profilePhoto),
+              profilePhoto: resolveProfilePhotoPublicUrl(
+                item.profilePhoto || item.photo || item.Profile_Photo || item.profile_photo,
+              ),
             })),
         );
       })
@@ -157,7 +178,7 @@ export default function HomePage() {
     if (role === 'INSTRUCTOR') {
       return [
         { icon: '📥', title: '받은 문의', description: '기관과 지역 주민에게서 도착한 문의를 먼저 확인합니다.', href: '/teacher', highlight: true },
-        { icon: '💬', title: '채팅', description: '수락한 문의의 대화를 이어가며 협의를 진행합니다.', href: '/chat' },
+        { icon: '💬', title: '채팅', description: '수락한 문의는 채팅을 이어가며 협의할 수 있습니다.', href: '/chat' },
         { icon: '🪪', title: '강사 카드', description: '소개, 경력, 활동 분야와 공개 동의한 인스타그램까지 정리해 자연스럽게 홍보합니다.', href: '/teacher' },
         { icon: '📢', title: '공지사항', description: '센터 운영 소식과 안내를 확인합니다.', href: '/notices' },
       ];
@@ -184,11 +205,11 @@ export default function HomePage() {
     if (role === 'INSTRUCTOR') {
       return {
         badge: 'Instructor Home',
-        title: '첫 문의부터\n지역과의 협력까지\n양양 이음터와 함께',
+        title: '양양의 어제와 오늘을 잇고,\n내일을 일구는 사람들의 네트워크',
         description:
           '양양 이음터는 강사님과 기관, 지역 주민을 연결해 수업 문의와 업무 협의가 자연스럽게 이어지도록 돕는 비영리 커뮤니티 플랫폼입니다.',
         secondary:
-          '받은 문의를 확인하고, 필요한 경우 채팅으로 협의를 이어가며, 공개 동의한 인스타그램 주소와 연동 버튼으로 강사님의 프로필 홍보도 자연스럽게 이어지도록 지원합니다.',
+          '받은 문의를 확인하고, 필요한 경우 채팅으로 협의를 이어가 보세요.',
         primaryHref: '/teacher',
         primaryLabel: '받은 문의 확인하기',
         secondaryHref: '/chat',
@@ -199,11 +220,11 @@ export default function HomePage() {
     if (role === 'USER') {
       return {
         badge: 'Local Matching',
-        title: '지역과 강사님을\n연결하는\n양양 이음터',
+        title: '양양의 어제와 오늘을 잇고,\n내일을 일구는 사람들의 네트워크',
         description:
-          '교육과 지역 서비스를 위한 문의를 남기고, 수락된 건은 채팅으로 이어서 협의할 수 있는 양양 지역 커뮤니티 플랫폼입니다.',
+          '교육과 지역 서비스를 위한 문의를 강사님께 남기고, 수락된 건은 채팅으로 이어서 협의할 수 있도록 돕는 비영리 플랫폼입니다.',
         secondary:
-          '일반회원은 문의하기 중, 채팅, 공지사항을 한 흐름으로 확인하고, 필요한 강사님을 찾아 지역 협업을 시작할 수 있습니다.',
+          '일반회원은 문의하기를 통해 필요한 강사님을 찾아 협업을 시작할 수 있습니다.',
         primaryHref: '/instructors',
         primaryLabel: '강사찾기',
         secondaryHref: '/profile',
@@ -234,12 +255,12 @@ export default function HomePage() {
       ];
     }
 
-      return [
-        { label: '공개 강사 카드', value: `${Math.max(instructors.length, 6)}+`, caption: '양양 지역 강사님의 전문 분야와 공개 프로필을 한눈에 확인할 수 있습니다.' },
-        { label: '월 문의 가능 횟수', value: '20회', caption: '일반회원은 월 20회 범위 안에서 문의를 접수할 수 있습니다.' },
-        { label: '공지와 안내', value: `${Math.max(notices.length, 3)}건`, caption: '센터 공지와 운영 안내를 빠르게 확인할 수 있습니다.' },
-      ];
-  }, [instructors.length, notices.length, role]);
+    return [
+      { label: '이용 에티켓 1', value: '존중하는 소통', caption: '강사님과의 문의 및 채팅 시 서로를 존중하고 다정한 언어를 사용해 주세요.' },
+      { label: '이용 에티켓 2', value: '구체적인 문의', caption: '수업 목적, 대상 인원, 희망 장소와 일정을 명확히 적어주시면 빠른 협의가 가능합니다.' },
+      { label: '이용 에티켓 3', value: '소중한 약속', caption: '협의가 완료된 일정은 꼭 지켜주시고, 부득이한 변동이 생기면 미리 당사자에게 알려주세요.' },
+    ];
+  }, [role]);
 
   const workflowSteps = useMemo(() => {
     if (role === 'INSTRUCTOR') {
@@ -322,6 +343,35 @@ export default function HomePage() {
     { icon: '💬', label: '의사 타진' },
     { icon: '🫶', label: '연결 완료' },
   ];
+  const filteredInstructors = useMemo(() => {
+    const keyword = directorySearch.trim().toLowerCase();
+
+    return instructors.filter((item) => {
+      const matchesKeyword =
+        !keyword ||
+        (item.name || '').toLowerCase().includes(keyword) ||
+        (item.field || '').toLowerCase().includes(keyword) ||
+        (item.area || '').toLowerCase().includes(keyword) ||
+        (item.org || '').toLowerCase().includes(keyword);
+
+      const matchesField = directoryField === '전체' || item.field === directoryField;
+
+      return matchesKeyword && matchesField;
+    });
+  }, [directoryField, directorySearch, instructors]);
+
+  useEffect(() => {
+    setInstructorPage(1);
+  }, [directoryField, directorySearch]);
+
+  const INSTRUCTORS_PER_PAGE = 6;
+  const totalPages = Math.max(1, Math.ceil(filteredInstructors.length / INSTRUCTORS_PER_PAGE));
+  const previewInstructors = filteredInstructors.slice(
+    (instructorPage - 1) * INSTRUCTORS_PER_PAGE,
+    instructorPage * INSTRUCTORS_PER_PAGE
+  );
+  
+  const isDirectoryFiltered = directorySearch.trim().length > 0 || directoryField !== '전체';
 
   return (
     <div className="min-h-screen bg-[#f7fbf8] text-gray-900">
@@ -389,10 +439,25 @@ export default function HomePage() {
             <div className="relative mx-auto max-w-5xl text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.32em] text-emerald-700">{heroCopy.badge}</p>
               <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-emerald-100 bg-white/90 px-5 py-3 shadow-sm shadow-emerald-100/60">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-700 text-xl font-black text-white">이</div>
-                <span className="text-2xl font-black tracking-tight text-emerald-950 md:text-4xl">양양 이음터</span>
+                <div className="flex -space-x-3">
+                  {previewInstructors.slice(0, 5).map((instructor, i) => (
+                    <div key={i} className="h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-emerald-100 shadow-sm transition-transform hover:scale-110">
+                      <img
+                        src={instructor.profilePhoto}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor.name || '')}&background=10b981&color=fff&size=80`;
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <span className="text-sm font-bold tracking-tight text-emerald-950 md:text-base">
+                  {instructors.length}+명의 지역 강사가 함께합니다
+                </span>
               </div>
-              <h1 className="mx-auto mt-10 max-w-4xl whitespace-pre-line text-3xl font-black leading-tight text-emerald-950 md:text-5xl">
+              <h1 className="mx-auto mt-10 max-w-4xl whitespace-pre-line text-4xl font-black leading-tight tracking-tight text-emerald-950 break-keep md:text-5xl md:leading-[1.15]">
                 {heroCopy.title}
               </h1>
               <p className="mx-auto mt-6 max-w-4xl text-base leading-8 text-gray-700 md:text-xl">
@@ -490,16 +555,35 @@ export default function HomePage() {
               <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-emerald-100">
                 {heroCopy.badge}
               </div>
-              <h1 className="mt-6 whitespace-pre-line text-4xl font-black leading-tight md:text-6xl">
+              <h1 className="mt-6 whitespace-pre-line text-4xl font-black leading-tight tracking-tight break-keep md:text-6xl md:leading-[1.1] lg:text-6xl">
                 {heroCopy.title}
               </h1>
               <p className="mt-5 max-w-3xl text-base leading-8 text-emerald-100 md:text-lg">
                 {heroCopy.description}
               </p>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-emerald-50/90 md:text-base">
-                {heroCopy.secondary}
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+              <div className="mt-10 flex items-center gap-4">
+                <div className="flex -space-x-4">
+                  {previewInstructors.slice(0, 5).map((instructor, i) => (
+                    <div key={i} className="h-14 w-14 overflow-hidden rounded-full border-4 border-emerald-900/20 bg-emerald-800 shadow-xl transition-transform hover:z-10 hover:scale-110">
+                      <img
+                        src={instructor.profilePhoto}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(instructor.name || '')}&background=10b981&color=fff&size=80`;
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="text-left text-white/90">
+                  <p className="text-lg font-black">{instructors.length}+명</p>
+                  <p className="text-xs font-medium text-emerald-100">함께하는 지역 강사</p>
+                </div>
+              </div>
+
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <Link href={heroCopy.primaryHref} className="rounded-2xl bg-white px-7 py-3.5 text-center font-bold text-emerald-800 hover:bg-emerald-50">
                   {heroCopy.primaryLabel}
                 </Link>
@@ -536,54 +620,126 @@ export default function HomePage() {
 
       <section className="bg-white px-4 py-14">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Instructor Directory</p>
-              <h2 className="mt-2 text-2xl font-black text-gray-900">{role === 'GUEST' ? '양양 강사 정보' : '강사찾기'}</h2>
-              <p className="mt-2 text-sm text-gray-500">
-                {role === 'GUEST'
-                  ? '우리 지역 활동가부터 분야별 전문가까지, 양양 안에서 함께할 파트너를 한눈에 살펴보세요.'
-                  : '양양에서 활동하는 강사님을 공개 목록으로 살펴보고, 상세 페이지에서 문의를 이어가거나 공개 동의한 인스타그램 정보를 확인할 수 있습니다.'}
-              </p>
+              <h2 className="mt-2 text-2xl font-black text-gray-900">양양 강사 정보</h2>
             </div>
             <Link href="/instructors" className="text-sm font-bold text-emerald-700 hover:text-emerald-900">
               전체 보기 →
             </Link>
           </div>
 
-          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-100 bg-[#fffdf7] px-5 py-4 text-sm leading-7 text-gray-600 shadow-sm">
-            <span className="mt-0.5 text-base">💡</span>
-            <p>
-              {role === 'GUEST'
-                ? '카드를 눌러 강사님의 상세 약력을 확인하고, 전체 강사 보기에서 분야별 탐색을 이어가보세요. 강사 연결 요청은 센터 확인 절차를 거쳐 진행됩니다.'
-                : '분야와 지역을 먼저 훑어본 뒤, 적합한 강사님을 찾으면 상세 페이지에서 문의를 남겨보세요. 강사님이 공개에 동의한 경우 인스타그램 주소와 연동 버튼도 함께 확인할 수 있어 프로필과 활동 분위기를 더 자연스럽게 살펴볼 수 있습니다.'}
-            </p>
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-3.5 text-sm font-medium text-emerald-800">
+            <span className="shrink-0 text-emerald-500">📋</span>
+            <p>카드를 눌러 상세 약력을 확인할 수 있습니다. 상단 카테고리를 눌러 분야별로 필터링해 보세요.</p>
           </div>
 
-          <div className="mb-8 flex flex-wrap gap-2">
+          <p className="mb-5 text-sm leading-7 text-gray-600">
+            우리 지역 활동가부터 분야별 전문 강사까지, 최적의 파트너를 검색해보세요.
+          </p>
+
+          <div className="mb-5 max-w-xl">
+            <label className="relative block">
+              <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-lg text-emerald-500">🔎</span>
+              <input
+                type="text"
+                value={directorySearch}
+                onChange={(event) => setDirectorySearch(event.target.value)}
+                placeholder="강사명, 분야, 소속 검색..."
+                className="w-full rounded-full border border-emerald-100 bg-white py-4 pl-14 pr-5 text-sm shadow-[0_10px_30px_rgba(16,185,129,0.08)] outline-none transition placeholder:text-gray-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+              />
+            </label>
+          </div>
+
+          <div className="mb-4 flex flex-wrap gap-2">
             {fieldChips.map((topic, index) => (
-              <span
+              <button
+                type="button"
                 key={topic}
-                className={`rounded-full border px-4 py-2 text-sm font-medium ${
-                  index === 0
-                    ? 'border-emerald-600 bg-emerald-700 text-white'
-                    : 'border-gray-200 bg-white text-gray-600'
-                }`}
+                onClick={() => setDirectoryField(topic)}
+                className={`rounded-full border px-4 py-2 text-sm font-medium ${directoryField === topic
+                  ? 'border-emerald-600 bg-emerald-700 text-white shadow-sm'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200 hover:text-emerald-700'
+                  }`}
               >
                 {topic}
-              </span>
+              </button>
             ))}
           </div>
 
-          {instructors.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {instructors.map((instructor, index) => (
-                <InstructorCard key={instructor.id || `${instructor.name}-${index}`} instructor={instructor} />
-              ))}
-            </div>
+          <div className="mb-8 flex items-center justify-between gap-4 text-sm">
+            <p className="text-gray-500">
+              {isDirectoryFiltered ? (
+                <>
+                  검색 결과 <span className="font-bold text-gray-900">{filteredInstructors.length}명</span>
+                </>
+              ) : (
+                <>
+                  등록 강사 <span className="font-bold text-gray-900">{instructors.length}명</span> 중 미리보기
+                </>
+              )}
+            </p>
+            {isDirectoryFiltered ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setDirectorySearch('');
+                  setDirectoryField('전체');
+                }}
+                className="rounded-full border border-gray-200 px-4 py-2 font-medium text-gray-600 hover:border-emerald-200 hover:text-emerald-700"
+              >
+                필터 초기화
+              </button>
+            ) : null}
+          </div>
+
+          {previewInstructors.length > 0 ? (
+            <>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {previewInstructors.map((instructor, index) => (
+                  <InstructorCard key={instructor.id || `${instructor.name}-${index}`} instructor={instructor} />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setInstructorPage(p => Math.max(1, p - 1))}
+                    disabled={instructorPage === 1}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-emerald-200 hover:text-emerald-700 disabled:opacity-50 disabled:hover:border-gray-200 disabled:hover:text-gray-500"
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setInstructorPage(p)}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full border ${
+                        instructorPage === p
+                          ? 'border-emerald-600 bg-emerald-700 text-white shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200 hover:text-emerald-700'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setInstructorPage(p => Math.min(totalPages, p + 1))}
+                    disabled={instructorPage === totalPages}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 hover:border-emerald-200 hover:text-emerald-700 disabled:opacity-50 disabled:hover:border-gray-200 disabled:hover:text-gray-500"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50 px-6 py-16 text-center text-sm text-gray-500">
-              강사 목록을 불러오는 중입니다.
+              조건에 맞는 강사를 찾지 못했습니다. 검색어나 카테고리를 다시 조정해보세요.
             </div>
           )}
         </div>

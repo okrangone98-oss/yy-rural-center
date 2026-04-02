@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
@@ -10,6 +9,16 @@ import { getAppPath } from '@/lib/app-url';
 // 이미지 압축 라이브러리는 무겁기 때문에 lazy import로 처리
 async function getProfilePhotoUtils() {
   return import('@/lib/profile-photo-client');
+}
+
+// Firebase Storage 경로 → 공개 URL 변환 (동기, 클라이언트 전용)
+function resolvePhotoUrl(value: string) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('data:')) return trimmed;
+  if (trimmed.startsWith('/')) return trimmed;
+  const base = (process.env.NEXT_PUBLIC_STORAGE_BASE_URL || '').replace(/\/+$/, '');
+  return base ? `${base}/${encodeURIComponent(trimmed)}?alt=media` : trimmed;
 }
 
 type Role = 'GUEST' | 'USER' | 'INSTRUCTOR' | 'ADMIN';
@@ -125,6 +134,8 @@ const INSTRUCTOR_STATUS_OPTIONS = ['대기', '승인', '삭제요청', '반려']
 
 const PUBLIC_PAGE_SIZE = 20;
 const ADMIN_INQUIRY_PAGE_SIZE = 7;
+const RAW_DB_PAGE_SIZE = 20;
+const RAW_INQUIRY_DB_PAGE_SIZE = 10;
 
 function hasMeaningfulValue(value: unknown) {
   if (value === null || value === undefined) return false;
@@ -411,6 +422,15 @@ export default function AdminDashboardPage() {
   const [inquiryActionLoadingId, setInquiryActionLoadingId] = useState<string | null>(null);
   const [inquiryActionMessage, setInquiryActionMessage] = useState<string | null>(null);
 
+  const [inquiryBoxOpen, setInquiryBoxOpen] = useState(true);
+  const [instructorDbOpen, setInstructorDbOpen] = useState(false);
+  const [memberDbOpen, setMemberDbOpen] = useState(false);
+  const [inquiryDbOpen, setInquiryDbOpen] = useState(false);
+  const [rawInquirySearch, setRawInquirySearch] = useState('');
+  const [rawInquiryPage, setRawInquiryPage] = useState(1);
+  const [instructorDbPage, setInstructorDbPage] = useState(1);
+  const [memberDbPage, setMemberDbPage] = useState(1);
+
   const actualRole = (session?.user?.role || 'GUEST') as Role;
   const effectiveRole: Role = actualRole === 'ADMIN' ? previewRole || actualRole : actualRole;
   const isPreviewing = actualRole === 'ADMIN' && !!previewRole && previewRole !== 'ADMIN';
@@ -476,11 +496,7 @@ export default function AdminDashboardPage() {
       fetchAllInstructors();
     }
 
-    if (
-      activeTab === 'instructor' &&
-      (effectiveRole === 'INSTRUCTOR' || effectiveRole === 'ADMIN') &&
-      !(actualRole === 'ADMIN' && isPreviewing)
-    ) {
+    if (activeTab === 'instructor' && effectiveRole === 'INSTRUCTOR' && actualRole !== 'ADMIN') {
       fetchMyProfile();
     }
 
@@ -497,6 +513,12 @@ export default function AdminDashboardPage() {
     isPreviewing,
     sheetBundle,
   ]);
+
+  useEffect(() => {
+    if (actualRole === 'ADMIN' && activeTab === 'instructor' && !isPreviewing) {
+      setActiveTab('admin');
+    }
+  }, [activeTab, actualRole, isPreviewing]);
 
   const handleSaveProfile = async () => {
     if (!session?.user?.email || isPreviewing) return;
@@ -1454,9 +1476,11 @@ export default function AdminDashboardPage() {
 
           {(effectiveRole === 'INSTRUCTOR' || effectiveRole === 'ADMIN') && (
             <button
-              onClick={() => setActiveTab('instructor')}
+              onClick={() => setActiveTab(actualRole === 'ADMIN' && !isPreviewing ? 'admin' : 'instructor')}
               className={`whitespace-nowrap rounded-xl px-4 py-3 text-left text-sm font-medium ${
-                activeTab === 'instructor' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600 hover:bg-gray-100'
+                activeTab === 'instructor' || (actualRole === 'ADMIN' && !isPreviewing && activeTab === 'admin')
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               강사 프로필 관리
@@ -2280,13 +2304,12 @@ export default function AdminDashboardPage() {
                             >
                               <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                                 {getInstructorProfilePhoto(adminInstructorForm) ? (
-                                  <Image
-                                    src={getInstructorProfilePhoto(adminInstructorForm)}
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={resolvePhotoUrl(getInstructorProfilePhoto(adminInstructorForm))}
                                     alt={`${getInstructorName(adminInstructorForm)} 강사 프로필 사진`}
-                                    width={1200}
-                                    height={960}
-                                    unoptimized
                                     className="h-80 w-full object-cover"
+                                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
                                   />
                                 ) : (
                                   <div className="flex h-80 items-center justify-center text-sm text-gray-400">
@@ -2355,7 +2378,7 @@ export default function AdminDashboardPage() {
                               <div className="mt-4 flex flex-wrap gap-2">
                                 {getInstructorProfilePhoto(adminInstructorForm) && (
                                   <a
-                                    href={getInstructorProfilePhoto(adminInstructorForm)}
+                                    href={resolvePhotoUrl(getInstructorProfilePhoto(adminInstructorForm))}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="rounded-lg border border-gray-300 px-3 py-2 text-xs hover:bg-gray-50"
@@ -2450,13 +2473,13 @@ export default function AdminDashboardPage() {
                   )}
                 </div>
 
-                <div id="admin-inquiry-box" className="rounded-2xl border border-gray-200 bg-white p-4 space-y-4">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                <div id="admin-inquiry-box" className="rounded-2xl border border-gray-200 bg-white">
+                  <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                       <h3 className="text-sm font-semibold text-gray-700">문의 운영함</h3>
-                      <p className="mt-1 text-xs text-gray-500">문의 상태 정리, 강사 전달, 회원 회신까지 처리하는 운영 큐입니다.</p>
+                      <p className="mt-0.5 text-xs text-gray-500">문의 상태 정리, 강사 전달, 회원 회신까지 처리하는 운영 큐입니다.</p>
                     </div>
-                    <div className="flex flex-col gap-2 md:flex-row">
+                    <div className="flex flex-wrap items-center gap-2">
                       <input
                         value={inquirySearch}
                         onChange={(event) => setInquirySearch(event.target.value)}
@@ -2484,9 +2507,17 @@ export default function AdminDashboardPage() {
                       >
                         {bulkInquiryDeleting ? '삭제 처리 중...' : `선택 삭제 ${selectedInquiryIds.length}`}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setInquiryBoxOpen((v) => !v)}
+                        className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                      >
+                        {inquiryBoxOpen ? '숨김 ▲' : '보기 ▼'}
+                      </button>
                     </div>
                   </div>
 
+                  {inquiryBoxOpen && (<div className="p-4 space-y-4">
                   {manualInquiryMessage && (
                     <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
                       {manualInquiryMessage}
@@ -2703,26 +2734,247 @@ export default function AdminDashboardPage() {
                       ) : null}
                     </div>
                   )}
+                  </div>)}
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-2">
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <h3 className="mb-2 text-sm font-semibold text-gray-700">
-                      강사DB 샘플 ({filteredSheetSources.instructorDb.rows.length}/{sheetBundle.sources.instructorDb.rowCount})
-                    </h3>
-                    {renderGenericTable(filteredSheetSources.instructorDb.rows, '강사DB 데이터가 없습니다.')}
+                <div className="space-y-4">
+                  {/* 강사 DB */}
+                  <div className="rounded-2xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => { setInstructorDbOpen((v) => !v); setInstructorDbPage(1); }}
+                      className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 rounded-2xl"
+                    >
+                      <div>
+                        <span className="text-sm font-semibold text-gray-700">강사 DB</span>
+                        <span className="ml-2 text-xs text-gray-400">({filteredSheetSources.instructorDb.rows.length}/{sheetBundle.sources.instructorDb.rowCount}건)</span>
+                      </div>
+                      <span className="text-xs text-gray-400">{instructorDbOpen ? '숨김 ▲' : '보기 ▼'}</span>
+                    </button>
+                    {instructorDbOpen && (() => {
+                      const rows = filteredSheetSources.instructorDb.rows;
+                      const totalPages = Math.max(1, Math.ceil(rows.length / RAW_DB_PAGE_SIZE));
+                      const pagedRows = rows.slice((instructorDbPage - 1) * RAW_DB_PAGE_SIZE, instructorDbPage * RAW_DB_PAGE_SIZE);
+                      return (
+                        <div className="border-t border-gray-100">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead className="bg-gray-50 text-xs text-gray-500">
+                                <tr>
+                                  <th className="w-8 px-3 py-2 text-left">#</th>
+                                  <th className="px-3 py-2 text-left">성명</th>
+                                  <th className="px-3 py-2 text-left">강의분야</th>
+                                  <th className="px-3 py-2 text-left">활동지역</th>
+                                  <th className="px-3 py-2 text-left">연락처</th>
+                                  <th className="px-3 py-2 text-left">이메일</th>
+                                  <th className="px-3 py-2 text-left">상태</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {pagedRows.length === 0 && (
+                                  <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">강사DB 데이터가 없습니다.</td></tr>
+                                )}
+                                {pagedRows.map((record, idx) => {
+                                  const status = getInstructorStatus(record as InstructorProfile);
+                                  return (
+                                    <tr key={`idb-${idx}`} className="hover:bg-gray-50">
+                                      <td className="px-3 py-2 text-xs text-gray-400">{(instructorDbPage - 1) * RAW_DB_PAGE_SIZE + idx + 1}</td>
+                                      <td className="px-3 py-2 font-medium text-gray-800">{getInstructorName(record) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-600">{getInstructorField(record) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-600">{getInstructorArea(record) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-600">{getInstructorPhone(record) || '-'}</td>
+                                      <td className="max-w-[180px] truncate px-3 py-2 text-gray-600">{getInstructorEmail(record) || '-'}</td>
+                                      <td className="px-3 py-2">
+                                        <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getInstructorStatusTone(status)}`}>{status}</span>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+                              <span className="text-xs text-gray-500">{rows.length}명 · {totalPages}페이지</span>
+                              <div className="flex gap-1">
+                                <button type="button" onClick={() => setInstructorDbPage((p) => Math.max(1, p - 1))} disabled={instructorDbPage === 1} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">이전</button>
+                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
+                                  <button key={p} type="button" onClick={() => setInstructorDbPage(p)} className={`rounded-lg border px-3 py-1.5 text-xs ${instructorDbPage === p ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>{p}</button>
+                                ))}
+                                <button type="button" onClick={() => setInstructorDbPage((p) => Math.min(totalPages, p + 1))} disabled={instructorDbPage === totalPages} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">다음</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                    <h3 className="mb-2 text-sm font-semibold text-gray-700">
-                      이용자DB 샘플 ({filteredSheetSources.memberDb.rows.length}/{sheetBundle.sources.memberDb.rowCount})
-                    </h3>
-                    {renderGenericTable(filteredSheetSources.memberDb.rows, '이용자DB 데이터가 없습니다.')}
+
+                  {/* 이용자 DB */}
+                  <div className="rounded-2xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => { setMemberDbOpen((v) => !v); setMemberDbPage(1); }}
+                      className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 rounded-2xl"
+                    >
+                      <div>
+                        <span className="text-sm font-semibold text-gray-700">이용자 DB</span>
+                        <span className="ml-2 text-xs text-gray-400">({filteredSheetSources.memberDb.rows.length}/{sheetBundle.sources.memberDb.rowCount}건)</span>
+                      </div>
+                      <span className="text-xs text-gray-400">{memberDbOpen ? '숨김 ▲' : '보기 ▼'}</span>
+                    </button>
+                    {memberDbOpen && (() => {
+                      const rows = filteredSheetSources.memberDb.rows;
+                      const totalPages = Math.max(1, Math.ceil(rows.length / RAW_DB_PAGE_SIZE));
+                      const pagedRows = rows.slice((memberDbPage - 1) * RAW_DB_PAGE_SIZE, memberDbPage * RAW_DB_PAGE_SIZE);
+                      return (
+                        <div className="border-t border-gray-100">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead className="bg-gray-50 text-xs text-gray-500">
+                                <tr>
+                                  <th className="w-8 px-3 py-2 text-left">#</th>
+                                  <th className="px-3 py-2 text-left">이름</th>
+                                  <th className="px-3 py-2 text-left">이메일</th>
+                                  <th className="px-3 py-2 text-left">연락처</th>
+                                  <th className="px-3 py-2 text-left">소속</th>
+                                  <th className="px-3 py-2 text-left">상태</th>
+                                  <th className="px-3 py-2 text-left">마지막 로그인</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {pagedRows.length === 0 && (
+                                  <tr><td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">이용자DB 데이터가 없습니다.</td></tr>
+                                )}
+                                {pagedRows.map((record, idx) => {
+                                  const status = getMemberStatus(record);
+                                  return (
+                                    <tr key={`mdb-${idx}`} className="hover:bg-gray-50">
+                                      <td className="px-3 py-2 text-xs text-gray-400">{(memberDbPage - 1) * RAW_DB_PAGE_SIZE + idx + 1}</td>
+                                      <td className="px-3 py-2 font-medium text-gray-800">{getMemberName(record) || '-'}</td>
+                                      <td className="max-w-[200px] truncate px-3 py-2 text-gray-600">{getMemberEmail(record) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-600">{getMemberPhone(record) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-600">{getMemberOrg(record) || '-'}</td>
+                                      <td className="px-3 py-2">
+                                        <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getMemberStatusTone(status)}`}>{status}</span>
+                                      </td>
+                                      <td className="px-3 py-2 text-xs text-gray-400">{getMemberLastLogin(record) || '-'}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+                              <span className="text-xs text-gray-500">{rows.length}명 · {totalPages}페이지</span>
+                              <div className="flex gap-1">
+                                <button type="button" onClick={() => setMemberDbPage((p) => Math.max(1, p - 1))} disabled={memberDbPage === 1} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">이전</button>
+                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
+                                  <button key={p} type="button" onClick={() => setMemberDbPage(p)} className={`rounded-lg border px-3 py-1.5 text-xs ${memberDbPage === p ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>{p}</button>
+                                ))}
+                                <button type="button" onClick={() => setMemberDbPage((p) => Math.min(totalPages, p + 1))} disabled={memberDbPage === totalPages} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">다음</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
-                  <div className="rounded-2xl border border-gray-200 bg-white p-4 xl:col-span-2">
-                    <h3 className="mb-2 text-sm font-semibold text-gray-700">
-                      문의접수 샘플 ({filteredSheetSources.inquiryDb.rows.length}/{sheetBundle.sources.inquiryDb.rowCount})
-                    </h3>
-                    {renderGenericTable(filteredSheetSources.inquiryDb.rows, '문의접수 데이터가 없습니다.')}
+
+                  {/* 문의접수 DB */}
+                  <div className="rounded-2xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => { setInquiryDbOpen((v) => !v); setRawInquiryPage(1); setRawInquirySearch(''); }}
+                      className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-gray-50 rounded-2xl"
+                    >
+                      <div>
+                        <span className="text-sm font-semibold text-gray-700">문의접수 DB</span>
+                        <span className="ml-2 text-xs text-gray-400">({filteredSheetSources.inquiryDb.rows.length}/{sheetBundle.sources.inquiryDb.rowCount}건)</span>
+                      </div>
+                      <span className="text-xs text-gray-400">{inquiryDbOpen ? '숨김 ▲' : '보기 ▼'}</span>
+                    </button>
+                    {inquiryDbOpen && (() => {
+                      const keyword = rawInquirySearch.trim().toLowerCase();
+                      const allRows = filteredSheetSources.inquiryDb.rows;
+                      const filteredRows = keyword
+                        ? allRows.filter((record) => {
+                            const teacher = findField(record, ['문의대상(강사명)', '강사명']).toLowerCase();
+                            const applicant = findField(record, ['신청인 성명']).toLowerCase();
+                            const purpose = findField(record, ['문의 목적', 'purpose']).toLowerCase();
+                            return teacher.includes(keyword) || applicant.includes(keyword) || purpose.includes(keyword);
+                          })
+                        : allRows;
+                      const totalPages = Math.max(1, Math.ceil(filteredRows.length / RAW_INQUIRY_DB_PAGE_SIZE));
+                      const pagedRows = filteredRows.slice((rawInquiryPage - 1) * RAW_INQUIRY_DB_PAGE_SIZE, rawInquiryPage * RAW_INQUIRY_DB_PAGE_SIZE);
+                      return (
+                        <div className="border-t border-gray-100">
+                          <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center">
+                            <input
+                              value={rawInquirySearch}
+                              onChange={(event) => { setRawInquirySearch(event.target.value); setRawInquiryPage(1); }}
+                              placeholder="문의대상 · 신청인 · 목적 조회"
+                              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => { setRawInquirySearch(''); setRawInquiryPage(1); }}
+                              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                            >
+                              조회 초기화
+                            </button>
+                            <span className="text-xs text-gray-400">{keyword ? `${filteredRows.length}건 검색됨` : `전체 ${allRows.length}건`}</span>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead className="bg-gray-50 text-xs text-gray-500">
+                                <tr>
+                                  <th className="w-8 px-3 py-2 text-left">#</th>
+                                  <th className="px-3 py-2 text-left">접수일시</th>
+                                  <th className="px-3 py-2 text-left">문의대상(강사)</th>
+                                  <th className="px-3 py-2 text-left">신청인</th>
+                                  <th className="px-3 py-2 text-left">목적</th>
+                                  <th className="px-3 py-2 text-left">처리상태</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {pagedRows.length === 0 && (
+                                  <tr><td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">{keyword ? '검색 결과가 없습니다.' : '문의접수 데이터가 없습니다.'}</td></tr>
+                                )}
+                                {pagedRows.map((record, idx) => {
+                                  const status = findField(record, ['처리 상태', 'status']) || '접수대기';
+                                  return (
+                                    <tr key={`qdb-${idx}`} className="hover:bg-gray-50">
+                                      <td className="px-3 py-2 text-xs text-gray-400">{(rawInquiryPage - 1) * RAW_INQUIRY_DB_PAGE_SIZE + idx + 1}</td>
+                                      <td className="whitespace-nowrap px-3 py-2 text-xs text-gray-500">{findField(record, ['접수일시']) || '-'}</td>
+                                      <td className="px-3 py-2 font-medium text-gray-800">{findField(record, ['문의대상(강사명)', '강사명']) || '-'}</td>
+                                      <td className="px-3 py-2 text-gray-700">{findField(record, ['신청인 성명']) || '-'}</td>
+                                      <td className="max-w-[200px] truncate px-3 py-2 text-gray-600">{findField(record, ['문의 목적', 'purpose']) || '-'}</td>
+                                      <td className="px-3 py-2">
+                                        <span className={`rounded-full border px-2 py-0.5 text-[11px] ${getInquiryStatusTone(status)}`}>{status}</span>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                          {totalPages > 1 && (
+                            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+                              <span className="text-xs text-gray-500">{filteredRows.length}건 · {totalPages}페이지</span>
+                              <div className="flex gap-1">
+                                <button type="button" onClick={() => setRawInquiryPage((p) => Math.max(1, p - 1))} disabled={rawInquiryPage === 1} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">이전</button>
+                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => i + 1).map((p) => (
+                                  <button key={p} type="button" onClick={() => setRawInquiryPage(p)} className={`rounded-lg border px-3 py-1.5 text-xs ${rawInquiryPage === p ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}`}>{p}</button>
+                                ))}
+                                <button type="button" onClick={() => setRawInquiryPage((p) => Math.min(totalPages, p + 1))} disabled={rawInquiryPage === totalPages} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50">다음</button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </>

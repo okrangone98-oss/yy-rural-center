@@ -1,9 +1,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Home } from 'lucide-react';
 import { profileUpdateSchema, type ProfileUpdatePayload } from '@/lib/domain';
 import { getAppPath } from '@/lib/app-url';
 
@@ -30,7 +32,7 @@ type MemberInquiry = {
   message: string;
   status: string;
   chatRoomId?: string;
-  chatRoomStatus?: 'PENDING' | 'ACTIVE' | 'ARCHIVED';
+  chatRoomStatus?: 'PENDING' | 'ACTIVE' | 'ARCHIVED' | 'DELETED';
 };
 
 function firstString(source: Record<string, unknown>, keys: string[]) {
@@ -74,8 +76,8 @@ function ChatStatusBadge({ status }: { status?: MemberInquiry['chatRoomStatus'] 
     status === 'ACTIVE'
       ? 'bg-emerald-100 text-emerald-700'
       : status === 'PENDING'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-gray-100 text-gray-500';
+        ? 'bg-amber-100 text-amber-800'
+        : 'bg-gray-100 text-gray-500';
 
   const label = status === 'ACTIVE' ? '채팅 가능' : status === 'PENDING' ? '수락 대기' : '종료';
   return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${tone}`}>{label}</span>;
@@ -94,9 +96,13 @@ export default function MemberProfileForm() {
   const [inquiriesLoading, setInquiriesLoading] = useState(true);
   const [inquiriesError, setInquiriesError] = useState('');
   const [chatEnabled, setChatEnabled] = useState(true);
-  const [inquiryView, setInquiryView] = useState<'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED'>('ALL');
+  const [inquiryView, setInquiryView] = useState<'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED' | 'DELETED'>('ALL');
   const [inquirySearch, setInquirySearch] = useState('');
   const [inquiryPage, setInquiryPage] = useState(1);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawError, setWithdrawError] = useState('');
+  const [selectedInquiryIds, setSelectedInquiryIds] = useState<Set<string>>(new Set());
 
   const {
     register,
@@ -165,6 +171,7 @@ export default function MemberProfileForm() {
           name: values.name || '',
           phone: values.phone || '',
           org: values.org || '',
+          password: values.password || undefined,
         }),
       });
       const result = await response.json();
@@ -187,12 +194,101 @@ export default function MemberProfileForm() {
     }
   });
 
+  const handleWithdraw = async () => {
+    setWithdrawError('');
+    setIsWithdrawing(true);
+
+    try {
+      const response = await fetch(getAppPath('/api/account/withdraw'), {
+        method: 'POST',
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '회원 탈퇴 요청 중 오류가 발생했습니다.');
+      }
+
+      // 탈퇴 성공 시 로그아웃 후 홈으로 이동
+      await signOut({ callbackUrl: '/' });
+    } catch (error) {
+      setWithdrawError(error instanceof Error ? error.message : '회원 탈퇴 처리에 실패했습니다.');
+      setIsWithdrawing(false);
+    }
+  };
+
+  const handleDeleteInquiry = async (inquiryId: string) => {
+    if (!confirm('이 문의를 삭제하시겠습니까? (프론트엔드 목록에서 사라집니다)')) return;
+
+    try {
+      const response = await fetch(getAppPath(`/api/chat/inquiries/${inquiryId}/delete`), {
+        method: 'POST',
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '삭제에 실패했습니다.');
+
+      // Reload inquiries
+      const inquiriesResult = await fetch(getAppPath('/api/account/inquiries'), { cache: 'no-store' }).then((r) => r.json());
+      if (inquiriesResult.success) {
+        setInquiries(Array.isArray(inquiriesResult.data) ? inquiriesResult.data : []);
+        setSelectedInquiryIds((prev) => {
+          const next = new Set(prev);
+          next.delete(inquiryId);
+          return next;
+        });
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedInquiryIds.size === 0) return;
+    if (!confirm(`${selectedInquiryIds.size}개의 문의를 삭제하시겠습니까?`)) return;
+
+    try {
+      const response = await fetch(getAppPath('/api/chat/inquiries/bulk-delete'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inquiryIds: Array.from(selectedInquiryIds) }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || '삭제에 실패했습니다.');
+
+      // Reload inquiries
+      const inquiriesResult = await fetch(getAppPath('/api/account/inquiries'), { cache: 'no-store' }).then((r) => r.json());
+      if (inquiriesResult.success) {
+        setInquiries(Array.isArray(inquiriesResult.data) ? inquiriesResult.data : []);
+        setSelectedInquiryIds(new Set());
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedInquiryIds.size === paginatedInquiries.length && paginatedInquiries.length > 0) {
+      setSelectedInquiryIds(new Set());
+    } else {
+      setSelectedInquiryIds(new Set(paginatedInquiries.map((i) => i.inquiryId)));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedInquiryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const inquiryStats = useMemo(
     () => ({
-      total: inquiries.length,
+      total: inquiries.filter((item) => item.chatRoomStatus !== 'DELETED').length,
       pending: inquiries.filter((item) => item.chatRoomStatus === 'PENDING' || !item.chatRoomStatus).length,
       active: inquiries.filter((item) => item.chatRoomStatus === 'ACTIVE').length,
       archived: inquiries.filter((item) => item.chatRoomStatus === 'ARCHIVED').length,
+      deleted: inquiries.filter((item) => item.chatRoomStatus === 'DELETED').length,
     }),
     [inquiries],
   );
@@ -207,6 +303,8 @@ export default function MemberProfileForm() {
       } else {
         filtered = filtered.filter((item) => item.chatRoomStatus === inquiryView);
       }
+    } else {
+      filtered = filtered.filter((item) => item.chatRoomStatus !== 'DELETED');
     }
 
     const keyword = inquirySearch.trim().toLowerCase();
@@ -256,7 +354,17 @@ export default function MemberProfileForm() {
       <section className="rounded-[30px] border border-sky-100 bg-[linear-gradient(135deg,#0b3b5e_0%,#14638c_100%)] px-6 py-7 text-white shadow-[0_25px_80px_rgba(8,42,66,0.18)]">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-100/80">Member My Page</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-100/80">Member My Page</p>
+              <button
+                type="button"
+                onClick={() => router.push('/')}
+                className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-400/10 px-3 py-1 text-[11px] font-bold text-sky-100 transition hover:bg-sky-400/20"
+              >
+                <Home className="h-3 w-3" />
+                홈으로
+              </button>
+            </div>
             <h1 className="mt-2 text-3xl font-bold">{profile.name || '일반회원 마이페이지'}</h1>
             <p className="mt-2 max-w-2xl text-sm text-sky-50/90">
               강사 매칭 문의를 위해 등록한 기본 회원정보를 여기서 직접 수정합니다.
@@ -301,6 +409,34 @@ export default function MemberProfileForm() {
               <label className="mb-1 block text-sm font-medium text-gray-700">소속명</label>
               <input {...register('org')} className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm" />
             </div>
+            <div className="md:col-span-2 rounded-2xl bg-amber-50/50 p-5 mt-4 border border-amber-100">
+              <h3 className="text-sm font-bold text-amber-900 mb-4 flex items-center gap-2">
+                <span>🔒</span> 보안을 위해 주기적인 비밀번호 변경을 권장합니다
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">새 비밀번호</label>
+                  <input
+                    type="password"
+                    {...register('password')}
+                    placeholder="변경 시에만 입력"
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm bg-white"
+                  />
+                  <p className="mt-1 text-[10px] text-gray-500">* 8자 이상, 특수문자 2개 이상 필수</p>
+                  {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">새 비밀번호 확인</label>
+                  <input
+                    type="password"
+                    {...register('confirmPassword')}
+                    placeholder="비밀번호 재입력"
+                    className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm bg-white"
+                  />
+                  {errors.confirmPassword && <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>}
+                </div>
+              </div>
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">이메일</label>
               <input value={profile.email} readOnly className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500" />
@@ -320,17 +456,23 @@ export default function MemberProfileForm() {
 
         {(submitError || submitMessage) && (
           <div
-            className={`rounded-2xl px-4 py-3 text-sm ${
-              submitError ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
-            }`}
+            className={`rounded-2xl px-4 py-3 text-sm ${submitError ? 'border border-red-200 bg-red-50 text-red-700' : 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+              }`}
           >
             {submitError || submitMessage}
           </div>
         )}
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-gray-500">저장 후 이용자DB와 Firestore 미러에 동시에 반영됩니다.</div>
-          <div className="flex gap-3">
+          <div className="text-sm text-gray-500"></div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setShowWithdrawModal(true)}
+              className="rounded-full border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+            >
+              회원 탈퇴
+            </button>
             <button
               type="button"
               onClick={() => router.push('/')}
@@ -349,13 +491,48 @@ export default function MemberProfileForm() {
         </div>
       </form>
 
+      {/* 회원 탈퇴 확인 모달 */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md animate-in fade-in zoom-in duration-200 rounded-[24px] border border-white/20 bg-white p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900">회원 탈퇴 확인</h3>
+            <p className="mt-3 text-sm leading-relaxed text-gray-600">
+              정말로 이음터 서비스를 탈퇴하시겠습니까? 탈퇴 시 기존의 프로필 정보와 이용 기록이 모두 삭제되며, 이 작업은 되돌릴 수 없습니다.
+            </p>
+            {withdrawError && (
+              <div className="mt-4 rounded-xl bg-red-50 p-3 text-xs text-red-700 border border-red-100">
+                {withdrawError}
+              </div>
+            )}
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowWithdrawModal(false)}
+                disabled={isWithdrawing}
+                className="flex-1 rounded-full border border-gray-300 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleWithdraw()}
+                disabled={isWithdrawing}
+                className="flex-1 rounded-full bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {isWithdrawing ? '처리 중...' : '탈퇴하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="rounded-[28px] border border-white/80 bg-white/95 p-6 shadow-[0_20px_60px_rgba(19,60,44,0.08)]">
         <div className="mb-5">
           <h2 className="text-xl font-semibold text-gray-900">내 문의 내역</h2>
           <p className="mt-1 text-sm text-gray-500">센터를 통해 접수한 강사 문의 현황을 확인합니다.</p>
         </div>
 
-        <div className="mb-5 grid gap-3 md:grid-cols-3">
+        <div className="mb-5 grid gap-3 md:grid-cols-4">
           <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">문의하기 중</p>
             <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.pending}</p>
@@ -370,6 +547,11 @@ export default function MemberProfileForm() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">문의 완료</p>
             <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.archived}</p>
             <p className="mt-1 text-xs text-slate-500">답변 완료 후 보관된 문의</p>
+          </div>
+          <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-700">삭제</p>
+            <p className="mt-2 text-2xl font-black text-slate-900">{inquiryStats.deleted}</p>
+            <p className="mt-1 text-xs text-slate-500">삭제된 문의함</p>
           </div>
         </div>
 
@@ -400,34 +582,49 @@ export default function MemberProfileForm() {
             { key: 'PENDING', label: '문의하기 중', count: inquiryStats.pending },
             { key: 'ACTIVE', label: '채팅', count: inquiryStats.active },
             { key: 'ARCHIVED', label: '완료', count: inquiryStats.archived },
+            { key: 'DELETED', label: '삭제', count: inquiryStats.deleted },
           ].map((tab) => (
             <button
               key={tab.key}
               type="button"
-              onClick={() => setInquiryView(tab.key as 'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED')}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                inquiryView === tab.key
-                  ? 'bg-slate-900 text-white'
-                  : 'border border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
-              }`}
+              onClick={() => setInquiryView(tab.key as 'ALL' | 'PENDING' | 'ACTIVE' | 'ARCHIVED' | 'DELETED')}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${inquiryView === tab.key
+                ? 'bg-slate-900 text-white'
+                : 'border border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
+                }`}
             >
               {tab.label} {tab.count}
             </button>
           ))}
         </div>
 
-        <div className="mb-5">
-          <label className="sr-only" htmlFor="member-inquiry-search">
-            문의 검색
-          </label>
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <input
             id="member-inquiry-search"
             type="search"
             value={inquirySearch}
             onChange={(event) => setInquirySearch(event.target.value)}
             placeholder="강사명, 연락처, 문의 목적, 문의 내용 검색"
-            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+            className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
           />
+          <div className="flex items-center gap-3">
+            {selectedInquiryIds.size > 0 && (
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                className="rounded-full bg-red-50 px-4 py-2 text-xs font-bold text-red-600 border border-red-200 hover:bg-red-100 transition"
+              >
+                선택 삭제 ({selectedInquiryIds.size})
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={toggleSelectAll}
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition"
+            >
+              {selectedInquiryIds.size === paginatedInquiries.length && paginatedInquiries.length > 0 ? '선택 해제' : '전체 선택'}
+            </button>
+          </div>
         </div>
 
         {inquiriesLoading ? (
@@ -443,17 +640,26 @@ export default function MemberProfileForm() {
         ) : (
           <div className="space-y-3">
             {paginatedInquiries.map((item) => (
-              <div key={item.inquiryId} className="rounded-2xl border border-gray-200 p-4">
+              <div key={item.inquiryId} className={`rounded-2xl border p-4 transition ${selectedInquiryIds.has(item.inquiryId) ? 'border-sky-300 bg-sky-50/30' : 'border-gray-200'}`}>
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <div className="text-sm font-semibold text-gray-900">{item.teacherName}</div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      접수일시 {item.receivedAt || '-'} / 문의 목적 {item.purpose || '-'}
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      title="문의 선택"
+                      checked={selectedInquiryIds.has(item.inquiryId)}
+                      onChange={() => toggleSelectOne(item.inquiryId)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500"
+                    />
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900">{item.teacherName}</div>
+                      <div className="mt-1 text-xs text-gray-500">
+                        접수일시 {item.receivedAt || '-'} / 문의 목적 {item.purpose || '-'}
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-                      {item.status}
+                      {item.status === '삭제완료' ? '문의 완료' : item.status}
                     </span>
                     <ChatStatusBadge status={item.chatRoomStatus} />
                   </div>
@@ -461,8 +667,17 @@ export default function MemberProfileForm() {
                 <div className="mt-3 whitespace-pre-line rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
                   {item.message || '상세 내용 없음'}
                 </div>
-                {item.chatRoomId && (
-                  <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-end gap-2">
+                  {item.chatRoomStatus !== 'DELETED' && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteInquiry(item.inquiryId)}
+                      className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+                    >
+                      문의 삭제
+                    </button>
+                  )}
+                  {item.chatRoomId && item.chatRoomStatus !== 'DELETED' && (
                     <button
                       type="button"
                       onClick={() => router.push(`/chat/${item.chatRoomId}`)}
@@ -470,8 +685,8 @@ export default function MemberProfileForm() {
                     >
                       {item.chatRoomStatus === 'ACTIVE' ? '채팅 열기' : '문의 현황 보기'}
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
             {inquiryPageCount > 1 ? (
@@ -484,11 +699,10 @@ export default function MemberProfileForm() {
                       key={pageNumber}
                       type="button"
                       onClick={() => setInquiryPage(pageNumber)}
-                      className={`h-9 min-w-9 rounded-full border px-3 text-sm font-semibold transition ${
-                        active
-                          ? 'border-sky-800 bg-sky-800 text-white'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
-                      }`}
+                      className={`h-9 min-w-9 rounded-full border px-3 text-sm font-semibold transition ${active
+                        ? 'border-sky-800 bg-sky-800 text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-sky-200 hover:text-sky-700'
+                        }`}
                     >
                       {pageNumber}
                     </button>

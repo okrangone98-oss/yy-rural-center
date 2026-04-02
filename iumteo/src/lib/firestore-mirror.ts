@@ -45,6 +45,30 @@ export async function updateMirrorUser(userId: string, payload: Partial<MirrorUs
   return { enabled: true, skipped: false, data: { userId, ...payload } };
 }
 
+// GAS 없이도 Firestore에 직접 강사 프로필을 저장 (CRUD 주 경로)
+export async function saveInstructorProfileDirect(profile: MirrorInstructorProfile) {
+  if (!isFirebaseMirrorEnabled()) return noopResult(profile);
+  const db = getFirestoreAdmin();
+  await db.collection('lecturer_profiles').doc(profile.id).set(
+    {
+      ...profile,
+      updatedAt: nowIso(),
+      mirroredAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+  return { enabled: true, skipped: false, data: profile };
+}
+
+// Firestore에서 강사 프로필 읽기 (GAS 폴백용)
+export async function getInstructorProfileFromFirestore(email: string) {
+  if (!isFirebaseMirrorEnabled()) return null;
+  const db = getFirestoreAdmin();
+  const doc = await db.collection('lecturer_profiles').doc(email).get();
+  if (!doc.exists) return null;
+  return doc.data() as MirrorInstructorProfile;
+}
+
 export async function upsertMirrorInstructorProfile(profile: MirrorInstructorProfile) {
   if (!areNonCoreFirestoreMirrorsEnabled()) return noopResult(profile);
   const db = getFirestoreAdmin();
@@ -106,3 +130,18 @@ export async function queueMailOutbox(entry: MailOutboxEntry) {
   });
   return { enabled: true, skipped: false, data: entry };
 }
+
+export async function deleteMirrorUser(userId: string) {
+  if (!isFirebaseMirrorEnabled()) return { enabled: false, skipped: true, userId };
+  const db = getFirestoreAdmin();
+  await db.collection('users').doc(userId).delete();
+  return { enabled: true, skipped: false, userId };
+}
+
+export async function deleteMirrorInstructorProfile(profileId: string) {
+  if (!isFirebaseMirrorEnabled()) return { enabled: false, skipped: true, profileId };
+  const db = getFirestoreAdmin();
+  await db.collection('lecturer_profiles').doc(profileId).delete();
+  return { enabled: true, skipped: false, profileId };
+}
+

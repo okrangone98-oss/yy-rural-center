@@ -62,7 +62,7 @@ export async function compressImageForProfile(file: File) {
   }
 
   if (blob.size > MAX_UPLOAD_BYTES) {
-    throw new Error('압축 후에도 5MB를 초과합니다. 더 작은 이미지를 사용해 주세요.');
+    throw new Error('이미지가 너무 커서 5MB 이하로 압축하지 못했습니다. 더 작은 이미지를 사용해 주세요.');
   }
 
   return new File([blob], `${file.name.replace(/\.[^.]+$/, '') || 'profile-photo'}.jpg`, {
@@ -83,11 +83,12 @@ export async function uploadProfilePhoto(file: File, name: string, email: string
   });
   const result = await response.json().catch(() => null);
 
-  if (!response.ok || !result?.success || !result?.data?.url) {
+  if (!response.ok || !result?.success || (!result?.data?.url && !result?.data?.objectPath)) {
     throw new Error(result?.message || '프로필 사진 업로드에 실패했습니다.');
   }
 
-  return String(result.data.url);
+  // url은 Firebase 액세스 토큰이 포함된 완전한 다운로드 URL (항상 로드 가능)
+  return String(result.data.url || result.data.objectPath);
 }
 
 export async function deleteProfilePhoto(fileUrl: string) {
@@ -110,5 +111,10 @@ export function resolveProfilePhotoPublicUrl(fileUrl?: string | null) {
   if (!value) return '';
   if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value;
   if (value.startsWith('/')) return new URL(value, `${getSiteOrigin()}/`).toString();
+  // Firebase Storage object path → public URL
+  const baseUrl = (process.env.NEXT_PUBLIC_STORAGE_BASE_URL || '').replace(/\/+$/, '');
+  if (baseUrl) {
+    return `${baseUrl}/${encodeURIComponent(value)}?alt=media`;
+  }
   return value;
 }

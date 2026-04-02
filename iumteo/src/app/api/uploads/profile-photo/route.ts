@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin');
 
   const ip = getClientIp(request);
-  const rateLimit = checkRateLimit(`upload:${ip}`, { windowMs: 60_000, max: 3 });
+  // 개발: 분당 20회 / 운영: 분당 5회
+  const uploadMax = process.env.NODE_ENV === 'production' ? 5 : 20;
+  const rateLimit = checkRateLimit(`upload:${ip}`, { windowMs: 60_000, max: uploadMax });
   if (!rateLimit.success) {
     return withCors(
       NextResponse.json({ success: false, message: '잠시 후 다시 시도해 주세요.' }, { status: 429 }),
@@ -137,12 +139,27 @@ export async function POST(request: NextRequest) {
       },
     }), origin);
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[profile-photo POST]', errorMessage);
+
     const isUserError = error instanceof Error && (
-      error.message.includes('이미지') || error.message.includes('파일')
+      error.message.includes('이미지') ||
+      error.message.includes('파일') ||
+      error.message.includes('MB') ||
+      error.message.includes('압축')
     );
+
+    // 개발 환경에서는 실제 에러를 노출해 진단 가능하게 함
+    const isDev = process.env.NODE_ENV !== 'production';
+    const clientMessage = isUserError
+      ? error.message
+      : isDev
+        ? `업로드 실패: ${errorMessage}`
+        : '프로필 사진 업로드에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+
     return withCors(
       NextResponse.json(
-        { success: false, message: isUserError ? error.message : '프로필 사진 업로드에 실패했습니다.' },
+        { success: false, message: clientMessage },
         { status: isUserError ? 400 : 500 },
       ),
       origin,

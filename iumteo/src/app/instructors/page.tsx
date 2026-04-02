@@ -18,6 +18,9 @@ type Instructor = {
   org?: string;
   intro?: string;
   profilePhoto?: string;
+  photo?: string;
+  Profile_Photo?: string;
+  profile_photo?: string;
   isLocal?: 'Y' | 'N' | boolean;
 };
 
@@ -25,7 +28,7 @@ function normalizeIsLocal(value: Instructor['isLocal']): 'Y' | 'N' {
   return value === true || value === 'Y' ? 'Y' : 'N';
 }
 
-const InstructorCard = memo(function InstructorCard({ instructor }: { instructor: Instructor }) {
+const InstructorCard = memo(function InstructorCard({ instructor, isAdmin }: { instructor: Instructor; isAdmin?: boolean }) {
   const router = useRouter();
   const name = instructor.name || '이름 없음';
   const isLocal = normalizeIsLocal(instructor.isLocal);
@@ -73,7 +76,18 @@ const InstructorCard = memo(function InstructorCard({ instructor }: { instructor
 
       <div className="flex items-center justify-between text-xs text-gray-400">
         <span>{instructor.area ? `📍 ${instructor.area}` : ''}</span>
-        <span className="font-semibold text-emerald-700">상세 보기</span>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={(e) => e.stopPropagation()}
+              className="font-semibold text-blue-600 hover:text-blue-800"
+            >
+              수정하기
+            </Link>
+          )}
+          <span className="font-semibold text-emerald-700">상세 보기</span>
+        </div>
       </div>
     </button>
   );
@@ -86,6 +100,9 @@ export default function InstructorsPage() {
   const [search, setSearch] = useState('');
   const [fieldFilter, setFieldFilter] = useState('all');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const PAGE_SIZE = 12;
 
   const isLoggedIn = status === 'authenticated' && !!session?.user;
   const userRole = session?.user?.role;
@@ -104,7 +121,9 @@ export default function InstructorsPage() {
           .filter((item: Instructor) => !!item.name)
           .map((item: Instructor) => ({
             ...item,
-            profilePhoto: resolveProfilePhotoPublicUrl(item.profilePhoto),
+            profilePhoto: resolveProfilePhotoPublicUrl(
+              item.profilePhoto || item.photo || item.Profile_Photo || item.profile_photo,
+            ),
           }));
 
         setInstructors(listed);
@@ -133,6 +152,13 @@ export default function InstructorsPage() {
       return matchesKeyword && matchesField;
     });
   }, [fieldFilter, instructors, search]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, fieldFilter]);
 
   const myPageHref =
     userRole === 'ADMIN' ? '/admin' : userRole === 'INSTRUCTOR' ? '/teacher' : '/profile';
@@ -273,11 +299,53 @@ export default function InstructorsPage() {
             ))}
           </div>
         ) : filtered.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((item, index) => (
-              <InstructorCard key={item.id || `${item.name}-${index}`} instructor={item} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {paginated.map((item, index) => (
+                <InstructorCard
+                  key={item.id || `${item.name}-${index}`}
+                  instructor={item}
+                  isAdmin={userRole === 'ADMIN'}
+                />
+              ))}
+            </div>
+
+            {pageCount > 1 && (
+              <div className="mt-10 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm text-gray-500 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  ‹
+                </button>
+
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setPage(num)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl border text-sm font-semibold transition ${num === page
+                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:text-emerald-700'
+                      }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  disabled={page === pageCount}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm text-gray-500 transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  ›
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-3xl border border-dashed border-gray-200 bg-white px-6 py-20 text-center">
             <p className="text-4xl">🔎</p>

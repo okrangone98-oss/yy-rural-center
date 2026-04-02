@@ -6,7 +6,7 @@
 
 - 인증: `NextAuth`가 `GAS_API_URL`의 `getUser`를 호출합니다.
 - 강사 관리: `/api/instructor`가 `GAS_API_URL`의 `getInstructors`, `updateInstructorProfile`을 호출합니다.
-- 관리자 시트 점검: `/api/admin/sheets`가 `양양이음터강사DB`, `이용자DB`, `문의접수` 3개 CSV를 직접 읽어 무결성 진단을 수행합니다.
+- 관리자 시트 점검: `/api/admin/sheets`가 GAS API를 통해 `양양이음터강사DB`, `이용자DB`, `문의접수` 데이터를 읽어 무결성 진단을 수행합니다.
 - 가입/프로필 수정: `registerMember`, `registerInstructor`, `updateMemberProfile`, `updateInstructorProfile` 액션을 사용합니다.
 
 ## 현재 운영 기준
@@ -44,15 +44,10 @@ NEXT_PUBLIC_SITE_URL=https://yycenter.kr/iumteo
 - `GAS_API_URL`
 - `GAS_API_KEY`
 
-## 선택 환경변수
-
-- `CSV_INSTRUCTOR_DB_URL`
-- `CSV_MEMBER_DB_URL`
-- `CSV_INQUIRY_DB_URL`
 - `FIREBASE_SERVICE_ACCOUNT_PATH`
 - 또는 `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`
 
-기본값은 현재 운영 중인 Google Sheets CSV 공개 URL로 코드에 이미 들어 있습니다.
+보안을 위해 Google Sheets의 **'웹에 게시(CSV)' 기능은 사용하지 않으며**, 모든 데이터는 인증된 GAS API를 통해서만 전달됩니다.
 
 ## Firebase 가장 쉬운 연결 방법
 
@@ -80,10 +75,13 @@ FIREBASE_SERVICE_ACCOUNT_PATH=./secrets/firebase-service-account.json
 ## GAS 배포 절차
 
 1. [`docs/gas/yy-integrated-backend-v3.gs`](./docs/gas/yy-integrated-backend-v3.gs) 내용을 Google Apps Script에 반영합니다.
-2. 배포 > 새 배포 > 유형 `웹 앱`으로 배포합니다.
-3. 실행 계정은 스프레드시트 편집 권한이 있는 계정으로 설정합니다.
-4. 접근 권한은 웹앱 사용 시나리오에 맞게 설정합니다.
-5. 발급된 `/exec` URL을 `GAS_API_URL`에 넣습니다.
+2. GAS 프로젝트 설정의 **스크립트 속성(Script Properties)**에 아래 항목을 추가합니다.
+   - `SPREADSHEET_ID`: 연결할 구글 스프레드시트 ID
+   - `API_KEY`: 이음터 앱의 `GAS_API_KEY`와 동일한 값
+3. 배포 > 새 배포 > 유형 `웹 앱`으로 배포합니다.
+4. 실행 계정은 스프레드시트 편집 권한이 있는 계정으로 설정합니다.
+5. 액세스 권한은 `모든 사람(Anyone)`으로 설정합니다. (내부에서 API Key로 보안 검증)
+6. 발급된 `/exec` URL을 이음터 앱의 `.env.local` 내 `GAS_API_URL`에 넣습니다.
 
 ## 배포 후 확인 포인트
 

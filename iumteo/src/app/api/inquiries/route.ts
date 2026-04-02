@@ -164,7 +164,7 @@ function buildTeacherMail(entry: MirrorInquiry, roomId: string, request: Request
 }
 
 export async function GET(request: Request) {
-  const { session, error } = await getRequiredSession(['USER', 'ADMIN']);
+  const { session, error } = await getRequiredSession(['USER', 'ADMIN', 'INSTRUCTOR']);
   if (error) return error;
 
   try {
@@ -204,7 +204,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { session, error } = await getRequiredSession(['USER', 'ADMIN']);
+  const { session, error } = await getRequiredSession(['USER', 'ADMIN', 'INSTRUCTOR']);
   if (error) return error;
 
   try {

@@ -31,12 +31,25 @@ export const consentPayloadSchema = z.object({
   consentVersion: z.string().min(1),
 });
 
+// Password policy: 8 or more characters, at least 2 special characters
+export const passwordSchema = z.string().trim()
+  .min(8, "비밀번호는 8자 이상이어야 합니다.")
+  .regex(/[!@#$%^&*(),.?":{}|<>]/, "특수문자를 포함해야 합니다.") // At least 1
+  .refine((val) => {
+    const specialChars = val.match(/[!@#$%^&*(),.?":{}|<>]/g);
+    return specialChars && specialChars.length >= 2;
+  }, {
+    message: "특수문자를 2개 이상 포함해야 합니다."
+  });
+
+export const optionalPasswordSchema = z.union([passwordSchema, z.literal('')]).optional();
+
 export const registerPayloadSchema = z.object({
   memberType: registerMemberTypeSchema,
   name: z.string().trim().min(2).max(50),
   email: z.string().trim().email().max(255),
   phone: z.string().trim().min(8).max(20),
-  password: z.string().trim().min(8).max(100).optional(),
+  password: passwordSchema,
   org: z.string().trim().max(100).optional().default(''),
   field: z.string().trim().max(50).optional().default(''),
   area: z.string().trim().max(100).optional().default(''),
@@ -52,21 +65,35 @@ export const registerPayloadSchema = z.object({
 
 export type RegisterPayload = z.infer<typeof registerPayloadSchema>;
 
+// 수정 스키마는 빈 문자열도 허용 (삭제 가능), min 조건은 적용하지 않음
+const optionalStr = (max: number) =>
+  z.union([z.string().trim().max(max), z.literal('')]).optional();
+
 export const profileUpdateSchema = z.object({
-  name: z.string().trim().min(2).max(50).optional(),
-  phone: z.string().trim().min(8).max(20).optional(),
-  org: z.string().trim().max(100).optional(),
-  field: z.string().trim().max(50).optional(),
-  area: z.string().trim().max(100).optional(),
-  intro: z.string().trim().max(1000).optional(),
-  career: z.string().trim().max(2000).optional(),
-  address: z.string().trim().max(200).optional(),
-  instagram: z.string().trim().max(100).optional(),
+  name: optionalStr(50),
+  phone: optionalStr(20),
+  org: optionalStr(100),
+  field: optionalStr(50),
+  area: optionalStr(100),
+  intro: optionalStr(1000),
+  career: optionalStr(2000),
+  address: optionalStr(200),
+  instagram: optionalStr(100),
   instagramOpen: z.enum(INSTAGRAM_VISIBILITY_OPTIONS).optional(),
-  portfolioLink: z.string().trim().max(500).optional(),
-  profilePhoto: z.string().trim().max(2000).optional(),
+  portfolioLink: optionalStr(500),
+  profilePhoto: optionalStr(2000),
   marketingAccepted: z.boolean().optional(),
   profilePublicAccepted: z.boolean().optional(),
+  password: optionalPasswordSchema,
+  confirmPassword: optionalPasswordSchema,
+}).refine((data) => {
+  if (data.password && data.password !== data.confirmPassword) {
+    return false;
+  }
+  return true;
+}, {
+  message: "비밀번호가 일치하지 않습니다.",
+  path: ["confirmPassword"],
 });
 
 export type ProfileUpdatePayload = z.infer<typeof profileUpdateSchema>;
@@ -248,7 +275,7 @@ export type MailOutboxEntry = {
 export const CHAT_ROOM_MAX_LENGTH = 300;
 export const CHAT_ROOM_WARN_LENGTH = 240;
 
-export type ChatRoomStatus = 'PENDING' | 'ACTIVE' | 'ARCHIVED';
+export type ChatRoomStatus = 'PENDING' | 'ACTIVE' | 'ARCHIVED' | 'DELETED';
 
 export type ChatRoom = {
   id: string;

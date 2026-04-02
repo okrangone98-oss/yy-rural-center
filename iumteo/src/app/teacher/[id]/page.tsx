@@ -175,7 +175,7 @@ export default function TeacherDetailPage() {
   const messageValue = watch('message') || '';
   const contactMethod = watch('contactMethod');
   const sessionRole = session?.user?.role || '';
-  const canInquire = sessionRole === 'USER' || sessionRole === 'ADMIN';
+  const canInquire = sessionRole === 'USER' || sessionRole === 'ADMIN' || sessionRole === 'INSTRUCTOR';
   const isOwner =
     !!session?.user?.email &&
     !!teacher.email &&
@@ -190,6 +190,20 @@ export default function TeacherDetailPage() {
     () => teacher.history.split('\n').map((item) => item.trim()).filter(Boolean),
     [teacher.history],
   );
+
+  const instagramHandle = useMemo(() => {
+    if (!teacher.insta) return '';
+    return teacher.insta
+      .replace(/^@/, '')
+      .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+      .replace(/\/?$/, '')
+      .trim();
+  }, [teacher.insta]);
+
+  const instagramHref = useMemo(() => {
+    if (!teacher.insta) return '';
+    return /^https?:\/\//i.test(teacher.insta) ? teacher.insta : `https://www.instagram.com/${instagramHandle}/`;
+  }, [instagramHandle, teacher.insta]);
 
   useEffect(() => {
     async function fetchTeacherData() {
@@ -225,9 +239,10 @@ export default function TeacherDetailPage() {
           instaPublic: record.instaPublic || '',
           email: typeof record.email === 'string' && record.email.includes('@') ? record.email : '',
           phone: record.phone || '',
-          photo: resolveProfilePhotoPublicUrl(record.photo || ''),
+          photo: resolveProfilePhotoPublicUrl(record.photo || (record as Partial<TeacherData> & { profilePhoto?: string }).profilePhoto || ''),
         };
 
+        setPhotoError(false);
         setTeacher(nextTeacher);
         setValue('teacherName', nextTeacher.name);
         setValue('teacherEmail', nextTeacher.email);
@@ -408,7 +423,18 @@ export default function TeacherDetailPage() {
 
           <div className="flex-1">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-200">Yangyang Iumteo Instructor</p>
-            <h1 className="mt-3 text-4xl font-black">{teacher.name}</h1>
+            <div className="flex items-center gap-4 flex-wrap">
+              <h1 className="mt-3 text-4xl font-black">{teacher.name}</h1>
+              {sessionRole === 'ADMIN' && (
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin')}
+                  className="mt-3 rounded-full bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 shadow-lg"
+                >
+                  정보 수정(관리자)
+                </button>
+              )}
+            </div>
             <p className="mt-2 text-lg text-emerald-100">{`${teacher.org} ${teacher.role}`.trim() || '양양 지역 강사'}</p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -422,14 +448,34 @@ export default function TeacherDetailPage() {
                   활동 지역 {teacher.area}
                 </span>
               ) : null}
-              {teacher.insta && /공개|동의|yes|y/i.test(teacher.instaPublic || '') ? (
+              {teacher.insta && /^(공개|동의|yes|y|true)$/i.test(teacher.instaPublic || '') ? (
                 <a
-                  href={/^https?:\/\//i.test(teacher.insta) ? teacher.insta : `https://www.instagram.com/${teacher.insta.replace(/^@/, '')}/`}
+                  href={instagramHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+                  aria-label={`${teacher.name} 강사의 인스타그램 열기`}
+                  className="group relative inline-flex overflow-hidden rounded-full p-[1.5px] shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_16px_36px_rgba(7,89,67,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_20px_44px_rgba(12,110,84,0.3)]"
                 >
-                  @{teacher.insta.replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/?$/, '')}
+                  <span className="absolute inset-0 bg-[linear-gradient(120deg,#f4c95d_0%,#f68b4d_18%,#db5f82_46%,#8b5cf6_74%,#0f766e_100%)]" />
+                  <span className="absolute -inset-2 rounded-full bg-[radial-gradient(circle_at_18%_18%,rgba(244,201,93,0.5),transparent_32%),radial-gradient(circle_at_70%_26%,rgba(219,95,130,0.45),transparent_38%),radial-gradient(circle_at_82%_78%,rgba(15,118,110,0.5),transparent_40%)] opacity-70 blur-lg transition duration-300 group-hover:opacity-100 group-hover:blur-xl" />
+                  <span className="absolute right-3 top-2 text-[10px] font-black text-white/80 animate-[pulse_2.6s_ease-in-out_infinite]">
+                    ✦
+                  </span>
+                  <span className="relative z-10 inline-flex items-center gap-3 rounded-full bg-[linear-gradient(135deg,rgba(249,253,251,0.96),rgba(233,247,240,0.92))] px-3 py-2 text-sm text-slate-900 backdrop-blur">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#f4c95d_0%,#f68b4d_18%,#db5f82_46%,#8b5cf6_74%,#0f766e_100%)] text-white shadow-[0_0_18px_rgba(15,118,110,0.28)]">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current">
+                        <rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5.5" strokeWidth="2.2" />
+                        <circle cx="12" cy="12" r="4.1" strokeWidth="2.2" />
+                        <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
+                      </svg>
+                    </span>
+                    <span className="flex flex-col items-start leading-none">
+                      <span className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700/80">Instagram</span>
+                      <span className="mt-1 text-sm font-bold text-emerald-950 transition group-hover:text-emerald-800">
+                        @{instagramHandle}
+                      </span>
+                    </span>
+                  </span>
                 </a>
               ) : null}
             </div>
@@ -516,7 +562,7 @@ export default function TeacherDetailPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Async Inquiry</p>
               <h2 className="mt-3 text-3xl font-black text-emerald-900">강사님께 문의 남기기</h2>
               <p className="mt-3 max-w-2xl break-keep text-sm leading-7 text-gray-600">
-                강사님께 문의 내용이 전달되며, 확인 후 회신해 드립니다. 월 20회, 300자 제한입니다.
+                강사님께 문의 내용이 메일로 전달되며, 강사님 확인 시 회신됩니다.
               </p>
             </div>
 
@@ -561,11 +607,10 @@ export default function TeacherDetailPage() {
                 ].map((option) => (
                   <label
                     key={option.value}
-                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                      contactMethod === option.value
-                        ? 'border-emerald-700 bg-emerald-50 text-emerald-800'
-                        : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
-                    }`}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${contactMethod === option.value
+                      ? 'border-emerald-700 bg-emerald-50 text-emerald-800'
+                      : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
+                      }`}
                   >
                     <input type="radio" value={option.value} {...register('contactMethod')} className="sr-only" />
                     <span>{option.label}</span>
@@ -580,8 +625,8 @@ export default function TeacherDetailPage() {
                   contactMethod === 'NONE'
                     ? '연락처 없이 문의를 보냅니다'
                     : contactMethod === 'EMAIL'
-                    ? '회신 받을 이메일을 입력해주세요'
-                    : '회신 받을 전화번호를 입력해주세요'
+                      ? '회신 받을 이메일을 입력해주세요'
+                      : '회신 받을 전화번호를 입력해주세요'
                 }
               />
               {errors.contactValue ? <p className="mt-1 text-xs text-red-600">{errors.contactValue.message}</p> : null}
@@ -623,9 +668,8 @@ export default function TeacherDetailPage() {
 
             {inquiryError || inquiryMessage ? (
               <div
-                className={`md:col-span-2 rounded-2xl border px-4 py-3 text-sm ${
-                  inquiryError ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                }`}
+                className={`md:col-span-2 rounded-2xl border px-4 py-3 text-sm ${inquiryError ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                  }`}
               >
                 {inquiryError || inquiryMessage}
               </div>

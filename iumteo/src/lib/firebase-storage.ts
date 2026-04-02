@@ -129,7 +129,14 @@ export function extractStorageObjectPath(fileUrl: string) {
 }
 
 export async function deleteInstructorProfilePhotoByUrl(fileUrl: string) {
-  const objectPath = extractStorageObjectPath(fileUrl);
+  const trimmed = String(fileUrl || '').trim();
+  if (!trimmed) return { deleted: false, skipped: true };
+
+  // 전체 URL이면 파싱, 경로만 있으면 그대로 사용
+  const objectPath = /^https?:\/\//i.test(trimmed)
+    ? extractStorageObjectPath(trimmed)
+    : trimmed;
+
   if (!objectPath) {
     return { deleted: false, skipped: true };
   }

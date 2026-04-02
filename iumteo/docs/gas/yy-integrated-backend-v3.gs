@@ -7,8 +7,20 @@
  * 3) 문의접수
  */
 
-const SPREADSHEET_ID = '1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf';
-const API_KEY = 'yy-iumteo-secret-key-2026';
+
+/** 스크립트 속성에서 설정을 불러오는 헬퍼 함수 */
+function getProperty_(key, defaultValue) {
+  var value = PropertiesService.getScriptProperties().getProperty(key);
+  return value || defaultValue || '';
+}
+
+function getSpreadsheetId_() {
+  return getProperty_('SPREADSHEET_ID', '1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf');
+}
+
+function getApiKey_() {
+  return getProperty_('API_KEY', 'yy-iumteo-secret-key-2026');
+}
 
 const HEADER_ROW = 1;
 const FIRST_DATA_ROW = 2;
@@ -110,14 +122,15 @@ function fail_(message, code) {
 }
 
 function ensureApiKey_(requestKey) {
-  if (requestKey !== API_KEY) {
+  var apiKey = getApiKey_();
+  if (!apiKey || requestKey !== apiKey) {
     throw new Error('Unauthorized API key');
   }
 }
 
 function getSS_() {
   try {
-    return SpreadsheetApp.openById(SPREADSHEET_ID);
+    return SpreadsheetApp.openById(getSpreadsheetId_());
   } catch (e) {
     return SpreadsheetApp.getActiveSpreadsheet();
   }
@@ -328,13 +341,18 @@ function formatMemberForClient_(entry) {
   });
 }
 
-function getUserByEmail_(email) {
-  var instructorMatch = findInstructorByEmail_(email);
-  var memberMatch = findMemberByEmail_(email);
+function getUserByEmail_(email, preferredRole) {
+  var normalizedEmail = normalizeEmail(email);
+  var instructorMatch = findInstructorByEmail_(normalizedEmail);
+  var memberMatch = findMemberByEmail_(normalizedEmail);
 
-  if (instructorMatch && memberMatch) {
-    throw new Error('동일 이메일이 강사DB와 이용자DB에 동시에 존재합니다: ' + normalizeEmail(email));
+  if (preferredRole === 'INSTRUCTOR' && instructorMatch) {
+    return formatInstructorForClient_(instructorMatch);
   }
+  if (preferredRole === 'USER' && memberMatch) {
+    return formatMemberForClient_(memberMatch);
+  }
+
   if (instructorMatch) return formatInstructorForClient_(instructorMatch);
   if (memberMatch) return formatMemberForClient_(memberMatch);
   return null;
@@ -571,7 +589,7 @@ function doGet(e) {
 
     if (action === 'getUser') {
       ensureApiKey_(apiKey);
-      var user = getUserByEmail_(e.parameter.email);
+      var user = getUserByEmail_(e.parameter.email, e.parameter.role || e.parameter.type);
       if (!user) return fail_('User not found', 404);
       return ok_('User loaded', user);
     }

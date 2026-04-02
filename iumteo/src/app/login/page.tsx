@@ -8,8 +8,6 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { getAppPath, getRoutePath } from '@/lib/app-url';
 
 function resolveNextRoute(role?: string | null) {
-  if (role === 'USER') return '/profile';
-  if (role === 'INSTRUCTOR') return '/teacher';
   if (role === 'ADMIN') return '/admin';
   return '/';
 }
@@ -32,6 +30,7 @@ async function resolveSessionRole() {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loginType, setLoginType] = useState<'USER' | 'INSTRUCTOR'>('USER');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -66,11 +65,20 @@ function LoginPageContent() {
       const response = await signIn('credentials', {
         username: submittedUsername,
         password: submittedPassword,
+        role: loginType,
         redirect: false,
       });
 
       if (!response || response.error) {
-        setError('전화번호, 가입 이메일 또는 비밀번호를 다시 확인해 주세요.');
+        if (response?.error && response.error !== 'CredentialsSignin') {
+          setError(response.error);
+        } else {
+          setError(
+            loginType === 'INSTRUCTOR'
+              ? '강사 정보를 찾을 수 없거나 비밀번호가 틀립니다.'
+              : '회원 정보를 찾을 수 없거나 비밀번호가 틀립니다.',
+          );
+        }
         return;
       }
 
@@ -139,7 +147,27 @@ function LoginPageContent() {
               </div>
             ) : null}
 
-            <form className="mt-8 space-y-5" onSubmit={handleCredentialsLogin}>
+            {/* 역할 선택 탭 */}
+            <div className="mt-8 flex rounded-2xl bg-slate-100 p-1">
+              <button
+                type="button"
+                onClick={() => setLoginType('USER')}
+                className={`flex-1 rounded-xl py-3 text-sm font-bold transition ${loginType === 'USER' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                일반회원 로그인
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginType('INSTRUCTOR')}
+                className={`flex-1 rounded-xl py-3 text-sm font-bold transition ${loginType === 'INSTRUCTOR' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+              >
+                강사 로그인
+              </button>
+            </div>
+
+            <form className="mt-6 space-y-5" onSubmit={handleCredentialsLogin}>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-700">
                   전화번호, 가입 이메일 또는 관리자 아이디

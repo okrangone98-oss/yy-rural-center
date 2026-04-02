@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { assertGasSuccess, gasGet, gasPost, isGasConfigured, type GasEnvelope } from '@/lib/gas-api';
 import { profileUpdateSchema } from '@/lib/domain';
-import { upsertMirrorInstructorProfile, upsertMirrorUser } from '@/lib/firestore-mirror';
+import {
+  getInstructorProfileFromFirestore,
+  saveInstructorProfileDirect,
+} from '@/lib/firestore-mirror';
+import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import { getRequiredSession } from '@/lib/rbac';
 
 function buildFallbackProfile(sessionUser: {
@@ -35,138 +39,158 @@ function buildFallbackProfile(sessionUser: {
   };
 }
 
+// ─── READ ────────────────────────────────────────────────────────────────────
 export async function GET() {
   const { session, error } = await getRequiredSession(['USER', 'INSTRUCTOR', 'ADMIN']);
   if (error) return error;
 
-  try {
-    if (!isGasConfigured()) {
-      return NextResponse.json({
-        success: true,
-        degraded: true,
-        saveAvailable: false,
-        message: '프로필 조회 설정이 아직 완료되지 않아 기본 계정 정보만 보여드립니다.',
-        data: buildFallbackProfile(session.user),
-      });
+  const email = session.user.email || '';
+
+  // 1차: GAS(구글 시트) 조회
+  if (isGasConfigured()) {
+    try {
+      const result = assertGasSuccess(
+        await gasGet<GasEnvelope<any>>(
+          new URLSearchParams({ action: 'getUser', email }),
+        ),
+        'getUser',
+      );
+      if (result.data) {
+        return NextResponse.json({
+          success: true,
+          degraded: false,
+          saveAvailable: true,
+          data: result.data,
+        });
+      }
+    } catch (gasError) {
+      console.warn('[profile GET] GAS 조회 실패, Firestore 폴백 시도:', gasError);
     }
-
-    const result = assertGasSuccess(
-      await gasGet<GasEnvelope<any>>(
-        new URLSearchParams({
-          action: 'getUser',
-          email: session.user.email || '',
-        }),
-      ),
-      'getUser',
-    );
-
-    return NextResponse.json({ success: true, degraded: false, saveAvailable: true, data: result.data || null });
-  } catch (fetchError) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: fetchError instanceof Error ? fetchError.message : '프로필 정보를 불러오지 못했습니다.',
-      },
-      { status: 400 },
-    );
   }
+
+  // 2차: Firestore 폴백
+  if (isFirebaseMirrorEnabled()) {
+    try {
+      const firestoreProfile = await getInstructorProfileFromFirestore(email);
+      if (firestoreProfile) {
+        return NextResponse.json({
+          success: true,
+          degraded: true,
+          saveAvailable: true,
+          message: 'Google Sheets 연결이 불안정합니다. 저장된 데이터를 불러왔습니다.',
+          data: firestoreProfile,
+        });
+      }
+    } catch (firestoreError) {
+      console.error('[profile GET] Firestore 조회 실패:', firestoreError);
+    }
+  }
+
+  // 최종 폴백: 세션 기반 기본값
+  return NextResponse.json({
+    success: true,
+    degraded: true,
+    saveAvailable: isGasConfigured() || isFirebaseMirrorEnabled(),
+    message: '프로필 정보를 불러오지 못했습니다. 기본 정보를 표시합니다.',
+    data: buildFallbackProfile(session.user),
+  });
 }
 
+// ─── UPDATE ──────────────────────────────────────────────────────────────────
 export async function POST(request: Request) {
   const { session, error } = await getRequiredSession(['USER', 'INSTRUCTOR', 'ADMIN']);
   if (error) return error;
 
-  try {
-    if (!isGasConfigured()) {
-      return NextResponse.json(
-        { success: false, message: '프로필 저장 설정이 아직 완료되지 않았습니다. 관리자 환경변수를 확인해 주세요.' },
-        { status: 503 },
-      );
-    }
+  const email = session.user.email || '';
 
+  try {
     const body = await request.json();
     const payload = profileUpdateSchema.parse(body);
-    const email = session.user.email || '';
     const now = new Date().toISOString();
     const role = session.user.role === 'ADMIN' ? 'INSTRUCTOR' : session.user.role;
 
     const action = role === 'INSTRUCTOR' ? 'updateInstructorProfile' : 'updateMemberProfile';
-    const sheetSync = assertGasSuccess(
-      await gasPost<GasEnvelope<any>>({
-        action,
-        email,
-        name: payload.name || session.user.name || '',
-        phone: payload.phone || '',
-        org: payload.org || '',
-        field: payload.field || '',
-        area: payload.area || '',
-        intro: payload.intro || '',
-        career: payload.career || '',
-        address: payload.address || '',
-        instagram: payload.instagram || '',
-        instagramOpen: payload.instagramOpen || '',
-        portfolioLink: payload.portfolioLink || '',
-        profilePhoto: payload.profilePhoto || '',
-        profilePublicAccepted: payload.profilePublicAccepted,
-        marketingAccepted: payload.marketingAccepted,
-      }),
-      action,
-    );
 
-    const userMirror = await upsertMirrorUser({
-      id: email,
-      email,
-      name: payload.name || session.user.name || email.split('@')[0],
-      phone: payload.phone || '',
-      role: session.user.role,
-      actualRole: session.user.role,
-      provider: session.user.provider,
-      organization: payload.org || '',
-      memberType: role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'USER',
-      consent: {
-        requiredAccepted: true,
-        profilePublicAccepted: payload.profilePublicAccepted ?? role === 'INSTRUCTOR',
-        marketingAccepted: payload.marketingAccepted ?? false,
-        consentVersion: 'profile-update-2026-03',
-        consentDate: now,
-      },
-      createdAt: now,
-      updatedAt: now,
-    });
+    let firestoreSaved = false;
+    let gasSaved = false;
+    const warnings: string[] = [];
 
-    let profileMirror = null;
+    // ── 1. Firestore 저장 (주 경로, Firebase 설정 시 항상 실행) ──
+    if (isFirebaseMirrorEnabled()) {
+      try {
+        await saveInstructorProfileDirect({
+          id: email,
+          email,
+          name: payload.name || session.user.name || email.split('@')[0],
+          phone: payload.phone || '',
+          organization: payload.org || '',
+          field: payload.field || '',
+          area: payload.area || '',
+          intro: payload.intro || '',
+          career: payload.career || '',
+          address: payload.address || '',
+          instagram: payload.instagram || '',
+          instagramOpen: (payload.instagramOpen as '공개' | '미공개') || '미공개',
+          portfolioLink: payload.portfolioLink || '',
+          profilePhoto: payload.profilePhoto || '',
+          approvalStatus: 'PENDING',
+          createdAt: now,
+          updatedAt: now,
+        });
+        firestoreSaved = true;
+      } catch (firestoreError) {
+        console.error('[profile POST] Firestore 저장 실패:', firestoreError);
+        warnings.push('Firestore 저장에 실패했습니다.');
+      }
+    }
 
-    if (role === 'INSTRUCTOR') {
-      profileMirror = await upsertMirrorInstructorProfile({
-        id: email,
-        email,
-        name: payload.name || session.user.name || email.split('@')[0],
-        phone: payload.phone || '',
-        organization: payload.org || '',
-        field: payload.field || '',
-        area: payload.area || '',
-        intro: payload.intro || '',
-        career: payload.career || '',
-        address: payload.address || '',
-        instagram: payload.instagram || '',
-        instagramOpen: payload.instagramOpen || '미공개',
-        portfolioLink: payload.portfolioLink || '',
-        profilePhoto: payload.profilePhoto || '',
-        approvalStatus: 'PENDING',
-        createdAt: now,
-        updatedAt: now,
-      });
+    // ── 2. GAS(구글 시트) 동기화 (보조 경로, 실패해도 전체가 막히지 않음) ──
+    if (isGasConfigured()) {
+      try {
+        assertGasSuccess(
+          await gasPost<GasEnvelope<any>>({
+            action,
+            email,
+            name: payload.name || session.user.name || '',
+            phone: payload.phone || '',
+            org: payload.org || '',
+            field: payload.field || '',
+            area: payload.area || '',
+            intro: payload.intro || '',
+            career: payload.career || '',
+            address: payload.address || '',
+            instagram: payload.instagram || '',
+            instagramOpen: payload.instagramOpen || '',
+            portfolioLink: payload.portfolioLink || '',
+            profilePhoto: payload.profilePhoto || '',
+            profilePublicAccepted: payload.profilePublicAccepted,
+            marketingAccepted: payload.marketingAccepted,
+            password: payload.password,
+          }),
+          action,
+        );
+        gasSaved = true;
+      } catch (gasError) {
+        console.error('[profile POST] GAS 동기화 실패:', gasError);
+        warnings.push('Google Sheets 동기화에 실패했습니다. 데이터는 저장되었습니다.');
+      }
+    }
+
+    // ── 3. 둘 다 실패한 경우 ──
+    if (!firestoreSaved && !gasSaved) {
+      return NextResponse.json(
+        { success: false, message: '프로필 저장에 실패했습니다. Firebase 및 Google Sheets 설정을 확인해 주세요.' },
+        { status: 503 },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      data: {
-        sheetSync,
-        userMirror,
-        profileMirror,
-      },
+      data: { firestoreSaved, gasSaved },
+      ...(warnings.length ? { warnings } : {}),
     });
   } catch (updateError) {
+    console.error('[profile POST] 오류:', updateError);
     return NextResponse.json(
       {
         success: false,

@@ -1,4 +1,4 @@
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, Filter } from 'firebase-admin/firestore';
 import { getFirestoreAdmin, isFirebaseMirrorEnabled, runWithFirebaseTimeout } from '@/lib/firebase-admin';
 import { CHAT_ROOM_MAX_LENGTH, type ChatMessage, type ChatRoom } from '@/lib/domain';
 
@@ -103,9 +103,13 @@ export async function findChatRoomsForUser(email: string, role: string) {
     );
   }
 
-  const field = role === 'INSTRUCTOR' ? 'instructorEmail' : 'memberEmail';
   const snapshot = await runWithFirebaseTimeout(
-    getChatRoomsCollection().where(field, '==', normalizedEmail).get(),
+    getChatRoomsCollection().where(
+      Filter.or(
+        Filter.where('instructorEmail', '==', normalizedEmail),
+        Filter.where('memberEmail', '==', normalizedEmail)
+      )
+    ).get(),
     'list user chat rooms',
   );
   return sortRooms(
@@ -129,9 +133,9 @@ export async function getChatMessages(roomId: string) {
 export type SendMessageResult =
   | { ok: true; message: ChatMessage; newTotalLength: number; notifyFirst: boolean }
   | {
-      ok: false;
-      reason: 'ROOM_NOT_FOUND' | 'ROOM_PENDING' | 'ROOM_ARCHIVED' | 'LIMIT_EXCEEDED' | 'FORBIDDEN';
-    };
+    ok: false;
+    reason: 'ROOM_NOT_FOUND' | 'ROOM_PENDING' | 'ROOM_ARCHIVED' | 'LIMIT_EXCEEDED' | 'FORBIDDEN';
+  };
 
 export async function sendChatMessage(
   roomId: string,
@@ -194,6 +198,64 @@ export async function sendChatMessage(
       return { ok: true as const, message: { ...message, createdAt: now }, newTotalLength: nextLength, notifyFirst };
     }),
     'send chat message',
+  );
+}
+
+export async function deleteChatMessage(
+  roomId: string,
+  messageId: string,
+  requesterEmail: string,
+  role: string,
+) {
+  if (!isFirebaseMirrorEnabled()) {
+    return { ok: true as const, newTotalLength: 0 };
+  }
+
+  const roomRef = getChatRoomsCollection().doc(roomId);
+  const messageRef = roomRef.collection('messages').doc(messageId);
+
+  return runWithFirebaseTimeout(
+    getFirestoreAdmin().runTransaction(async (tx) => {
+      const roomSnapshot = await tx.get(roomRef);
+      if (!roomSnapshot.exists) return { ok: false as const, reason: 'ROOM_NOT_FOUND' as const };
+
+      const messageSnapshot = await tx.get(messageRef);
+      if (!messageSnapshot.exists) return { ok: false as const, reason: 'MESSAGE_NOT_FOUND' as const };
+
+      const room = { id: roomSnapshot.id, ...roomSnapshot.data() } as ChatRoom;
+      const message = { id: messageSnapshot.id, ...messageSnapshot.data() } as ChatMessage;
+
+      const isParticipant =
+        room.memberEmail === requesterEmail ||
+        room.instructorEmail === requesterEmail ||
+        role === 'ADMIN';
+
+      if (!isParticipant) return { ok: false as const, reason: 'FORBIDDEN' as const };
+
+      if (message.senderEmail !== requesterEmail && role !== 'ADMIN') {
+        return { ok: false as const, reason: 'FORBIDDEN' as const };
+      }
+
+      if (room.status === 'ARCHIVED') return { ok: false as const, reason: 'ROOM_ARCHIVED' as const };
+
+      const currentLength = room.totalLength ?? 0;
+      const nextLength = Math.max(0, currentLength - message.content.length);
+      const now = nowIso();
+
+      tx.delete(messageRef);
+
+      tx.set(
+        roomRef,
+        {
+          totalLength: nextLength,
+          updatedAt: now,
+        },
+        { merge: true },
+      );
+
+      return { ok: true as const, newTotalLength: nextLength };
+    }),
+    'delete chat message',
   );
 }
 

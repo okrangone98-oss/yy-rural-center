@@ -115,7 +115,7 @@ async function fetchGasRecords(action: 'getInstructors' | 'getMembers', includeA
   return Array.isArray(result.data) ? result.data : [];
 }
 
-async function loadGasUserByEmail(email: string) {
+async function loadGasUserByEmail(email: string, preferredRole?: string) {
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) return null;
 
@@ -124,41 +124,53 @@ async function loadGasUserByEmail(email: string) {
     email: normalizedEmail,
   });
 
+  if (preferredRole) {
+    params.set('role', preferredRole);
+  }
+
   const result = assertGasSuccess(await gasGet<GasEnvelope<CsvRecord>>(params), 'getUser');
   return result.data ? toAuthUser(result.data) : null;
 }
 
-async function loadGasUserByPhone(phone: string) {
-  const normalizedPhone = normalizePhone(phone);
-  if (!normalizedPhone) return null;
+async function findGasUserByIdentifier(identifier: string, loginRole?: string) {
+  const trimmed = String(identifier || '').trim();
+  if (!trimmed) return null;
+
+  const isEmail = isEmailIdentifier(trimmed);
+  const normalized = isEmail ? normalizeEmail(trimmed) : normalizePhone(trimmed);
+  if (!normalized) return null;
 
   const [instructors, members] = await Promise.all([
     fetchGasRecords('getInstructors', true),
     fetchGasRecords('getMembers'),
   ]);
 
-  const instructor = instructors.find((record) => getRecordPhone(record) === normalizedPhone);
-  if (instructor) {
-    return toAuthUser(instructor, 'INSTRUCTOR');
+  const matchFn = (record: CsvRecord) => isEmail
+    ? getRecordEmail(record) === normalized
+    : getRecordPhone(record) === normalized;
+
+  const foundInstructor = instructors.find(matchFn);
+  const foundMember = members.find(matchFn);
+
+  if (!loginRole) {
+    if (foundInstructor) return toAuthUser(foundInstructor, 'INSTRUCTOR');
+    if (foundMember) return toAuthUser(foundMember, 'USER');
+    return null; // Both null
   }
 
-  const member = members.find((record) => getRecordPhone(record) === normalizedPhone);
-  if (member) {
-    return toAuthUser(member, 'USER');
+  if (loginRole === 'INSTRUCTOR') {
+    if (foundInstructor) return toAuthUser(foundInstructor, 'INSTRUCTOR');
+    if (foundMember) throw new Error('일반회원으로 등록된 계정입니다. "일반회원 로그인" 탭을 선택해 주세요.');
+    return null;
+  }
+
+  if (loginRole === 'USER') {
+    if (foundMember) return toAuthUser(foundMember, 'USER');
+    if (foundInstructor) throw new Error('강사로 등록 또는 승인 대기 중인 계정입니다. "강사 로그인" 탭을 선택해 주세요.');
+    return null;
   }
 
   return null;
-}
-
-async function findGasUserByIdentifier(identifier: string) {
-  const trimmed = String(identifier || '').trim();
-  if (!trimmed) return null;
-
-  if (isEmailIdentifier(trimmed)) {
-    return loadGasUserByEmail(trimmed);
-  }
-
-  return loadGasUserByPhone(trimmed);
 }
 
 declare module 'next-auth' {
@@ -209,10 +221,12 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         username: { label: '전화번호 또는 가입 이메일', type: 'text' },
         password: { label: '비밀번호', type: 'password' },
+        role: { label: '로그인 역할', type: 'text' },
       },
       async authorize(credentials) {
         const identifier = String(credentials?.username || '').trim();
         const password = String(credentials?.password || '').trim();
+        const loginRole = String(credentials?.role || '').trim();
 
         if (!identifier || !password) {
           return null;
@@ -236,13 +250,26 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const gasUser = await findGasUserByIdentifier(identifier);
+          const gasUser = await findGasUserByIdentifier(identifier, loginRole);
           if (!gasUser) {
             return null;
           }
 
           if (password !== gasUser.password) {
             return null;
+          }
+
+          if (loginRole) {
+            const isInstructorLogin = loginRole === 'INSTRUCTOR';
+            const isUserLogin = loginRole === 'USER';
+
+            if (isUserLogin && (gasUser.role === 'INSTRUCTOR' || gasUser.role === 'GUEST')) {
+              throw new Error('강사로 등록 또는 승인 대기 중인 계정입니다. "강사 로그인" 탭을 선택해 주세요.');
+            }
+
+            if (isInstructorLogin && gasUser.role === 'USER') {
+              throw new Error('일반회원으로 등록된 계정입니다. "일반회원 로그인" 탭을 선택해 주세요.');
+            }
           }
 
           return {

@@ -26,7 +26,7 @@ function normalizeInquiry(record: CsvRecord) {
 }
 
 export async function GET() {
-  const { session, error } = await getRequiredSession(['USER', 'ADMIN']);
+  const { session, error } = await getRequiredSession(['USER', 'ADMIN', 'INSTRUCTOR']);
   if (error) return error;
 
   try {

@@ -5,13 +5,15 @@ import { findChatRoomsByInquiryIds } from '@/lib/chat-store';
 import { isFirebaseMirrorEnabled } from '@/lib/firebase-admin';
 import { parseCsv, rowsToRecords, pickByAliases } from '@/lib/sheets';
 
+import { assertGasSuccess, gasGet, type GasEnvelope } from '@/lib/gas-api';
+
 export const dynamic = 'force-dynamic';
 
-const INQUIRY_CSV_URL =
+const CSV_INQUIRY_DB_URL =
   process.env.CSV_INQUIRY_DB_URL ||
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv';
 
-const INSTRUCTOR_CSV_URL =
+const CSV_INSTRUCTOR_DB_URL =
   process.env.CSV_INSTRUCTOR_DB_URL ||
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv';
 
@@ -26,12 +28,40 @@ function normalizeKey(value: string) {
 }
 
 async function fetchCsv(url: string): Promise<CsvRecord[]> {
-  const response = await fetch(url, { cache: 'no-store' });
+  const response = await fetch(`${url}&t=${Date.now()}`, { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`CSV fetch failed: ${response.status}`);
   }
 
   return rowsToRecords(parseCsv(await response.text()));
+}
+
+async function fetchInquiryRows(): Promise<CsvRecord[]> {
+  try {
+    const result = assertGasSuccess(
+      await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInquiries' })),
+      'getInquiries',
+    );
+    return Array.isArray(result.data) ? result.data : [];
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message.toLowerCase() : '';
+    if (!errorMsg.includes('unknown action') && !errorMsg.includes('지원하지 않습')) throw err;
+    return fetchCsv(CSV_INQUIRY_DB_URL);
+  }
+}
+
+async function fetchInstructorRows(): Promise<CsvRecord[]> {
+  try {
+    const result = assertGasSuccess(
+      await gasGet<GasEnvelope<CsvRecord[]>>(new URLSearchParams({ action: 'getInstructors', cacheBust: String(Date.now()) })),
+      'getInstructors',
+    );
+    return Array.isArray(result.data) ? result.data : [];
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message.toLowerCase() : '';
+    if (!errorMsg.includes('unknown action') && !errorMsg.includes('지원하지 않습')) throw err;
+    return fetchCsv(CSV_INSTRUCTOR_DB_URL);
+  }
 }
 
 function getInstructorName(record: CsvRecord) {
@@ -74,8 +104,8 @@ export async function GET() {
   try {
     const chatEnabled = isFirebaseMirrorEnabled();
     const [inquiryRows, instructorRows] = await Promise.all([
-      fetchCsv(INQUIRY_CSV_URL),
-      fetchCsv(INSTRUCTOR_CSV_URL),
+      fetchInquiryRows(),
+      fetchInstructorRows(),
     ]);
 
     const sessionEmail = normalizeEmail(session.user.email);

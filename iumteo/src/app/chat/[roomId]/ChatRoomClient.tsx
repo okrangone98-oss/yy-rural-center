@@ -214,6 +214,7 @@ export default function ChatRoomClient({
         lastMessage: result.data.message.content,
         lastMessageAt: result.data.message.createdAt,
       }));
+
       setInput('');
       setRefreshTick((value) => value + 1);
     } catch (sendError) {
@@ -222,6 +223,27 @@ export default function ChatRoomClient({
       setActionState(null);
     }
   }, [input, isReadOnly, roomId, sending]);
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('이 메시지를 삭제하시겠습니까? 삭제된 메시지는 복구할 수 없습니다.')) return;
+
+    try {
+      const response = await fetch(getAppPath(`/api/chat/rooms/${roomId}/messages?messageId=${messageId}`), {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '메시지 삭제 실패');
+      }
+
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      if (result.data?.newTotalLength !== undefined) {
+        setRoom((prev) => ({ ...prev, totalLength: result.data.newTotalLength }));
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '삭제 중 오류가 발생했습니다.');
+    }
+  };
 
   return (
     <div className="flex min-h-[70vh] flex-col bg-white">
@@ -294,18 +316,34 @@ export default function ChatRoomClient({
           <div className="flex flex-col items-center justify-center py-16 text-center text-gray-400">
             <MessageCircle size={30} className="mb-3" />
             <p className="text-sm">아직 채팅 메시지가 없습니다.</p>
-            <p className="mt-1 text-xs">문의 수락 후 이곳에서 대화를 이어갈 수 있습니다.</p>
+            <p className="mt-1 text-xs">
+              {isPending
+                ? canAccept
+                  ? "상단의 '문의 수락' 버튼을 눌러 대화를 시작해 보세요."
+                  : '강사님의 수락을 기다리고 있습니다. 수락 후 대화를 나눌 수 있습니다.'
+                : isArchived
+                  ? '문의가 종료된 채팅방입니다.'
+                  : '채팅방이 활성화되었습니다. 첫 메시지로 인사를 건네 보세요!'}
+            </p>
           </div>
         ) : (
           messages.map((message) => {
             const isMine = message.senderEmail === myEmail;
 
             return (
-              <div key={message.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+              <div key={message.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} group relative`}>
+                {isMine && !isArchived && (
+                  <button
+                    onClick={() => handleDeleteMessage(message.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-1/2 -translate-y-1/2 right-[calc(80%+1rem)] md:right-auto md:-left-8 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                    title="메시지 삭제"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
                 <div
-                  className={`max-w-[80%] rounded-3xl px-4 py-3 shadow-sm ${
-                    isMine ? 'bg-emerald-600 text-white' : 'bg-white text-gray-800'
-                  }`}
+                  className={`max-w-[80%] rounded-3xl px-4 py-3 shadow-sm ${isMine ? 'bg-emerald-600 text-white' : 'bg-white text-gray-800'
+                    }`}
                 >
                   <p className="whitespace-pre-wrap text-sm leading-6">{message.content}</p>
                   <p className={`mt-2 text-[11px] ${isMine ? 'text-emerald-50/80' : 'text-gray-400'}`}>
@@ -326,8 +364,8 @@ export default function ChatRoomClient({
               {isLimitReached
                 ? '채팅 누적 글자 수 300자에 도달했습니다.'
                 : isWarning
-                ? `남은 글자 수 ${remaining}자`
-                : '채팅 누적 글자 수'}
+                  ? `남은 글자 수 ${remaining}자`
+                  : '채팅 누적 글자 수'}
             </span>
             <span>
               {totalLength} / {CHAT_ROOM_MAX_LENGTH}
@@ -353,8 +391,8 @@ export default function ChatRoomClient({
             {isPending
               ? '강사 수락 이후 대화를 시작할 수 있습니다.'
               : isArchived
-              ? '문의가 종료되어 더 이상 메시지를 보낼 수 없습니다.'
-              : '누적 글자 수 제한에 도달했습니다.'}
+                ? '문의가 종료되어 더 이상 메시지를 보낼 수 없습니다.'
+                : '누적 글자 수 제한에 도달했습니다.'}
           </div>
         ) : (
           <div className="flex items-end gap-3">

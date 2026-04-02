@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,9 +49,8 @@ function RoleCard({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl border p-4 text-left transition-colors ${
-        active ? 'border-emerald-700 bg-emerald-50' : 'border-gray-200 bg-white hover:bg-gray-50'
-      }`}
+      className={`rounded-2xl border p-4 text-left transition-colors ${active ? 'border-emerald-700 bg-emerald-50' : 'border-gray-200 bg-white hover:bg-gray-50'
+        }`}
     >
       <div className="font-semibold text-gray-900">{title}</div>
       <div className="mt-1 text-sm text-gray-500">{description}</div>
@@ -215,21 +214,9 @@ export default function RegisterPage() {
           </div>
 
           {!usingSocialSession && (
-            <div className="mb-6 grid gap-3 md:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => signIn('google', { callbackUrl: '/register' })}
-                className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                구글 로그인 후 가입 이어가기
-              </button>
-              <button
-                type="button"
-                onClick={() => signIn('naver', { callbackUrl: '/register' })}
-                className="rounded-2xl border border-[#03C75A] bg-[#03C75A] px-4 py-3 text-sm font-semibold text-white hover:bg-[#02b350]"
-              >
-                네이버 로그인 후 가입 이어가기
-              </button>
+            <div className="mb-6 flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm text-gray-500">
+              <span className="shrink-0 text-base">🔒</span>
+              <p>소셜 로그인(구글·네이버·카카오) 기능은 현재 준비 중입니다. 아래 양식으로 직접 가입해 주세요.</p>
             </div>
           )}
 
@@ -280,16 +267,18 @@ export default function RegisterPage() {
                 <label className="mb-1 block text-sm font-medium text-gray-700">소속</label>
                 <input {...register('org')} className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm" />
               </div>
-              {!usingSocialSession && (
-                <div className="md:col-span-2">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">비밀번호</label>
-                  <input
-                    type="password"
-                    {...register('password')}
-                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
-                  />
-                </div>
-              )}
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-gray-700">비밀번호</label>
+                <input
+                  type="password"
+                  {...register('password')}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  * 8자 이상, 특수문자 2개 이상 필수
+                </p>
+                {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>}
+              </div>
             </section>
 
             {memberType === 'INSTRUCTOR' && (

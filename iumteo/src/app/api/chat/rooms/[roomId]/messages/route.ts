@@ -175,3 +175,38 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { roomId: string } },
+) {
+  const { session, error } = await getRequiredSession(['USER', 'INSTRUCTOR', 'ADMIN']);
+  if (error) return error;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const messageId = searchParams.get('messageId');
+
+    if (!messageId) {
+      return NextResponse.json({ success: false, message: '삭제할 메시지 ID가 필요합니다.' }, { status: 400 });
+    }
+
+    const requesterEmail = session.user.email || '';
+    const requesterRole = session.user.role || '';
+
+    // Import deleteChatMessage at the top or dynamically
+    const { deleteChatMessage } = await import('@/lib/chat-store');
+    const result = await deleteChatMessage(params.roomId, messageId, requesterEmail, requesterRole);
+
+    if (!result.ok) {
+      return NextResponse.json(
+        { success: false, message: result.reason === 'FORBIDDEN' ? '권한이 없습니다.' : '메시지를 삭제하지 못했습니다.' },
+        { status: result.reason === 'FORBIDDEN' ? 403 : 400 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: { newTotalLength: result.newTotalLength } });
+  } catch (err) {
+    return NextResponse.json({ success: false, message: '삭제 중 오류가 발생했습니다.' }, { status: 500 });
+  }
+}

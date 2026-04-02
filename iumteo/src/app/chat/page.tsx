@@ -12,9 +12,10 @@ function StatusBadge({ status }: { status: ChatRoom['status'] }) {
     PENDING: 'bg-amber-100 text-amber-800',
     ACTIVE: 'bg-emerald-100 text-emerald-800',
     ARCHIVED: 'bg-gray-100 text-gray-500',
+    DELETED: 'bg-red-100 text-red-700',
   } satisfies Record<ChatRoom['status'], string>;
 
-  const label = status === 'PENDING' ? '수락 대기' : status === 'ACTIVE' ? '대화 중' : '문의 완료';
+  const label = status === 'PENDING' ? '수락 대기' : status === 'ACTIVE' ? '대화 중' : status === 'ARCHIVED' ? '문의 완료' : '삭제됨';
   return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${tone[status]}`}>{label}</span>;
 }
 
@@ -69,7 +70,7 @@ export default async function ChatListPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-semibold text-gray-900">
-                          {session.user.role === 'INSTRUCTOR' ? room.memberName : room.instructorName}
+                          {room.instructorEmail === session.user.email ? room.memberName : room.instructorName}
                         </h2>
                         <StatusBadge status={room.status} />
                         {unread > 0 ? (

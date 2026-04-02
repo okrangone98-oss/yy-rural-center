@@ -65,5 +65,5 @@ export async function normalizeProfileImage(input: {
     }
   }
 
-  throw new Error('이미지를 1280px 이하 / JPEG / 5MB 이하 기준으로 변환하지 못했습니다.');
+  throw new Error('이미지가 너무 커서 5MB 이하로 압축하지 못했습니다. 더 작은 이미지를 사용해 주세요.');
 }

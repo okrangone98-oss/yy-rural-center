@@ -6,7 +6,7 @@ const normalizeBasePath = (value) => {
 
 const basePath =
   process.env.NODE_ENV === 'production'
-    ? normalizeBasePath(process.env.NEXT_PUBLIC_APP_BASE_PATH || '/iumteo')
+    ? normalizeBasePath(process.env.NEXT_PUBLIC_APP_BASE_PATH || '')
     : '';
 
 /** @type {import('next').NextConfig} */

@@ -14,22 +14,6 @@ type SourceBundle = {
   rows: CsvRecord[];
 };
 
-const CSV_FALLBACK_SOURCES = {
-  instructorDb:
-    process.env.CSV_INSTRUCTOR_DB_URL ||
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=0&single=true&output=csv',
-  memberDb:
-    process.env.CSV_MEMBER_DB_URL ||
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=846647310&single=true&output=csv',
-  inquiryDb:
-    process.env.CSV_INQUIRY_DB_URL ||
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1950022642&single=true&output=csv',
-};
-
-function isUnsupportedLegacyGasError(error: unknown) {
-  const message = error instanceof Error ? error.message : '';
-  return message.includes('지원하지 않습니다');
-}
 
 function parseLimit(param: string | null): number {
   const parsed = Number(param || '200');
@@ -144,24 +128,6 @@ async function fetchGasSheetRecords(action: 'getInstructors' | 'getMembers' | 'g
   };
 }
 
-async function fetchCsvFallback(url: string, limit: number) {
-  const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`CSV fetch failed (${response.status})`);
-  }
-
-  const rows = rowsToRecords(parseCsv(await response.text())).map((record, index) => ({
-    ...record,
-    rowIndex: String(index + 2),
-  }));
-
-  return {
-    source: 'csv-fallback' as const,
-    rowCount: rows.length,
-    rows: rows.slice(0, limit),
-    allRows: rows,
-  };
-}
 
 export async function GET(request: Request) {
   try {
@@ -173,18 +139,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = parseLimit(searchParams.get('limit'));
 
-    const instructorSource = await fetchGasSheetRecords('getInstructors', limit, true).catch((error) => {
-      if (!isUnsupportedLegacyGasError(error)) throw error;
-      return fetchCsvFallback(CSV_FALLBACK_SOURCES.instructorDb, limit);
-    });
-    const memberSource = await fetchGasSheetRecords('getMembers', limit).catch((error) => {
-      if (!isUnsupportedLegacyGasError(error)) throw error;
-      return fetchCsvFallback(CSV_FALLBACK_SOURCES.memberDb, limit);
-    });
-    const inquirySource = await fetchGasSheetRecords('getInquiries', limit).catch((error) => {
-      if (!isUnsupportedLegacyGasError(error)) throw error;
-      return fetchCsvFallback(CSV_FALLBACK_SOURCES.inquiryDb, limit);
-    });
+    const instructorSource = await fetchGasSheetRecords('getInstructors', limit, true);
+    const memberSource = await fetchGasSheetRecords('getMembers', limit);
+    const inquirySource = await fetchGasSheetRecords('getInquiries', limit);
 
     const instructorDb = instructorSource.allRows;
     const memberDb = memberSource.allRows;
