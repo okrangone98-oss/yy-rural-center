@@ -319,6 +319,81 @@
         width: 100%;
         flex: 1;
       }
+
+      /* 네비게이션 항목 좌측 정렬 */
+      .nav-links a,
+      .nav-links .dropdown-trigger,
+      .nav-links .nested-dropdown-trigger {
+        text-align: left;
+        justify-content: flex-start;
+        width: 100%;
+      }
+
+      /* 공지사항 리스트 — 모바일 카드형 레이아웃 */
+      .notice-table-wrap {
+        overflow-x: visible;
+      }
+      .notice-table,
+      .notice-table tbody,
+      .notice-table tr,
+      .notice-table td {
+        display: block;
+        width: 100%;
+      }
+      .notice-table thead {
+        display: none;
+      }
+      .notice-table tr.notice-row {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        background: #fff;
+      }
+      .notice-table tr.notice-row:hover {
+        background: #fafafa;
+      }
+      .notice-table td {
+        border-bottom: none;
+        padding: 2px 0;
+      }
+      .notice-table td.notice-title {
+        font-size: 1rem;
+        line-height: 1.5;
+        white-space: normal;
+        word-break: keep-all;
+        margin: 6px 0 4px;
+      }
+      .notice-table td.notice-date {
+        font-size: 0.82rem;
+        color: #888;
+      }
+
+      /* 공지 상세 모달 */
+      .modal {
+        padding: 12px;
+        align-items: flex-start;
+      }
+      .modal-dialog {
+        max-height: 94vh;
+        padding: 48px 20px 24px;
+        border-radius: 16px;
+      }
+      .modal-title {
+        font-size: 1.15rem;
+        padding-right: 36px;
+      }
+      .modal-body {
+        font-size: 0.95rem;
+        padding-right: 2px;
+      }
+      .modal-img-frame img {
+        max-height: 260px;
+      }
+      .modal-link {
+        width: 100%;
+        align-self: stretch;
+      }
     }
 
     /* 공지사항 특화 CSS */
