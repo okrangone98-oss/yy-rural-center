@@ -4,11 +4,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com;">
   <title>공지사항 - 양양군 농촌활성화지원센터</title>
+  <meta name="description" content="양양군 농촌활성화지원센터의 공식 공지사항. 사업 일정, 교육·행사 안내, 모집 공고 등 최신 소식을 확인하세요." />
+  <meta name="keywords" content="양양, 농촌활성화지원센터, 공지사항, 공고, 양양군 공지, 두레동아리 공지" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="공지사항 | 양양군 농촌활성화지원센터" />
+  <meta property="og:description" content="양양군 농촌활성화지원센터 공지사항 페이지입니다. 사업·교육·행사 안내를 제공합니다." />
+  <meta property="og:url" content="https://www.yycenter.kr/notice.html" />
+  <meta property="og:image" content="https://www.yycenter.kr/images/PD사진/logo-main.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="공지사항 | 양양군 농촌활성화지원센터" />
+  <meta name="twitter:description" content="양양군 농촌활성화지원센터 공지사항." />
+  <meta name="twitter:image" content="https://www.yycenter.kr/images/PD사진/logo-main.png" />
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/common.css">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     :root {
       --primary: #5b8a72;
       --primary-dark: #3b5f4f;
@@ -307,92 +331,6 @@
 
       .dropdown.is-open .dropdown-content {
         display: block;
-      }
-
-      .notice-toolbar-left,
-      .notice-toolbar-right {
-        width: 100%;
-      }
-
-      .notice-search-input {
-        min-width: 0;
-        width: 100%;
-        flex: 1;
-      }
-
-      /* 네비게이션 항목 좌측 정렬 */
-      .nav-links a,
-      .nav-links .dropdown-trigger,
-      .nav-links .nested-dropdown-trigger {
-        text-align: left;
-        justify-content: flex-start;
-        width: 100%;
-      }
-
-      /* 공지사항 리스트 — 모바일 카드형 레이아웃 */
-      .notice-table-wrap {
-        overflow-x: visible;
-      }
-      .notice-table,
-      .notice-table tbody,
-      .notice-table tr,
-      .notice-table td {
-        display: block;
-        width: 100%;
-      }
-      .notice-table thead {
-        display: none;
-      }
-      .notice-table tr.notice-row {
-        border: 1px solid #eee;
-        border-radius: 12px;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        background: #fff;
-      }
-      .notice-table tr.notice-row:hover {
-        background: #fafafa;
-      }
-      .notice-table td {
-        border-bottom: none;
-        padding: 2px 0;
-      }
-      .notice-table td.notice-title {
-        font-size: 1rem;
-        line-height: 1.5;
-        white-space: normal;
-        word-break: keep-all;
-        margin: 6px 0 4px;
-      }
-      .notice-table td.notice-date {
-        font-size: 0.82rem;
-        color: #888;
-      }
-
-      /* 공지 상세 모달 */
-      .modal {
-        padding: 12px;
-        align-items: flex-start;
-      }
-      .modal-dialog {
-        max-height: 94vh;
-        padding: 48px 20px 24px;
-        border-radius: 16px;
-      }
-      .modal-title {
-        font-size: 1.15rem;
-        padding-right: 36px;
-      }
-      .modal-body {
-        font-size: 0.95rem;
-        padding-right: 2px;
-      }
-      .modal-img-frame img {
-        max-height: 260px;
-      }
-      .modal-link {
-        width: 100%;
-        align-self: stretch;
       }
     }
 
@@ -839,10 +777,12 @@
       <div class="notice-wrapper">
         <div class="notice-toolbar">
           <div class="notice-toolbar-left">
-            <input type="text" id="notice-search-input" class="notice-search-input" placeholder="검색어 입력" />
+            <label for="notice-search-input" class="sr-only">공지사항 검색</label>
+            <input type="search" id="notice-search-input" name="notice-search" class="notice-search-input" placeholder="검색어 입력" aria-label="공지사항 검색" autocomplete="off" />
           </div>
           <div class="notice-toolbar-right">
-            <select id="notice-type-filter" class="notice-filter-select">
+            <label for="notice-type-filter" class="sr-only">카테고리 필터</label>
+            <select id="notice-type-filter" name="notice-type" class="notice-filter-select" aria-label="카테고리 필터">
               <option value="전체">모든 카테고리</option>
             </select>
           </div>
