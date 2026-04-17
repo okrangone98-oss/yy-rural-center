@@ -437,6 +437,44 @@
             }
         }
 
+        /* 소형 모바일 (≤640px) 보강 */
+        @media (max-width: 640px) {
+            .profile-photo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-info h1 {
+                font-size: 1.35rem;
+            }
+
+            .profile-tags {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .profile-tags span,
+            .profile-tags .tag {
+                font-size: 0.78rem;
+                padding: 4px 10px;
+            }
+
+            .profile-content {
+                gap: 16px;
+            }
+
+            .profile-section h2,
+            .profile-section h3 {
+                font-size: 1.05rem;
+            }
+
+            .profile-section p,
+            .profile-section li {
+                font-size: 0.92rem;
+                word-break: keep-all;
+            }
+        }
+
         /* GNB 동기화를 위한 CSS (patch_headers.py로 덮어쓰기됨) */
     </style>
 </head>

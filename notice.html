@@ -334,6 +334,183 @@
       }
     }
 
+    /* 모바일 공지사항 전용 카드 레이아웃 (≤640px) */
+    @media (max-width: 640px) {
+      main {
+        padding: 28px 0 40px;
+      }
+
+      .page-title {
+        font-size: 1.4rem;
+        margin-bottom: 6px;
+      }
+
+      .page-sub {
+        font-size: 0.88rem;
+        margin-bottom: 16px;
+      }
+
+      .notice-wrapper {
+        padding: 14px 12px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .notice-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+      }
+
+      .notice-toolbar-left,
+      .notice-toolbar-right {
+        width: 100%;
+      }
+
+      .notice-search-input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+      }
+
+      .notice-filter-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+      }
+
+      /* 테이블을 카드 형태로 전환 */
+      .notice-table-wrap {
+        overflow-x: visible;
+      }
+
+      .notice-table,
+      .notice-table tbody,
+      .notice-table tr,
+      .notice-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .notice-table thead {
+        display: none;
+      }
+
+      .notice-table tr.notice-row {
+        position: relative;
+        border: 1px solid #ececec;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      }
+
+      .notice-table tr.notice-row:hover {
+        background: #fafafa;
+      }
+
+      .notice-table td {
+        padding: 0;
+        border: none;
+        font-size: 0.92rem;
+      }
+
+      .notice-table td:first-child {
+        margin-bottom: 6px;
+      }
+
+      .notice-table td.notice-title {
+        font-size: 0.98rem;
+        line-height: 1.45;
+        margin-bottom: 6px;
+        word-break: keep-all;
+        white-space: normal;
+      }
+
+      .notice-table td.notice-date {
+        font-size: 0.82rem;
+        color: #888;
+      }
+
+      .notice-type {
+        font-size: 0.76rem;
+      }
+
+      /* 빈 상태(empty) 카드도 블록 */
+      .notice-empty {
+        display: block;
+        padding: 36px 10px;
+      }
+
+      /* 페이지네이션 */
+      .notice-pagination {
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .notice-page-btn {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+      }
+
+      /* 모달 최적화 */
+      .modal {
+        padding: 8px;
+        align-items: flex-end;
+      }
+
+      .modal-dialog {
+        max-height: 92vh;
+        padding: 28px 18px 22px;
+        border-radius: 18px 18px 12px 12px;
+      }
+
+      .modal-title {
+        font-size: 1.15rem;
+        padding-right: 40px;
+      }
+
+      .modal-meta {
+        font-size: 0.82rem;
+      }
+
+      .modal-body {
+        font-size: 0.95rem;
+        padding-right: 2px;
+      }
+
+      .modal-close {
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+
+      .modal-link {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .modal-img-frame img {
+        max-height: 240px;
+      }
+
+      .modal-img-nav {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
     /* 공지사항 특화 CSS */
     main {
       padding: 48px 0;
@@ -1056,6 +1233,17 @@
     document.getElementById("modal-close-btn").onclick = () => modal.classList.remove("is-open");
     document.getElementById("notice-search-input").oninput = (e) => { currentKeyword = e.target.value; applyNoticeFilter(); };
     document.getElementById("notice-type-filter").onchange = (e) => { currentTypeFilter = e.target.value; applyNoticeFilter(); };
+
+    // 모바일 UX: 오버레이 탭/ESC 키로 모달 닫기
+    const overlay = modal.querySelector(".modal-overlay");
+    if (overlay) {
+      overlay.addEventListener("click", () => modal.classList.remove("is-open"));
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        modal.classList.remove("is-open");
+      }
+    });
   </script>
   <script src="assets/js/data-actions.js" defer></script>
 </body>

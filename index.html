@@ -2007,6 +2007,75 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
       }
+
+      /* 섹션 패딩/제목 최적화 */
+      section {
+        padding-top: 32px;
+        padding-bottom: 32px;
+      }
+
+      h1, h2, h3 {
+        word-break: keep-all;
+      }
+
+      .hero-title {
+        font-size: 1.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 0.9rem;
+      }
+
+      .hero-inner {
+        padding: 36px 14px;
+      }
+
+      /* 메뉴 칩 줄바꿈 정리 */
+      .nav-links {
+        row-gap: 6px;
+      }
+
+      /* 강사 카드 그리드 더 타이트하게 */
+      .teacher-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 0;
+      }
+
+      .teacher-card {
+        padding: 12px 8px !important;
+      }
+
+      .teacher-photo {
+        width: 70px !important;
+        height: 84px !important;
+      }
+
+      .teacher-name {
+        font-size: 0.95rem !important;
+      }
+
+      /* 카테고리 필터 버튼 오버플로 방지 */
+      .teacher-filter {
+        gap: 6px !important;
+      }
+
+      .teacher-filter .filter-btn {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+      }
+
+      /* 검색창 박스 */
+      #teacher-search-input {
+        font-size: 0.95rem !important;
+        padding: 12px 18px !important;
+      }
+
+      /* 가로 스크롤 방지 */
+      .container {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
     }
 
     @media (min-width:1200px) {
