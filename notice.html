@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
   <title>공지사항 - 양양군 농촌활성화지원센터</title>
   <meta name="description" content="양양군 농촌활성화지원센터의 공식 공지사항. 사업 일정, 교육·행사 안내, 모집 공고 등 최신 소식을 확인하세요." />
   <meta name="keywords" content="양양, 농촌활성화지원센터, 공지사항, 공고, 양양군 공지, 두레동아리 공지" />
@@ -714,7 +714,7 @@
       </a>
       <nav class="nav-links">
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='index.html#about'">홈</span>
+          <span class="dropdown-trigger" data-action="nav-home-about">홈</span>
           <div class="dropdown-content">
             <a href="index.html#about"><span>🏢</span> 센터 소개</a>
             <div class="nested-dropdown nested-dropdown-trigger">
@@ -730,7 +730,7 @@
         </div>
 
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='index.html#teachers'">강사 이음터</span>
+          <span class="dropdown-trigger" data-action="nav-home-teachers">강사 이음터</span>
           <div class="dropdown-content">
             <a href="/iumteo"><span>✨</span> 양양 강사 이음터</a>
             <a href="index.html#teachers"><span>🔍</span> 양양 강사 정보</a>
@@ -1029,7 +1029,7 @@
       const paged = FILTERED_NOTICES.slice(start, end);
 
       tbody.innerHTML = paged.length ? paged.map((n, i) => `
-        <tr class="notice-row" onclick="openModal(${start + i})">
+        <tr class="notice-row" data-action="notice-row" data-row-index="${start + i}">
           <td><span class="notice-type">${n.type}</span></td>
           <td class="notice-title">${n.title}</td>
           <td class="notice-date">${n.date}</td>
@@ -1038,6 +1038,7 @@
     }
 
     const modal = document.getElementById("noticeModal");
+    window.openModal = openModal;
     function openModal(idx) {
       const n = FILTERED_NOTICES[idx];
       document.getElementById("modal-title").textContent = n.title;
@@ -1056,6 +1057,7 @@
     document.getElementById("notice-search-input").oninput = (e) => { currentKeyword = e.target.value; applyNoticeFilter(); };
     document.getElementById("notice-type-filter").onchange = (e) => { currentTypeFilter = e.target.value; applyNoticeFilter(); };
   </script>
+  <script src="assets/js/data-actions.js" defer></script>
 </body>
 
 </html>

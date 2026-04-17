@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
   <title>양양군 농촌활성화지원센터 Q&A</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="양양군 농촌활성화지원센터에 궁금한 점을 남겨주세요. 귀농·귀촌, 사업 참여, 교육 신청 등 문의에 답변드립니다." />
@@ -444,28 +444,23 @@
       <nav class="nav-links">
         <a href="index.html#about">홈</a>
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='index.html#programs'">주요사업</span>
+          <span class="dropdown-trigger" data-action="nav-home-programs">주요사업</span>
           <div class="dropdown-content">
-            <a href="index.html#programs"
-              onclick="Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2026'))?.click();"><span>📅</span>
+            <a href="index.html#programs" data-action="program-year" data-year="2026"><span>📅</span>
               2026년</a>
-            <a href="index.html#programs"
-              onclick="Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2025'))?.click();"><span>📆</span>
+            <a href="index.html#programs" data-action="program-year" data-year="2025"><span>📆</span>
               2025년</a>
-            <a href="index.html#programs"
-              onclick="Array.from(document.querySelectorAll('#program-year-tabs .program-tab-btn')).find(e=>e.textContent.includes('2024'))?.click();"><span>🗓️</span>
+            <a href="index.html#programs" data-action="program-year" data-year="2024"><span>🗓️</span>
               2024년</a>
           </div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-trigger" onclick="location.href='index.html#teachers'">강사 이음터</span>
+          <span class="dropdown-trigger" data-action="nav-home-teachers">강사 이음터</span>
           <div class="dropdown-content">
             <a href="admin_iumteo.html"><span>✨</span> 강사 정보 등록</a>
-            <a href="index.html#teachers"
-              onclick="setTimeout(()=>Array.from(document.querySelectorAll('.filter-btn')).find(e=>e.textContent === '전체')?.click(),100);"><span>🔍</span>
+            <a href="index.html#teachers" data-action="filter-all"><span>🔍</span>
               양양 강사 정보</a>
-            <a href="index.html#teachers"
-              onclick="setTimeout(()=>Array.from(document.querySelectorAll('.filter-btn')).find(e=>e.textContent === 'PD')?.click(),100);"><span>🧑‍🏫</span>
+            <a href="index.html#teachers" data-action="filter-pd"><span>🧑‍🏫</span>
               PD</a>
           </div>
         </div>
@@ -703,6 +698,7 @@
     document.getElementById("year").textContent = new Date().getFullYear();
     loadFAQ();
   </script>
+  <script src="assets/js/data-actions.js" defer></script>
 </body>
 
 </html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
     <title>강사 상세 프로필 | 양양군 농촌활성화지원센터</title>
     <meta name="description" content="양양군 농촌활성화지원센터 등록 강사의 이력·전문 분야·활동 영상 등 상세 프로필을 확인하세요." />
     <meta name="keywords" content="양양 강사, 농촌활성화 강사, 두레동아리 강사, 양양군 강사 프로필, 귀농 강사" />
@@ -464,7 +464,7 @@
             <nav class="nav-links">
                 <a href="index.html#about">홈</a>
                 <div class="dropdown">
-                    <span class="dropdown-trigger" onclick="location.href='index.html#programs'">주요사업</span>
+                    <span class="dropdown-trigger" data-action="nav-home-programs">주요사업</span>
                     <div class="dropdown-content">
                         <a href="index.html#programs">2026년</a>
                         <a href="index.html#programs">2025년</a>
@@ -472,7 +472,7 @@
                     </div>
                 </div>
                 <div class="dropdown">
-                    <span class="dropdown-trigger" onclick="location.href='index.html#teachers'">강사 이음터</span>
+                    <span class="dropdown-trigger" data-action="nav-home-teachers">강사 이음터</span>
                     <div class="dropdown-content">
                         <a href="index.html#teachers">강사 정보 등록</a>
                         <a href="index.html#teachers">양양 강사 정보</a>
@@ -581,6 +581,17 @@
                         본 페이지의 정보는 양양군 농촌활성화지원센터 강사 이음터 운영 및 마을 교육 연계를 목적으로만 제공됩니다.
                         강사님의 개인식별정보(연락처 등)는 정보 보호 정책에 따라 비공개 처리되며, 강의 섭외 및 관련 문의는 센터를 통해 진행해 주시기 바랍니다.
                     </p>
+                    <div id="t-consent-notice"
+                        style="margin-top: 14px; padding: 12px 14px; background: #f6fbf8; border: 1px solid #d7eade; border-radius: 10px; font-size: 0.85rem; color: #555; line-height: 1.6;">
+                        <strong style="color:#0b7c5b;">정보공개 동의 상태:</strong>
+                        <span id="t-consent-badge" style="margin-left:6px;">확인 중…</span>
+                        <div style="margin-top:8px; color:#666;">
+                            동의 철회·재동의는 강사 본인이 직접
+                            <a href="https://app.yycenter.kr/profile" target="_blank" rel="noopener noreferrer"
+                                style="color:#0b7c5b; font-weight:600; text-decoration:underline;">강사 이음터(app.yycenter.kr) 내 프로필</a>에서
+                            요청할 수 있습니다.
+                        </div>
+                    </div>
                 </div>
 
                 <a href="index.html#teachers" class="btn-back">← 강사 목록으로 돌아가기</a>
@@ -665,6 +676,11 @@
 
                 const tInsta = getCol(['인스타그램', 'SNS']);
                 const tInstaPublic = getCol(['공개', '인스타 공개 여부']);
+                const tConsentRaw = getCol(['동의여부', '정보공개', 'info_open_agree', 'consent']);
+                const consentStr = (tConsentRaw || '').toString().trim().toLowerCase();
+                const isConsentPublic = !!consentStr
+                    && !/미동의|비공개|no|false|^0$|^n$/.test(consentStr)
+                    && /동의|공개|yes|true|^y$|^1$|agree|ok/.test(consentStr);
 
                 document.getElementById('t-name').textContent = tName;
                 document.getElementById('t-role').textContent = `${tOrg} ${tRole}`.trim() || '지역 활동가';
@@ -675,6 +691,9 @@
                 // 태그
                 const tagsHtml = [];
                 if (tTarget) tagsHtml.push(`<span class="profile-tag">대상: ${tTarget}</span>`);
+                tagsHtml.push(isConsentPublic
+                    ? `<span class="profile-tag" title="강사 본인이 정보공개에 동의한 프로필입니다." style="background:rgba(255,255,255,0.28); font-weight:700;">✅ 정보공개 동의</span>`
+                    : `<span class="profile-tag" title="본인 동의 전이거나 철회된 프로필로, 일부 정보가 제한됩니다." style="background:rgba(0,0,0,0.25); font-weight:700;">🔒 미공개</span>`);
 
                 const isInstaPublic = tInsta && /공개|동의|예|yes|y/i.test(tInstaPublic || "");
                 if (isInstaPublic) {
@@ -702,6 +721,14 @@
                 // 설명
                 document.getElementById('t-desc').textContent = tDesc || '등록된 상세 강의 내용이 없습니다.';
 
+                // 정보공개 동의 안내 박스
+                const consentBadgeEl = document.getElementById('t-consent-badge');
+                if (consentBadgeEl) {
+                    consentBadgeEl.innerHTML = isConsentPublic
+                        ? `<span style="background:#e7f6ef; color:#0b7c5b; font-size:0.8rem; padding:3px 10px; border-radius:12px; font-weight:700; border:1px solid #c9e8d6;">동의 (공개)</span>`
+                        : `<span style="background:#f3f4f6; color:#6b7280; font-size:0.8rem; padding:3px 10px; border-radius:12px; font-weight:700; border:1px solid #e5e7eb;">미공개</span>`;
+                }
+
                 // 주요 이력
                 if (tHistory) {
                     const histories = tHistory.split('\n').filter(s => s.trim());
@@ -724,6 +751,7 @@
 
         document.addEventListener('DOMContentLoaded', loadTeacherDetail);
     </script>
+    <script src="assets/js/data-actions.js" defer></script>
 </body>
 
 </html>
