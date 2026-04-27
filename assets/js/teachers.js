@@ -239,7 +239,7 @@ window.TeachersModule = (function () {
 
         // 컬러링
         const pastels = ['#f0f7f4', '#fdf7f0', '#f4f7fd', '#faf4fd'];
-        const textColors = ['#0b7c5b', '#e67e22', '#2980b9', '#8e44ad'];
+        const textColors = ['#086550', '#e67e22', '#2980b9', '#8e44ad'];
         const sumAscii = (t.name || '?').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const colorIndex = sumAscii % pastels.length;
 
