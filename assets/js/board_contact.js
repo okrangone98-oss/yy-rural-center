@@ -91,7 +91,7 @@ function openBoardWrite(editId = null, editTitle = '', editMessage = '') {
 
     // ** 로그인 확인 **
     if (!auth || !auth.user) {
-        alert("로그인한 회원만 글을 작성할 수 있습니다.\n'강사 이음터'의 로그인 버튼을 통해 로그인해주세요.");
+        alert("로그인한 회원만 글을 작성할 수 있습니다.\n'양양 이음터'의 로그인 버튼을 통해 로그인해주세요.");
         return;
     }
 
