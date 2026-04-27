@@ -34,7 +34,11 @@
   <meta name="apple-mobile-web-app-title" content="양양 농활센터" />
   <link rel="manifest" href="manifest.json" />
 
-  <!-- 웹폰트 -->
+  <!-- 모바일 LCP 개선: hero 이미지·배경 preload (가장 먼저 그려져야 할 자원) -->
+  <link rel="preload" as="image" href="images/hero-home.svg" fetchpriority="high" />
+  <link rel="preload" as="image" href="images/hero-home.jpg?v=20260205f" />
+
+  <!-- 웹폰트 — preconnect + display=swap 적용으로 폰트 로딩 중 텍스트 표시 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet" />
@@ -2338,7 +2342,7 @@
     <div class="container">
       <div class="hero-top-frame">
         <div class="hero-top-inner">
-          <img class="hero-top-image" src="images/hero-home.svg" alt="양양군 농촌활성화지원센터 메인 배경 이미지" />
+          <img class="hero-top-image" src="images/hero-home.svg" alt="양양군 농촌활성화지원센터 메인 배경 이미지" width="1600" height="900" fetchpriority="high" decoding="async" />
           <a class="hero-hotspot hero-hotspot-programs" href="#programs" aria-label="2025 주요사업 보기"></a>
           <a class="hero-hotspot hero-hotspot-contact" href="#contact" aria-label="문의 및 상담"></a>
           <a class="hero-video-thumb" href="#video-preview" aria-label="활동영상 섹션으로 이동">
