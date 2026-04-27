@@ -149,7 +149,7 @@ window.PDModule = (function(){
 
       const photoHtml = p.photo
         ? `<img src="${p.photo}" alt="${p.name} 프로필" class="teacher-photo" />`
-        : `<div class="teacher-photo" style="display:flex;align-items:center;justify-content:center;background:#f1f1f1;border:2px solid #5b8a7233;color:#666;font-weight:700;">
+        : `<div class="teacher-photo" style="display:flex;align-items:center;justify-content:center;background:#f1f1f1;border:2px solid #08655033;color:#666;font-weight:700;">
              ${p.name.slice(0,1)}
            </div>`;
 
