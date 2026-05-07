@@ -1229,7 +1229,7 @@
           content: r[colIndex.content] || "",
           url: r[colIndex.url] || "",
           images: (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean),
-          drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : 
+          drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : ""
         })).filter(n => n.title);
 
         buildTypeFilter();
