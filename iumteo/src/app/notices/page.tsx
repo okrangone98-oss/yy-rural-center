@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { getAppPath } from '@/lib/app-url';
@@ -14,6 +14,9 @@ type NoticeItem = {
   body: string;
   date: string;
   createdAt: number;
+  imageUrl?: string;
+  fileUrl?: string;
+  fileName?: string;
 };
 
 function NoticeBadge({ tag }: { tag: NoticeTag }) {
@@ -37,6 +40,35 @@ export default function NoticesPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const isAdmin = session?.user?.role === 'ADMIN';
+
+  // 파일 업로드 상태
+  const posterInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [attachedImage, setAttachedImage] = useState<{ url: string } | null>(null);
+  const [attachedFile, setAttachedFile] = useState<{ url: string; name: string } | null>(null);
+
+  async function handleUpload(file: File, type: 'poster' | 'file') {
+    const setter = type === 'poster' ? setUploadingPoster : setUploadingFile;
+    setter(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(getAppPath('/api/admin/notices/upload'), { method: 'POST', body: fd });
+      const json = (await res.json()) as { ok: boolean; url?: string; fileName?: string; error?: string };
+      if (!json.ok || !json.url) throw new Error(json.error || '업로드 실패');
+      if (type === 'poster') {
+        setAttachedImage({ url: json.url });
+      } else {
+        setAttachedFile({ url: json.url, name: json.fileName || file.name });
+      }
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : '업로드에 실패했습니다.');
+    } finally {
+      setter(false);
+    }
+  }
 
   const fetchNotices = useCallback(async () => {
     setLoading(true);
@@ -80,6 +112,9 @@ export default function NoticesPage() {
           tag: form.tag,
           title: form.title.trim(),
           body: form.body.trim(),
+          imageUrl: attachedImage?.url || '',
+          fileUrl: attachedFile?.url || '',
+          fileName: attachedFile?.name || '',
         }),
       });
 
@@ -90,6 +125,8 @@ export default function NoticesPage() {
       }
 
       setForm({ tag: '공지', title: '', body: '' });
+      setAttachedImage(null);
+      setAttachedFile(null);
       setMessage('공지사항이 등록되었습니다.');
       await fetchNotices();
     } catch (createError) {
@@ -190,6 +227,60 @@ export default function NoticesPage() {
               placeholder="공지 내용"
               className="mt-3 w-full rounded-3xl border border-gray-200 px-4 py-3 text-sm leading-7 focus:border-emerald-400 focus:outline-none"
             />
+            {/* 포스터 이미지 업로드 */}
+            <div className="mt-4">
+              <input
+                ref={posterInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleUpload(f, 'poster'); e.target.value = ''; }}
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => posterInputRef.current?.click()}
+                  disabled={uploadingPoster}
+                  className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                >
+                  🖼️ {uploadingPoster ? '업로드 중...' : '포스터 이미지 첨부'}
+                </button>
+                {attachedImage && (
+                  <div className="flex items-center gap-2">
+                    <img src={attachedImage.url} alt="포스터 미리보기" className="h-16 rounded-xl object-cover shadow" />
+                    <button type="button" onClick={() => setAttachedImage(null)} className="text-xs text-red-500 hover:underline">제거</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 첨부파일 (HWP/Word/PDF) 업로드 */}
+            <div className="mt-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".hwp,.doc,.docx,.pdf"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleUpload(f, 'file'); e.target.value = ''; }}
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingFile}
+                  className="flex items-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100 disabled:opacity-50"
+                >
+                  📎 {uploadingFile ? '업로드 중...' : '파일 첨부 (HWP · DOCX · PDF)'}
+                </button>
+                {attachedFile && (
+                  <div className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 px-3 py-1.5 text-sm">
+                    <span className="font-medium text-sky-700">{attachedFile.name}</span>
+                    <button type="button" onClick={() => setAttachedFile(null)} className="text-xs text-red-500 hover:underline">제거</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
@@ -226,6 +317,13 @@ export default function NoticesPage() {
                 <div className="space-y-4">
                   {pinnedNotices.map((notice) => (
                     <article key={notice.id} className="rounded-[32px] border border-red-100 bg-[#fff7f6] p-6 shadow-sm">
+                      {notice.imageUrl ? (
+                        <img
+                          src={notice.imageUrl}
+                          alt="공지 포스터"
+                          className="mb-5 w-full rounded-2xl object-contain shadow-sm"
+                        />
+                      ) : null}
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
@@ -234,6 +332,17 @@ export default function NoticesPage() {
                           </div>
                           <h3 className="mt-3 text-xl font-black text-gray-900">{notice.title}</h3>
                           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-600">{notice.body}</p>
+                          {notice.fileUrl ? (
+                            <a
+                              href={notice.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              {notice.fileName || '첨부파일 다운로드'}
+                            </a>
+                          ) : null}
                         </div>
                         {isAdmin ? (
                           <button
@@ -260,6 +369,13 @@ export default function NoticesPage() {
                 <div className="space-y-4">
                   {regularNotices.map((notice) => (
                     <article key={notice.id} className="rounded-[32px] border border-white bg-white p-6 shadow-sm">
+                      {notice.imageUrl ? (
+                        <img
+                          src={notice.imageUrl}
+                          alt="공지 포스터"
+                          className="mb-5 w-full rounded-2xl object-contain shadow-sm"
+                        />
+                      ) : null}
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
@@ -268,6 +384,17 @@ export default function NoticesPage() {
                           </div>
                           <h3 className="mt-3 text-xl font-black text-gray-900">{notice.title}</h3>
                           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-gray-600">{notice.body}</p>
+                          {notice.fileUrl ? (
+                            <a
+                              href={notice.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                              {notice.fileName || '첨부파일 다운로드'}
+                            </a>
+                          ) : null}
                         </div>
                         {isAdmin ? (
                           <button

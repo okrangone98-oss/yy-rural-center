@@ -19,6 +19,9 @@ type NoticeItem = {
   body: string;
   date: string;
   createdAt: number;
+  imageUrl?: string;   // 포스터 이미지 URL
+  fileUrl?: string;    // 첨부파일 URL (HWP, DOCX 등)
+  fileName?: string;   // 첨부파일 표시 이름
 };
 
 const COLLECTION = 'notices';
@@ -63,6 +66,9 @@ export async function GET() {
         body: String(data.body || ''),
         date: formatDate(createdAt),
         createdAt,
+        imageUrl: String(data.imageUrl || ''),
+        fileUrl: String(data.fileUrl || ''),
+        fileName: String(data.fileName || ''),
       };
     });
 
@@ -95,10 +101,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: '관리자만 공지를 작성할 수 있습니다.' }, { status: 403 });
     }
 
-    const payload = (await request.json()) as { tag?: NoticeTag; title?: string; body?: string };
+    const payload = (await request.json()) as {
+      tag?: NoticeTag;
+      title?: string;
+      body?: string;
+      imageUrl?: string;
+      fileUrl?: string;
+      fileName?: string;
+    };
     const tag = payload.tag || '공지';
     const title = payload.title?.trim() || '';
     const body = payload.body?.trim() || '';
+    const imageUrl = payload.imageUrl?.trim() || '';
+    const fileUrl = payload.fileUrl?.trim() || '';
+    const fileName = payload.fileName?.trim() || '';
 
     if (!NOTICE_TAGS.includes(tag) || !title || !body) {
       return NextResponse.json({ ok: false, error: 'tag, title, body는 모두 필요합니다.' }, { status: 400 });
@@ -113,6 +129,9 @@ export async function POST(request: Request) {
         body,
         createdAt,
         createdBy: session.user.email || 'admin',
+        ...(imageUrl && { imageUrl }),
+        ...(fileUrl && { fileUrl }),
+        ...(fileName && { fileName }),
       }),
       'create notice',
     );
@@ -142,6 +161,9 @@ export async function POST(request: Request) {
         body,
         date: formatDate(createdAt),
         createdAt,
+        imageUrl,
+        fileUrl,
+        fileName,
       },
     });
   } catch (error) {

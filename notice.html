@@ -502,7 +502,10 @@
       }
 
       .modal-img-frame img {
-        max-height: 240px;
+        max-height: 280px;
+      }
+      .modal-images.is-poster .modal-img-frame img {
+        max-height: none;
       }
 
       .modal-img-nav {
@@ -755,6 +758,46 @@
       max-height: 400px;
       display: block;
       object-fit: contain;
+    }
+
+    /* 포스터 전체 표시 모드 */
+    .modal-images.is-poster {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-images.is-poster .modal-img-frame {
+      width: 100%;
+    }
+    .modal-images.is-poster .modal-img-frame img {
+      max-height: none;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    .modal-images.is-poster .modal-img-nav {
+      display: none;
+    }
+
+    /* 파일 다운로드 버튼 */
+    .modal-file-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #f0faf5;
+      border: 1.5px solid #b2dac7;
+      color: #0b7c5b;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-top: 4px;
+    }
+    .modal-file-btn:hover {
+      background: #d6f0e4;
+      border-color: #086550;
     }
 
     .modal-img-indicator {
@@ -1043,9 +1086,9 @@
         <button type="button" class="modal-img-nav" id="modal-img-next">&rarr;</button>
       </div>
       <div class="modal-body" id="modal-content"></div>
-      <div class="modal-actions">
-        <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer">자세히 보기 &rarr;</a>
-        <a id="modal-drive" class="modal-drive-btn" href="#" target="_blank" rel="noopener noreferrer">
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+        <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">자세히 보기 &rarr;</a>
+        <a id="modal-drive" class="modal-drive-btn" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">
           <svg width="18" height="18" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
             <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
@@ -1054,7 +1097,11 @@
             <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
             <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
           </svg>
-          첨부파일 열기
+          구글 드라이브 열기
+        </a>
+        <a id="modal-file-btn" class="modal-file-btn" href="#" download target="_blank" rel="noopener noreferrer" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="modal-file-name">첨부파일 다운로드</span>
         </a>
       </div>
     </div>
@@ -1218,8 +1265,10 @@
           date: norm.findIndex(h => h.includes("날짜") || h.includes("date")),
           content: norm.findIndex(h => h.includes("내용") || h.includes("본문")),
           url: norm.findIndex(h => h.includes("링크") || h.includes("타겟")),
-          image: norm.findIndex(h => h.includes("사진") || h.includes("이미지")),
-          drive: norm.findIndex(h => h.includes("드라이브") || h.includes("첨부") || h.includes("drive") || h.includes("파일링크"))
+          image: norm.findIndex(h => h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
+          drive: norm.findIndex(h => h.includes("드라이브") || h.includes("파일링크")),
+          file: norm.findIndex(h => h.includes("첨부") || h.includes("파일url") || h.includes("fileurl")),
+          fileName: norm.findIndex(h => h.includes("파일명") || h.includes("filename") || h.includes("파일이름"))
         };
 
         NOTICES = rows.slice(1).map(r => ({
@@ -1229,7 +1278,9 @@
           content: r[colIndex.content] || "",
           url: r[colIndex.url] || "",
           images: (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean),
-          drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : ""
+          drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : "",
+          file: colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "",
+          fileName: colIndex.fileName >= 0 ? (r[colIndex.fileName] || "").trim() : 
         })).filter(n => n.title);
 
         buildTypeFilter();
@@ -1263,55 +1314,4 @@
       const end = start + PAGE_SIZE;
       const paged = FILTERED_NOTICES.slice(start, end);
 
-      tbody.innerHTML = paged.length ? paged.map((n, i) => `
-        <tr class="notice-row" data-action="notice-row" data-row-index="${start + i}">
-          <td><span class="notice-type">${n.type}</span></td>
-          <td class="notice-title">${n.title}</td>
-          <td class="notice-date">${n.date}</td>
-        </tr>
-      `).join("") : '<tr><td colspan="3" class="notice-empty">아직 등록된 공지사항이 없어요. 새 소식이 올라오면 이곳에서 가장 먼저 확인할 수 있어요.</td></tr>';
-    }
-
-    const modal = document.getElementById("noticeModal");
-    window.openModal = openModal;
-    function openModal(idx) {
-      const n = FILTERED_NOTICES[idx];
-      document.getElementById("modal-title").textContent = n.title;
-      document.getElementById("modal-type").textContent = n.type;
-      document.getElementById("modal-date").textContent = n.date;
-      document.getElementById("modal-content").innerHTML = n.content.replace(/\n/g, "<br>");
-      
-      const link = document.getElementById("modal-link");
-      if(n.url) { link.href = n.url; link.style.display = "inline-flex"; }
-      else link.style.display = "none";
-
-      const driveBtn = document.getElementById("modal-drive");
-      if(n.drive) {
-        driveBtn.href = n.drive;
-        driveBtn.style.display = "inline-flex";
-      } else {
-        driveBtn.style.display = "none";
-      }
-
-      modal.classList.add("is-open");
-    }
-
-    document.getElementById("modal-close-btn").onclick = () => modal.classList.remove("is-open");
-    document.getElementById("notice-search-input").oninput = (e) => { currentKeyword = e.target.value; applyNoticeFilter(); };
-    document.getElementById("notice-type-filter").onchange = (e) => { currentTypeFilter = e.target.value; applyNoticeFilter(); };
-
-    // 모바일 UX: 오버레이 탭/ESC 키로 모달 닫기
-    const overlay = modal.querySelector(".modal-overlay");
-    if (overlay) {
-      overlay.addEventListener("click", () => modal.classList.remove("is-open"));
-    }
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.classList.contains("is-open")) {
-        modal.classList.remove("is-open");
-      }
-    });
-  </script>
-  <script src="assets/js/data-actions.js" defer></script>
-</body>
-
-</html>
+      tbody.innerHTML = paged.length ? paged

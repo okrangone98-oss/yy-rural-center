@@ -307,8 +307,8 @@ window.TeachersModule = (function () {
     if (isHomePage) {
       const targetTeacher = TEACHERS.find((teacher) => teacher.rowIndex === rowIndex);
       location.href = targetTeacher && targetTeacher.name
-        ? `/iumteo/teacher/${encodeURIComponent(targetTeacher.name)}`
-        : '/iumteo/instructors';
+        ? `https://app.yycenter.kr/teacher/${encodeURIComponent(targetTeacher.name)}`
+        : 'https://app.yycenter.kr/instructors';
     } else {
       if (typeof window.showTeacherDetails === 'function') {
         window.showTeacherDetails(rowIndex, true);
@@ -328,13 +328,13 @@ window.TeachersModule = (function () {
       if (typeof window.openAuthDrawer === 'function') {
         window.openAuthDrawer('user');
       } else {
-        location.href = '/iumteo/register?type=user';
+        location.href = 'https://app.yycenter.kr/register?type=user';
       }
     } else {
       if (typeof window.openInquiryModal === 'function') {
         window.openInquiryModal(name, photo);
       } else {
-        location.href = `/iumteo/teacher/${encodeURIComponent(name)}`;
+        location.href = `https://app.yycenter.kr/teacher/${encodeURIComponent(name)}`;
       }
     }
   }

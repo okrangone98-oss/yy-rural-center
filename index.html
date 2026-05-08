@@ -2254,7 +2254,7 @@
           <span class="dropdown-trigger" data-href="#teachers">이음터</span>
           <div class="dropdown-content">
             <a href="https://app.yycenter.kr"><span>✨</span> 양양 이음터</a>
-            <a href="#teachers" data-action="filter-all"><span>🔍</span>
+            <a href="https://app.yycenter.kr/instructors"><span>🔍</span>
               양양 강사 정보</a>
           </div>
         </div>
@@ -3049,116 +3049,4 @@
 
       function applyLabel(slot, label, isActive) {
         slot.textContent = label.text;
-        slot.dataset.tone = label.tone;
-        slot.className = isActive ? "logo-switch-slot is-active" : "logo-switch-slot";
-      }
-
-      function syncAriaLabel(label) {
-        brand.setAttribute("aria-label", `양양군 ${label.text}`);
-      }
-
-      function updateViewportWidth() {
-        const width = Math.max(...slots.map((slot) => slot.scrollWidth));
-        if (width > 0) {
-          viewport.style.width = `${Math.ceil(width)}px`;
-        }
-      }
-
-      function switchLogoText() {
-        if (isAnimating) return;
-
-        const nextLabelIndex = (activeLabelIndex + 1) % labels.length;
-        const activeSlot = slots[activeSlotIndex];
-        const nextSlotIndex = (activeSlotIndex + 1) % slots.length;
-        const nextSlot = slots[nextSlotIndex];
-        const nextLabel = labels[nextLabelIndex];
-
-        applyLabel(nextSlot, nextLabel, false);
-        updateViewportWidth();
-        syncAriaLabel(nextLabel);
-
-        if (reduceMotionQuery.matches) {
-          applyLabel(activeSlot, labels[activeLabelIndex], false);
-          applyLabel(nextSlot, nextLabel, true);
-          activeSlotIndex = nextSlotIndex;
-          activeLabelIndex = nextLabelIndex;
-          return;
-        }
-
-        isAnimating = true;
-
-        requestAnimationFrame(() => {
-          activeSlot.classList.add("is-leaving");
-          nextSlot.classList.add("is-entering");
-        });
-
-        window.setTimeout(() => {
-          applyLabel(activeSlot, labels[activeLabelIndex], false);
-          applyLabel(nextSlot, nextLabel, true);
-          activeSlotIndex = nextSlotIndex;
-          activeLabelIndex = nextLabelIndex;
-          isAnimating = false;
-        }, 620);
-      }
-
-      applyLabel(slots[0], labels[0], true);
-      applyLabel(slots[1], labels[1], false);
-      syncAriaLabel(labels[0]);
-      updateViewportWidth();
-
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(updateViewportWidth).catch(() => { });
-      }
-      window.addEventListener("resize", updateViewportWidth);
-      reduceMotionQuery.addEventListener?.("change", updateViewportWidth);
-
-      window.setInterval(switchLogoText, 5000);
-    })();
-  </script>
-
-  <script>
-    (function () {
-      const lightbox = document.getElementById("gallery-lightbox");
-      const lightboxImg = document.getElementById("gallery-lightbox-img");
-      const lightboxCaption = document.getElementById("gallery-lightbox-caption");
-      const closeBtn = document.getElementById("gallery-lightbox-close");
-      const overlay = lightbox.querySelector(".gallery-lightbox-overlay");
-      const galleryImages = document.querySelectorAll(".gallery-item img");
-
-      if (!lightbox || !lightboxImg || !overlay || !galleryImages.length) return;
-
-      function openLightbox(src, alt) {
-        lightboxImg.src = src;
-        lightboxImg.alt = alt || "활동 사진";
-        lightboxCaption.textContent = alt || "";
-        lightbox.classList.add("is-open");
-        lightbox.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeLightbox() {
-        lightbox.classList.remove("is-open");
-        lightbox.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-        lightboxImg.src = "";
-      }
-
-      galleryImages.forEach(img => {
-        img.addEventListener("click", () => {
-          openLightbox(img.src, img.alt);
-        });
-      });
-
-      closeBtn.addEventListener("click", closeLightbox);
-      overlay.addEventListener("click", closeLightbox);
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && lightbox.classList.contains("is-open")) {
-          closeLightbox();
-        }
-      });
-    })();
-  </script>
-
-</body>
-
-</html>
+        slot.dataset.tone = l
