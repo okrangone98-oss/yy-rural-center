@@ -1251,6 +1251,16 @@
     const PAGE_SIZE = 10;
     let currentPage = 1;
 
+    function extractGdriveId(url) {
+      const m = String(url || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/);
+      return m ? m[1] : null;
+    }
+
+    function gdriveToImgSrc(url) {
+      const id = extractGdriveId(url);
+      return id ? `https://lh3.googleusercontent.com/d/${id}` : null;
+    }
+
     async function loadNotices() {
       try {
         if(!NOTICE_CSV_URL) return;
@@ -1271,17 +1281,49 @@
           fileName: norm.findIndex(h => h.includes("파일명") || h.includes("filename") || h.includes("파일이름"))
         };
 
-        NOTICES = rows.slice(1).map(r => ({
-          type: r[colIndex.type] || "공지",
-          title: r[colIndex.title] || "",
-          date: r[colIndex.date] || "",
-          content: r[colIndex.content] || "",
-          url: r[colIndex.url] || "",
-          images: (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean),
-          drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : "",
-          file: colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "",
-          fileName: colIndex.fileName >= 0 ? (r[colIndex.fileName] || "").trim() : ""
-        })).filter(n => n.title);
+        NOTICES = rows.slice(1).map(r => {
+          const directImages = colIndex.image >= 0
+            ? (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean)
+            : [];
+
+          const attachRaw = colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "";
+          const attachItems = attachRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+          const driveImgSrcs = [];
+          const driveOrigUrls = [];
+          let fileUrl = "";
+
+          attachItems.forEach(item => {
+            const imgSrc = gdriveToImgSrc(item);
+            if (imgSrc) {
+              driveImgSrcs.push(imgSrc);
+              driveOrigUrls.push(item);
+            } else if (!fileUrl) {
+              fileUrl = item;
+            }
+          });
+
+          const allImages = [...directImages, ...driveImgSrcs];
+          const imageDriveUrls = [
+            ...Array(directImages.length).fill(""),
+            ...driveOrigUrls
+          ];
+
+          const dedicatedDrive = colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : "";
+
+          return {
+            type: r[colIndex.type] || "공지",
+            title: r[colIndex.title] || "",
+            date: r[colIndex.date] || "",
+            content: r[colIndex.content] || "",
+            url: r[colIndex.url] || "",
+            images: allImages,
+            imageDriveUrls: imageDriveUrls,
+            drive: dedicatedDrive,
+            file: fileUrl,
+            fileName: colIndex.fileName >= 0 ? (r[colIndex.fileName] || "").trim() : ""
+          };
+        }).filter(n => n.title);
 
         buildTypeFilter();
         applyNoticeFilter();
@@ -1340,11 +1382,13 @@
     const modal = document.getElementById("noticeModal");
     let currentImgIndex = 0;
     let currentImages = [];
+    let currentNotice = null;
 
     window.openModal = openModal;
     function openModal(idx) {
       const n = FILTERED_NOTICES[idx];
       if (!n) return;
+      currentNotice = n;
 
       document.getElementById("modal-title").textContent = n.title;
       document.getElementById("modal-type").textContent = n.type;
@@ -1362,7 +1406,8 @@
       else { link.style.display = "none"; }
 
       const driveBtn = document.getElementById("modal-drive");
-      if (n.drive) { driveBtn.href = n.drive; driveBtn.style.display = "inline-flex"; }
+      const firstDriveUrl = (n.imageDriveUrls && n.imageDriveUrls[0]) || n.drive;
+      if (firstDriveUrl) { driveBtn.href = firstDriveUrl; driveBtn.style.display = "inline-flex"; }
       else { driveBtn.style.display = "none"; }
 
       const fileBtn = document.getElementById("modal-file-btn");
@@ -1400,6 +1445,15 @@
       img.src = currentImages[currentImgIndex];
       img.alt = `첨부 이미지 ${currentImgIndex + 1}`;
       indicator.textContent = `${currentImgIndex + 1}/${currentImages.length}`;
+
+      if (currentNotice) {
+        const driveBtn = document.getElementById("modal-drive");
+        const slideUrl = (currentNotice.imageDriveUrls && currentNotice.imageDriveUrls[currentImgIndex]) || "";
+        const fallbackUrl = currentNotice.drive;
+        const url = slideUrl || fallbackUrl;
+        if (url) { driveBtn.href = url; driveBtn.style.display = "inline-flex"; }
+        else { driveBtn.style.display = "none"; }
+      }
     }
 
     document.getElementById("modal-img-prev").addEventListener("click", () => {
