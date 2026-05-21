@@ -1280,7 +1280,7 @@
           images: (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean),
           drive: colIndex.drive >= 0 ? (r[colIndex.drive] || "").trim() : "",
           file: colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "",
-          fileName: colIndex.fileName >= 0 ? (r[colIndex.fileName] || "").trim() : 
+          fileName: colIndex.fileName >= 0 ? (r[colIndex.fileName] || "").trim() : ""
         })).filter(n => n.title);
 
         buildTypeFilter();
@@ -1314,4 +1314,143 @@
       const end = start + PAGE_SIZE;
       const paged = FILTERED_NOTICES.slice(start, end);
 
-      tbody.innerHTML = paged.length ? paged
+      tbody.innerHTML = paged.length ? paged.map((n, i) => `
+        <tr class="notice-row" data-action="notice-row" data-row-index="${start + i}">
+          <td><span class="notice-type">${n.type}</span></td>
+          <td class="notice-title">${n.title}</td>
+          <td class="notice-date">${n.date}</td>
+        </tr>
+      `).join("") : '<tr><td colspan="3" class="notice-empty">아직 등록된 공지사항이 없어요. 새 소식이 올라오면 이곳에서 가장 먼저 확인할 수 있어요.</td></tr>';
+
+      renderNoticePagination();
+    }
+
+    function renderNoticePagination() {
+      const paginationEl = document.getElementById("notice-pagination");
+      const totalPages = Math.ceil(FILTERED_NOTICES.length / PAGE_SIZE);
+      if (totalPages <= 1) { paginationEl.innerHTML = ""; return; }
+
+      paginationEl.innerHTML = `
+        <button class="notice-page-btn" data-action="notice-prev" ${currentPage <= 1 ? "disabled" : ""}>&laquo; 이전</button>
+        <span class="notice-page-info">${currentPage} / ${totalPages}</span>
+        <button class="notice-page-btn" data-action="notice-next" ${currentPage >= totalPages ? "disabled" : ""}>다음 &raquo;</button>
+      `;
+    }
+
+    const modal = document.getElementById("noticeModal");
+    let currentImgIndex = 0;
+    let currentImages = [];
+
+    window.openModal = openModal;
+    function openModal(idx) {
+      const n = FILTERED_NOTICES[idx];
+      if (!n) return;
+
+      document.getElementById("modal-title").textContent = n.title;
+      document.getElementById("modal-type").textContent = n.type;
+      document.getElementById("modal-date").textContent = n.date;
+
+      const contentEl = document.getElementById("modal-content");
+      if (typeof marked !== "undefined" && marked.parse) {
+        contentEl.innerHTML = marked.parse(n.content || "");
+      } else {
+        contentEl.innerHTML = (n.content || "").replace(/\n/g, "<br>");
+      }
+
+      const link = document.getElementById("modal-link");
+      if (n.url) { link.href = n.url; link.style.display = "inline-flex"; }
+      else { link.style.display = "none"; }
+
+      const driveBtn = document.getElementById("modal-drive");
+      if (n.drive) { driveBtn.href = n.drive; driveBtn.style.display = "inline-flex"; }
+      else { driveBtn.style.display = "none"; }
+
+      const fileBtn = document.getElementById("modal-file-btn");
+      const fileNameEl = document.getElementById("modal-file-name");
+      if (n.file) {
+        fileBtn.href = n.file;
+        fileNameEl.textContent = n.fileName || "첨부파일 다운로드";
+        fileBtn.style.display = "inline-flex";
+      } else {
+        fileBtn.style.display = "none";
+      }
+
+      const imagesEl = document.getElementById("modal-images");
+      currentImages = n.images || [];
+      currentImgIndex = 0;
+
+      if (currentImages.length > 0) {
+        const isPoster = currentImages.length === 1;
+        imagesEl.style.display = "flex";
+        imagesEl.classList.toggle("is-poster", isPoster);
+        updateModalImage();
+      } else {
+        imagesEl.style.display = "none";
+        imagesEl.classList.remove("is-poster");
+      }
+
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function updateModalImage() {
+      if (!currentImages.length) return;
+      const img = document.getElementById("modal-img");
+      const indicator = document.getElementById("modal-img-indicator");
+      img.src = currentImages[currentImgIndex];
+      img.alt = `첨부 이미지 ${currentImgIndex + 1}`;
+      indicator.textContent = `${currentImgIndex + 1}/${currentImages.length}`;
+    }
+
+    document.getElementById("modal-img-prev").addEventListener("click", () => {
+      if (currentImages.length <= 1) return;
+      currentImgIndex = (currentImgIndex - 1 + currentImages.length) % currentImages.length;
+      updateModalImage();
+    });
+
+    document.getElementById("modal-img-next").addEventListener("click", () => {
+      if (currentImages.length <= 1) return;
+      currentImgIndex = (currentImgIndex + 1) % currentImages.length;
+      updateModalImage();
+    });
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("modal-close-btn").addEventListener("click", closeModal);
+    document.getElementById("notice-search-input").addEventListener("input", (e) => { currentKeyword = e.target.value; applyNoticeFilter(); });
+    document.getElementById("notice-type-filter").addEventListener("change", (e) => { currentTypeFilter = e.target.value; applyNoticeFilter(); });
+
+    const overlay = modal.querySelector(".modal-overlay");
+    if (overlay) {
+      overlay.addEventListener("click", closeModal);
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      const row = e.target.closest("[data-action='notice-row']");
+      if (row) {
+        const idx = parseInt(row.dataset.rowIndex, 10);
+        openModal(idx);
+        return;
+      }
+      if (e.target.closest("[data-action='notice-prev']")) {
+        if (currentPage > 1) { currentPage--; renderNoticeTable(); }
+        return;
+      }
+      if (e.target.closest("[data-action='notice-next']")) {
+        const totalPages = Math.ceil(FILTERED_NOTICES.length / PAGE_SIZE);
+        if (currentPage < totalPages) { currentPage++; renderNoticeTable(); }
+      }
+    });
+  </script>
+  <script src="assets/js/data-actions.js" defer></script>
+</body>
+
+</html>
