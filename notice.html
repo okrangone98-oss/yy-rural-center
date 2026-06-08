@@ -1300,7 +1300,7 @@
 
     function parseAttachments(raw) {
       if (!raw) return [];
-      return raw.split(",").map(s => s.trim()).filter(Boolean).map((item, i) => {
+      return raw.split(/[\r\n,;]+/).map(s => s.trim()).filter(Boolean).map((item, i) => {
         const sep = item.indexOf("::");
         let name, url;
         if (sep >= 0) {
@@ -1310,7 +1310,7 @@
           name = "";
           url = item.trim();
         }
-        if (!url) return null;
+        if (!/^https?:\/\//i.test(url)) return null;
         return { name: name || `첨부파일 ${i + 1}`, url };
       }).filter(Boolean);
     }
