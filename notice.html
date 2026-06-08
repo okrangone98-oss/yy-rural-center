@@ -436,6 +436,19 @@
       .notice-table td.notice-date {
         font-size: 0.82rem;
         color: #888;
+        display: inline-block;
+      }
+
+      .notice-table td.notice-views {
+        display: inline-block;
+        margin-left: 10px;
+        font-size: 0.82rem;
+        color: #aaa;
+        text-align: left;
+      }
+
+      .notice-table td.notice-views::before {
+        content: "· 조회 ";
       }
 
       .notice-type {
@@ -622,6 +635,17 @@
 
     .notice-row:hover {
       background: #fcfcfc;
+    }
+
+    .notice-table th:last-child {
+      text-align: center;
+    }
+
+    .notice-table td.notice-views {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
     }
 
     .notice-type {
@@ -1119,6 +1143,7 @@
                 <th style="width:100px;">카테고리</th>
                 <th>제목</th>
                 <th style="width:120px;">작성일</th>
+                <th style="width:64px;">조회</th>
               </tr>
             </thead>
             <tbody id="notice-tbody"></tbody>
@@ -1298,9 +1323,59 @@
     const PAGE_SIZE = 10;
     let currentPage = 1;
 
+    /* ===== 조회수 (Google Apps Script + 시트) ===== */
+    const VIEWS_API = (window.SHEET_CONFIG && window.SHEET_CONFIG.notices && window.SHEET_CONFIG.notices.viewsApiUrl) || "";
+    let VIEW_COUNTS = {};
+    const viewedThisSession = new Set();
+
+    function viewsUrl(params) {
+      return VIEWS_API + (VIEWS_API.indexOf("?") >= 0 ? "&" : "?") + params + "&t=" + Date.now();
+    }
+
+    async function loadViewCounts() {
+      if (!VIEWS_API) return; // 미설정 시 조용히 통과 ('-' 유지)
+      try {
+        const res = await fetch(viewsUrl("action=getViews"));
+        const json = await res.json();
+        VIEW_COUNTS = (json && json.data) ? json.data : (json || {});
+        document.querySelectorAll(".notice-views[data-no]").forEach(td => {
+          const no = td.getAttribute("data-no");
+          if (no && VIEW_COUNTS[no] != null) td.textContent = VIEW_COUNTS[no];
+          else if (td.textContent === "-") td.textContent = "0";
+        });
+      } catch (e) {
+        /* 조회수 실패해도 페이지는 정상 동작 */
+      }
+    }
+
+    function addViewCount(no) {
+      if (!VIEWS_API || !no) return;
+      if (viewedThisSession.has(no)) return; // 같은 세션 중복 카운트 방지
+      viewedThisSession.add(no);
+      const cur = (parseInt(VIEW_COUNTS[no], 10) || 0) + 1;
+      VIEW_COUNTS[no] = cur;
+      const td = document.querySelector('.notice-views[data-no="' + no + '"]');
+      if (td) td.textContent = cur;
+      fetch(viewsUrl("action=addView&id=" + encodeURIComponent(no))).catch(() => {});
+    }
+
     function parseAttachments(raw) {
       if (!raw) return [];
-      return raw.split(/[\r\n,;]+/).map(s => s.trim()).filter(Boolean).map((item, i) => {
+      // 1차: 쉼표·줄바꿈·세미콜론으로 분리
+      let parts = raw.split(/[\r\n,;]+/).map(s => s.trim()).filter(Boolean);
+      // 2차: 구분자 없이 붙어버린 URL 보강 — 한 항목에 http가 2개 이상이면 http 경계로 분리
+      //      (단, "파일명::URL" 형식은 그대로 보존)
+      const expanded = [];
+      parts.forEach(item => {
+        if (item.indexOf("::") >= 0) { expanded.push(item); return; }
+        const hits = item.match(/https?:\/\//gi);
+        if (hits && hits.length > 1) {
+          item.split(/(?=https?:\/\/)/i).forEach(u => { if (u.trim()) expanded.push(u.trim()); });
+        } else {
+          expanded.push(item);
+        }
+      });
+      return expanded.map((item, i) => {
         const sep = item.indexOf("::");
         let name, url;
         if (sep >= 0) {
@@ -1324,6 +1399,7 @@
         const headers = rows[0].map(h => window.CSVUtils.safeText(h).trim());
         const norm = headers.map(window.CSVUtils.normalizeHeader);
         const colIndex = {
+          no: norm.findIndex(h => h.includes("번호") || h === "no" || h === "id"),
           type: norm.findIndex(h => h.includes("구분") || h.includes("카테고리")),
           title: norm.findIndex(h => h.includes("제목") || h.includes("title")),
           date: norm.findIndex(h => h.includes("날짜") || h.includes("date")),
@@ -1341,7 +1417,9 @@
           const attachRaw = colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "";
           const files = parseAttachments(attachRaw);
 
+          const no = colIndex.no >= 0 ? String(r[colIndex.no] || "").trim() : "";
           return {
+            no,
             type: r[colIndex.type] || "공지",
             title: r[colIndex.title] || "",
             date: r[colIndex.date] || "",
@@ -1354,6 +1432,7 @@
 
         buildTypeFilter();
         applyNoticeFilter();
+        loadViewCounts();
       } catch (err) {
         console.error("Notice error:", err);
       }
@@ -1388,8 +1467,9 @@
           <td><span class="notice-type">${n.type}</span></td>
           <td class="notice-title">${n.title}</td>
           <td class="notice-date">${n.date}</td>
+          <td class="notice-views" data-no="${n.no}">${n.no && VIEW_COUNTS[n.no] != null ? VIEW_COUNTS[n.no] : "-"}</td>
         </tr>
-      `).join("") : '<tr><td colspan="3" class="notice-empty">아직 등록된 공지사항이 없어요. 새 소식이 올라오면 이곳에서 가장 먼저 확인할 수 있어요.</td></tr>';
+      `).join("") : '<tr><td colspan="4" class="notice-empty">아직 등록된 공지사항이 없어요. 새 소식이 올라오면 이곳에서 가장 먼저 확인할 수 있어요.</td></tr>';
 
       renderNoticePagination();
     }
@@ -1414,6 +1494,8 @@
     function openModal(idx) {
       const n = FILTERED_NOTICES[idx];
       if (!n) return;
+
+      addViewCount(n.no);
 
       document.getElementById("modal-title").textContent = n.title;
       document.getElementById("modal-type").textContent = n.type;

@@ -15,6 +15,9 @@ window.SHEET_CONFIG = {
   },
   notices: {
     csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTO3geLtt5vZ-bOZiY4vb_Rd48xcQGJyZbmjXcHA1ZDnDmFQWAysgxvD-EumgkalVDlmRgdHfzqIVwf/pub?gid=1610639191&single=true&output=csv",
+    // 조회수 Apps Script 웹앱 URL (조회수_GAS.gs 배포 후 /exec URL 을 붙여넣기)
+    // 비어 있으면 조회수는 '-'로 표시되고 페이지는 정상 동작합니다.
+    viewsApiUrl: "",
   },
   popup: {
     // 대표님께서 새로 만든 [팝업관리] 탭의 CSV 배포 URL
