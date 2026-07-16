@@ -297,12 +297,43 @@
       margin: 0;
       aspect-ratio: 1080 / 473;
       min-height: 240px;
+      perspective: 1400px;
+      transition: box-shadow .4s ease;
+    }
+
+    .hero-top-frame.is-tilting {
+      box-shadow: 0 28px 56px rgba(0, 0, 0, .18);
     }
 
     .hero-top-inner {
       position: relative;
       width: 100%;
       height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .5s cubic-bezier(.22, .61, .36, 1);
+      will-change: transform;
+    }
+
+    .hero-top-inner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s ease;
+      background: radial-gradient(circle at var(--tilt-x, 50%) var(--tilt-y, 50%), rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 55%);
+      mix-blend-mode: overlay;
+    }
+
+    .hero-top-frame.is-tilting .hero-top-inner::after {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-top-inner {
+        transition: none;
+      }
     }
 
     .hero-top-image {
@@ -1965,9 +1996,15 @@
         margin-left: -15%;
       }
 
-      .hero-hotspot,
+      .hero-hotspot-programs,
+      .hero-hotspot-contact {
+        left: 24.42%;
+        width: 19.8%;
+      }
+
       .hero-video-thumb {
-        display: none;
+        left: 88%;
+        width: 15.3%;
       }
 
       .hero-top+section {
@@ -3021,7 +3058,7 @@
   <script src="assets/js/utils.js" defer></script>
   <script src="assets/js/teachers.js?v=20260205d" defer></script>
   <script src="assets/js/notices.js" defer></script>
-  <script src="assets/js/videos.js" defer></script>
+  <script src="assets/js/videos.js?v=20260716a" defer></script>
   <script src="assets/js/programs.js?v=20260205d" defer></script>
   <script src="assets/js/pd.js" defer></script>
   <script src="assets/js/main.js" defer></script>
@@ -3156,6 +3193,43 @@
           closeLightbox();
         }
       });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const frame = document.querySelector(".hero-top-frame");
+      const inner = document.querySelector(".hero-top-inner");
+      if (!frame || !inner) return;
+
+      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const fineHoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+      if (reduceMotionQuery.matches || !fineHoverQuery.matches) return;
+
+      const MAX_TILT_DEG = 6;
+
+      function handleMove(e) {
+        const rect = frame.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const rotateY = (x - 0.5) * MAX_TILT_DEG * 2;
+        const rotateX = (0.5 - y) * MAX_TILT_DEG * 2;
+
+        inner.style.transition = "transform .08s linear";
+        inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        inner.style.setProperty("--tilt-x", `${x * 100}%`);
+        inner.style.setProperty("--tilt-y", `${y * 100}%`);
+        frame.classList.add("is-tilting");
+      }
+
+      function handleLeave() {
+        inner.style.transition = "transform .5s cubic-bezier(.22, .61, .36, 1)";
+        inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+        frame.classList.remove("is-tilting");
+      }
+
+      frame.addEventListener("mousemove", handleMove);
+      frame.addEventListener("mouseleave", handleLeave);
     })();
   </script>
 

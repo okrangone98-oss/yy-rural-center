@@ -236,6 +236,23 @@
     if(heroThumbVideo){
       heroThumbVideo.src = video.url || "";
       heroThumbVideo.poster = video.thumbnail || DEFAULT_POSTER;
+      heroThumbVideo.loop = false;
+      heroThumbVideo.onloadedmetadata = () => {
+        if(heroThumbVideo.duration && heroThumbVideo.duration < PREVIEW_SECONDS){
+          heroThumbVideo.loop = true;
+        }else{
+          heroThumbVideo.currentTime = 0;
+        }
+      };
+      heroThumbVideo.ontimeupdate = () => {
+        if(heroThumbVideo.duration && heroThumbVideo.duration >= PREVIEW_SECONDS && heroThumbVideo.currentTime >= PREVIEW_SECONDS){
+          heroThumbVideo.pause();
+          heroThumbVideo.currentTime = 0;
+          setTimeout(() => {
+            heroThumbVideo.play().catch(()=>{});
+          }, 800);
+        }
+      };
       heroThumbVideo.play().catch(()=>{});
     }
   }
