@@ -255,6 +255,10 @@
       border-color: #086550;
     }
 
+    .nav-quick-desc {
+      display: none;
+    }
+
     /* ====== 네이버 톤 버튼 공통 스타일 ====== */
     .btn-unified {
       display: inline-flex;
@@ -1863,6 +1867,23 @@
         display: flex;
       }
 
+      .nav-quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        border-radius: 14px !important;
+        line-height: 1.25;
+      }
+
+      .nav-quick-desc {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 400;
+        opacity: 0.75;
+        margin-top: 2px;
+        white-space: normal;
+      }
+
       .nav-links a:not(.nav-community-link):not(.nav-enroll-link),
       .dropdown-trigger {
         font-size: 0.95rem;
@@ -2302,6 +2323,12 @@
             <a href="#" data-action="open-board"><span>📋</span> 게시판</a>
           </div>
         </div>
+        <a href="https://script.google.com/macros/s/AKfycbznD8TgSTjqE7q6-l15h6wM-BKhLbvjtQo7TKfajNMN03G0QwDdDOJf4gNngkW18yMoSA/exec"
+          target="_blank" rel="noopener noreferrer" class="nav-quick-link"
+          title="일반 강사 증빙서류 및 재료비 신청">
+          <span class="nav-quick-label">간편접수</span>
+          <small class="nav-quick-desc">일반 강사 증빙서류 및 재료비 신청</small>
+        </a>
         <a href="https://script.google.com/macros/s/AKfycbz6nzIYIQeURu91FcI85W684o32ToJbwwFfFOd3jlYLNA9PNukb2UAlnTWIfDvvs3Snow/exec"
           target="_blank" rel="noopener noreferrer" class="nav-community-link" title="참여자 및 직원 전용 관리시스템">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
