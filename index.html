@@ -237,6 +237,24 @@
       border-color: #ed5807;
     }
 
+    .nav-enroll-link {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 4px;
+      color: #fff !important;
+      font-weight: 600;
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 4px 12px !important;
+      border-radius: var(--radius);
+    }
+
+    .nav-enroll-link:hover {
+      background: #086550 !important;
+      color: #fff !important;
+      border-color: #086550;
+    }
+
     /* ====== 네이버 톤 버튼 공통 스타일 ====== */
     .btn-unified {
       display: inline-flex;
@@ -1845,7 +1863,7 @@
         display: flex;
       }
 
-      .nav-links a:not(.nav-community-link),
+      .nav-links a:not(.nav-community-link):not(.nav-enroll-link),
       .dropdown-trigger {
         font-size: 0.95rem;
         padding: 6px 12px;
@@ -2258,6 +2276,15 @@
               양양 강사 정보</a>
           </div>
         </div>
+        <a href="https://yangyang-resident-platform.vercel.app/" target="_blank" rel="noopener noreferrer"
+          class="nav-enroll-link" title="양양 주민 플랫폼에서 수강신청하기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+          </svg>
+          수강신청
+        </a>
         <a href="notice.html">공지사항</a>
         <div class="dropdown">
           <span class="dropdown-trigger">아카이브</span>
