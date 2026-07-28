@@ -385,15 +385,12 @@ export default function HomePage() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-4 text-sm font-medium md:flex lg:gap-6">
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
             <Link href="/instructors" className="text-gray-600 hover:text-emerald-700">강사찾기</Link>
             <Link href="/notices" className="text-gray-600 hover:text-emerald-700">공지사항</Link>
             <Link href="/qna" className="text-gray-600 hover:text-emerald-700">이용안내</Link>
-            <a
-              href="https://yycenter.kr"
-              className="inline-flex items-center rounded-full border border-emerald-200 px-3 py-2 font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50"
-            >
-              ← 센터 홈페이지로 돌아가기
+            <a href="https://yycenter.kr" target="_blank" rel="noreferrer" className="text-gray-600 hover:text-emerald-700">
+              yycenter.kr
             </a>
           </nav>
 
