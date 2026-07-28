@@ -356,6 +356,20 @@
       top: 71.8%;
       width: 11.0%;
       height: 5.35%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #9ade31;
+      background: rgba(19, 94, 71, .96);
+      color: #fff;
+      font-size: clamp(9px, 1.05vw, 17px);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .hero-hotspot-programs:hover,
+    .hero-hotspot-programs:focus-visible {
+      background: rgba(19, 94, 71, 1);
     }
 
     .hero-hotspot-contact {
@@ -535,6 +549,10 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 16px;
+    }
+
+    #programs {
+      scroll-margin-top: 88px;
     }
 
     .program-tab-btn {
@@ -2004,9 +2022,21 @@
         margin-left: -15%;
       }
 
-      .hero-hotspot,
+      .hero-hotspot-contact,
       .hero-video-thumb {
         display: none;
+      }
+
+      .hero-hotspot-programs {
+        left: 24.4%;
+        width: 19.8%;
+        font-size: clamp(8px, 2.4vw, 12px);
+      }
+
+      .hero-hotspot-programs::after {
+        content: "";
+        position: absolute;
+        inset: -14px -8px;
       }
 
       .hero-top+section {
@@ -2397,7 +2427,7 @@
       <div class="hero-top-frame">
         <div class="hero-top-inner">
           <img class="hero-top-image" src="images/hero-home.svg" alt="양양군 농촌활성화지원센터 메인 배경 이미지" width="1600" height="900" fetchpriority="high" decoding="async" />
-          <a class="hero-hotspot hero-hotspot-programs" href="#programs" aria-label="2025 주요사업 보기"></a>
+          <a class="hero-hotspot hero-hotspot-programs" href="#programs" data-action="program-year" data-year="2026" aria-label="2026 주요사업 보기">2026 주요사업 보기</a>
           <a class="hero-hotspot hero-hotspot-contact" href="#contact" aria-label="문의 및 상담"></a>
           <a class="hero-video-thumb" href="#video-preview" aria-label="활동영상 섹션으로 이동">
             <video class="hero-video-thumb-media" muted playsinline preload="metadata"></video>
@@ -3080,7 +3110,7 @@
   <script src="assets/js/pd.js" defer></script>
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/board_contact.js" defer></script>
-  <script src="assets/js/data-actions.js" defer></script>
+  <script src="assets/js/data-actions.js?v=20260728a" defer></script>
 
   <script>
     (function () {
