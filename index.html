@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https://firebasestorage.googleapis.com blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
   <title>양양군 농촌활성화지원센터</title>
 
   <!-- SEO 및 기본 메타 태그 -->
@@ -83,6 +83,11 @@
     a {
       text-decoration: none;
       color: inherit;
+    }
+
+    :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+      outline: 3px solid #ffbf47;
+      outline-offset: 3px;
     }
 
     /* 헤더 */
@@ -194,11 +199,15 @@
 
     .mobile-menu-btn {
       display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
       background: none;
       border: none;
       color: var(--text);
       cursor: pointer;
-      padding: 4px;
+      padding: 10px;
     }
 
     .nav-links {
@@ -346,9 +355,13 @@
 
     .hero-hotspot:focus-visible,
     .hero-hotspot:hover {
-      outline-color: rgba(79, 126, 102, .6);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, .15);
+      outline-color: #ffbf47;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, .92), 0 6px 16px rgba(0, 0, 0, .2);
       background: rgba(255, 255, 255, .08);
+    }
+
+    .hero-mobile-content {
+      display: none;
     }
 
     .hero-hotspot-programs {
@@ -1778,9 +1791,15 @@
 
     .dropdown-trigger {
       cursor: pointer;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
       padding: 4px 8px;
+      border: 0;
       border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
       transition: background-color 0.2s, color 0.2s;
     }
 
@@ -1809,6 +1828,9 @@
 
     .dropdown-content a,
     .dropdown-content .nested-dropdown-trigger {
+      width: 100%;
+      border: 0;
+      background: transparent;
       color: #333;
       padding: 10px 20px;
       text-decoration: none;
@@ -1830,7 +1852,9 @@
       padding-left: 24px;
     }
 
-    .dropdown:hover>.dropdown-content {
+    .dropdown:hover>.dropdown-content,
+    .dropdown:focus-within>.dropdown-content,
+    .dropdown.is-open>.dropdown-content {
       display: block;
     }
 
@@ -1883,7 +1907,9 @@
 
     /* PC에서 마우스 호버 시 2뎁스 메뉴 노출 */
     @media (min-width: 769px) {
-      .nested-dropdown:hover .nested-content {
+      .nested-dropdown:hover .nested-content,
+      .nested-dropdown:focus-within .nested-content,
+      .nested-dropdown.is-open .nested-content {
         display: block;
       }
     }
@@ -1941,6 +1967,15 @@
 
     /* 반응형 */
     @media (max-width:768px) {
+      button,
+      .nav-links a,
+      .program-tab,
+      .filter-btn,
+      .teacher-filter-btn,
+      .pd-filter-btn {
+        min-height: 44px;
+      }
+
       .mobile-menu-btn {
         display: flex !important;
       }
@@ -1985,7 +2020,8 @@
       .nav-links a:not(.nav-community-link):not(.nav-enroll-link),
       .dropdown-trigger {
         font-size: 0.95rem;
-        padding: 6px 12px;
+        min-height: 44px;
+        padding: 10px 14px;
         background: #f4f6f3;
         border-radius: 999px;
         color: var(--text);
@@ -2102,21 +2138,78 @@
         margin-left: -15%;
       }
 
-      .hero-hotspot-contact,
+      .hero-hotspot,
       .hero-video-thumb {
         display: none;
       }
 
-      .hero-hotspot-programs {
-        left: 24.4%;
-        width: 19.8%;
-        font-size: clamp(8px, 2.4vw, 12px);
+      .hero-top-frame {
+        min-height: 0;
+        aspect-ratio: auto;
+        border: 0;
+        box-shadow: none;
       }
 
-      .hero-hotspot-programs::after {
-        content: "";
-        position: absolute;
-        inset: -14px -8px;
+      .hero-top-image {
+        display: none;
+      }
+
+      .hero-mobile-content {
+        display: block;
+        padding: 48px 20px;
+        color: #fff;
+        background:
+          linear-gradient(135deg, rgba(8, 101, 80, .97), rgba(73, 139, 86, .94)),
+          #086550;
+      }
+
+      .hero-mobile-eyebrow {
+        display: block;
+        margin-bottom: 12px;
+        color: #dff19c;
+        font-size: .82rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+      }
+
+      .hero-mobile-content h1 {
+        margin-bottom: 14px;
+        font-size: clamp(1.85rem, 8vw, 2.35rem);
+        line-height: 1.35;
+        letter-spacing: var(--tracking-tight);
+        word-break: keep-all;
+      }
+
+      .hero-mobile-content p {
+        max-width: 30em;
+        color: rgba(255, 255, 255, .88);
+        font-size: 1rem;
+        line-height: 1.75;
+      }
+
+      .hero-mobile-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 26px;
+      }
+
+      .hero-mobile-actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 12px 18px;
+        border: 1px solid #dff19c;
+        border-radius: var(--radius);
+        background: #dff19c;
+        color: #17493b;
+        font-weight: 700;
+      }
+
+      .hero-mobile-actions a:last-child {
+        border-color: rgba(255, 255, 255, .7);
+        background: transparent;
+        color: #fff;
       }
 
       .hero-top+section {
@@ -2392,14 +2485,16 @@
           </span>
         </span>
       </div>
-      <nav class="nav-links">
+      <nav class="nav-links" id="primary-navigation" aria-label="주요 메뉴">
         <div class="dropdown">
-          <span class="dropdown-trigger" data-href="#home">홈</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" data-href="#home" aria-expanded="false"
+            aria-controls="home-menu">홈</button>
+          <div class="dropdown-content" id="home-menu">
             <a href="#about"><span>🏢</span> 센터 소개</a>
-            <div class="nested-dropdown nested-dropdown-trigger">
-              <span style="display: flex; align-items: center; gap: 10px;"><span>💼</span> 주요사업</span>
-              <div class="nested-content">
+            <div class="nested-dropdown">
+              <button type="button" class="nested-dropdown-trigger" aria-expanded="false"
+                aria-controls="program-year-menu"><span>💼</span> 주요사업</button>
+              <div class="nested-content" id="program-year-menu">
                 <a href="#programs" data-action="program-year" data-year="2026">2026년</a>
                 <a href="#programs" data-action="program-year" data-year="2025">2025년</a>
                 <a href="#programs" data-action="program-year" data-year="2024">2024년</a>
@@ -2410,8 +2505,9 @@
         </div>
 
         <div class="dropdown">
-          <span class="dropdown-trigger" data-href="#teachers">이음터</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" data-href="#teachers" aria-expanded="false"
+            aria-controls="iumteo-menu">이음터</button>
+          <div class="dropdown-content" id="iumteo-menu">
             <a href="https://app.yycenter.kr"><span>✨</span> 양양 이음터</a>
             <a href="https://app.yycenter.kr/instructors"><span>🔍</span>
               양양 강사 정보</a>
@@ -2428,15 +2524,17 @@
         </a>
         <a href="notice.html">공지사항</a>
         <div class="dropdown">
-          <span class="dropdown-trigger">아카이브</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" aria-expanded="false"
+            aria-controls="archive-menu">아카이브</button>
+          <div class="dropdown-content" id="archive-menu">
             <a href="#gallery"><span>🖼️</span> 활동사진</a>
             <a href="#video-preview"><span>🎬</span> 활동영상</a>
           </div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-trigger">안내 & 정보</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" aria-expanded="false"
+            aria-controls="information-menu">안내 & 정보</button>
+          <div class="dropdown-content" id="information-menu">
             <a href="#contact"><span>📍</span> 문의 및 오시는 길</a>
             <a href="#site-links"><span>🔗</span> 유관기관 및 지역정보</a>
             <a href="qna.html"><span>❓</span> Q&A</a>
@@ -2459,7 +2557,8 @@
           공동체 관리시스템
         </a>
       </nav>
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기" aria-expanded="false"
+        aria-controls="primary-navigation">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -2474,39 +2573,96 @@
     document.addEventListener('DOMContentLoaded', () => {
       const mobileBtn = document.getElementById('mobile-menu-btn');
       const navLinks = document.querySelector('.nav-links');
+      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
+
+      const closeDropdown = (dropdown) => {
+        dropdown.classList.remove('is-open');
+        dropdown.querySelector(':scope > .dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        dropdown.querySelectorAll('.nested-dropdown').forEach(nested => {
+          nested.classList.remove('is-open');
+          nested.querySelector('.nested-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+      };
+
+      const setMobileMenu = (open, returnFocus = false) => {
+        navLinks.classList.toggle('is-mobile-open', open);
+        mobileBtn.setAttribute('aria-expanded', String(open));
+        mobileBtn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+        if (!open) {
+          dropdowns.forEach(closeDropdown);
+          if (returnFocus) mobileBtn.focus();
+        }
+      };
+
       if (mobileBtn && navLinks) {
         mobileBtn.addEventListener('click', () => {
-          navLinks.classList.toggle('is-mobile-open');
+          setMobileMenu(!navLinks.classList.contains('is-mobile-open'));
         });
       }
 
-      // 드롭다운 메뉴 토글 (모바일: 토글, 데스크톱: data-href 이동)
-      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
       dropdowns.forEach(dropdown => {
-        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const trigger = dropdown.querySelector(':scope > .dropdown-trigger');
         if (trigger) {
           trigger.addEventListener('click', (e) => {
             if (window.innerWidth <= 768) {
               e.preventDefault();
-              // 다른 열린 드롭다운 닫기
-              dropdowns.forEach(d => { if (d !== dropdown) d.classList.remove('is-open'); });
-              dropdown.classList.toggle('is-open');
+              const willOpen = !dropdown.classList.contains('is-open');
+              dropdowns.forEach(d => { if (d !== dropdown) closeDropdown(d); });
+              dropdown.classList.toggle('is-open', willOpen);
+              trigger.setAttribute('aria-expanded', String(willOpen));
             } else {
               const href = trigger.getAttribute('data-href');
-              if (href) location.href = href;
+              if (href) {
+                location.href = href;
+              } else {
+                const willOpen = !dropdown.classList.contains('is-open');
+                dropdown.classList.toggle('is-open', willOpen);
+                trigger.setAttribute('aria-expanded', String(willOpen));
+              }
+            }
+          });
+
+          trigger.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              dropdown.classList.add('is-open');
+              trigger.setAttribute('aria-expanded', 'true');
+              dropdown.querySelector('.dropdown-content a, .nested-dropdown-trigger')?.focus();
             }
           });
         }
+
+        dropdown.addEventListener('focusin', () => trigger?.setAttribute('aria-expanded', 'true'));
+        dropdown.addEventListener('focusout', () => {
+          requestAnimationFrame(() => {
+            if (!dropdown.contains(document.activeElement)) closeDropdown(dropdown);
+          });
+        });
       });
-      // 모바일 메뉴에서 링크 클릭 시 메뉴 닫기
-      const links = document.querySelectorAll('.nav-links a:not(.dropdown-trigger)');
+
+      document.querySelectorAll('.nested-dropdown').forEach(nested => {
+        const trigger = nested.querySelector('.nested-dropdown-trigger');
+        trigger?.addEventListener('click', () => {
+          const willOpen = !nested.classList.contains('is-open');
+          nested.classList.toggle('is-open', willOpen);
+          trigger.setAttribute('aria-expanded', String(willOpen));
+        });
+      });
+
+      const links = document.querySelectorAll('.nav-links a');
       links.forEach(link => {
         link.addEventListener('click', () => {
           if (window.innerWidth <= 768) {
-            navLinks.classList.remove('is-mobile-open');
-            dropdowns.forEach(d => d.classList.remove('is-open'));
+            setMobileMenu(false);
           }
         });
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const wasOpen = navLinks.classList.contains('is-mobile-open');
+        dropdowns.forEach(closeDropdown);
+        if (wasOpen) setMobileMenu(false, true);
       });
     });
   </script>
@@ -2522,6 +2678,15 @@
           <a class="hero-video-thumb" href="#video-preview" aria-label="활동영상 섹션으로 이동">
             <video class="hero-video-thumb-media" muted playsinline preload="metadata"></video>
           </a>
+          <div class="hero-mobile-content">
+            <span class="hero-mobile-eyebrow">YANGYANG RURAL COMMUNITY</span>
+            <h1>농촌에 활력을 더하고<br>양양의 더 나은 내일을 디자인합니다.</h1>
+            <p>주민이 주도하고 공동체가 성장하는 지속가능한 양양을 위해 교육·컨설팅·네트워크를 지원합니다.</p>
+            <div class="hero-mobile-actions">
+              <a href="#programs" data-action="program-year" data-year="2026">2026 주요사업 보기</a>
+              <a href="#contact">문의 및 상담</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -3113,29 +3278,30 @@
 
   <!-- 문의하기 모달 -->
   <div id="contact-modal" class="modal-backdrop">
-    <div class="modal-card" style="max-width: 500px;">
+    <div class="modal-card" style="max-width: 500px;" role="dialog" aria-modal="true"
+      aria-labelledby="contact-modal-title">
       <div class="modal-header">
-        <div class="modal-title">글로 문의하기</div>
-        <button class="modal-close" data-action="close-contact-modal">×</button>
+        <div class="modal-title" id="contact-modal-title">글로 문의하기</div>
+        <button class="modal-close" data-action="close-contact-modal" aria-label="문의창 닫기">×</button>
       </div>
       <div class="modal-body">
         <form id="contact-form" onsubmit="submitContactForm(event)">
           <div class="teacher-submit-grid" style="grid-template-columns: 1fr; gap: 14px;">
             <div>
-              <label>이름 <span style="color:red">*</span></label>
+              <label for="contact-name">이름 <span style="color:red">*</span></label>
               <input type="text" id="contact-name" required placeholder="이름을 입력하세요">
             </div>
             <div>
-              <label>전화번호 <span style="color:red">*</span></label>
+              <label for="contact-phone">전화번호 <span style="color:red">*</span></label>
               <input type="tel" id="contact-phone" required placeholder="예: 010-1234-5678">
             </div>
             <div>
-              <label>문의 내용 <span style="color:red">*</span></label>
+              <label for="contact-message">문의 내용 <span style="color:red">*</span></label>
               <textarea id="contact-message" required placeholder="문의하실 내용을 상세히 적어주세요"></textarea>
             </div>
           </div>
           <div class="teacher-submit-actions" style="margin-top: 24px; justify-content: flex-end;">
-            <span id="contact-status" class="teacher-submit-status"
+            <span id="contact-status" class="teacher-submit-status" role="status" aria-live="polite"
               style="margin-right: auto; font-weight: 500;"></span>
             <button type="button" class="btn-unified"
               style="background: #888; width: auto; height: 40px; margin-right: 8px;"
@@ -3150,10 +3316,11 @@
 
   <!-- 게시판 모달 -->
   <div id="board-modal" class="modal-backdrop">
-    <div class="modal-card" style="max-width: 800px; height: 80vh;">
+    <div class="modal-card" style="max-width: 800px; height: 80vh;" role="dialog" aria-modal="true"
+      aria-labelledby="board-modal-title">
       <div class="modal-header">
-        <div class="modal-title">게시판</div>
-        <button class="modal-close" data-action="close-board-modal">×</button>
+        <div class="modal-title" id="board-modal-title">게시판</div>
+        <button class="modal-close" data-action="close-board-modal" aria-label="게시판 닫기">×</button>
       </div>
       <div class="modal-body" style="display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -3187,16 +3354,16 @@
             <input type="hidden" id="board-row-id" value="">
             <div class="teacher-submit-grid" style="grid-template-columns: 1fr; gap: 14px;">
               <div>
-                <label>작성자 <span style="color:red">*</span></label>
+                <label for="board-name">작성자 <span style="color:red">*</span></label>
                 <input type="text" id="board-name" required placeholder="이름 또는 닉네임" style="max-width: 300px;">
               </div>
               <div>
-                <label>내용 <span style="color:red">*</span></label>
+                <label for="board-message">내용 <span style="color:red">*</span></label>
                 <textarea id="board-message" required placeholder="게시글 내용을 작성하세요" style="min-height: 160px;"></textarea>
               </div>
             </div>
             <div class="teacher-submit-actions" style="margin-top: 24px; justify-content: flex-end;">
-              <span id="board-status" class="teacher-submit-status"
+              <span id="board-status" class="teacher-submit-status" role="status" aria-live="polite"
                 style="margin-right: auto; font-weight: 500;"></span>
               <button type="button" class="btn-unified"
                 style="background: #888; width: auto; height: 40px; margin-right: 8px;"
