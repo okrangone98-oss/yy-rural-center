@@ -19,10 +19,10 @@
         if (typeof window.closePopupToday === 'function') window.closePopupToday();
         break;
       case 'program-year':
-        if (window.innerWidth > 768) {
-          var year = target.getAttribute('data-year') || '';
-          if (year) clickButtonByText('#program-year-tabs .program-tab-btn', year);
-        }
+        var year = target.getAttribute('data-year') || '';
+        if (year) clickButtonByText('#program-year-tabs .program-tab-btn', year);
+        var programs = document.getElementById('programs');
+        if (programs) programs.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
       case 'filter-all':
         setTimeout(function () {
