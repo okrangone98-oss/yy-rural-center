@@ -564,6 +564,61 @@
       letter-spacing: var(--tracking-tight);
     }
 
+    .text-vaporize-word {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .text-vaporize-letter {
+      position: relative;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+
+    .text-vaporize-glyph {
+      display: block;
+      will-change: transform;
+    }
+
+    .text-vaporize-particle {
+      position: absolute;
+      top: 46%;
+      left: 50%;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .text-vaporize.is-vaporizing .text-vaporize-glyph {
+      animation: vaporize-glyph .88s ease-in-out var(--vapor-delay) both;
+    }
+
+    .text-vaporize.is-vaporizing .text-vaporize-particle {
+      animation: vaporize-particle .88s ease-out var(--vapor-delay) both;
+    }
+
+    @keyframes vaporize-glyph {
+      0%, 22% { opacity: 1; filter: blur(0); transform: translate(0, 0) scale(1); }
+      48%, 58% { opacity: .08; filter: blur(5px); transform: translate(var(--vapor-x), var(--vapor-y)) scale(.9); }
+      100% { opacity: 1; filter: blur(0); transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes vaporize-particle {
+      0%, 20% { opacity: 0; transform: translate(0, 0) scale(.5); }
+      42% { opacity: .8; }
+      70%, 100% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.15); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .text-vaporize.is-vaporizing .text-vaporize-glyph,
+      .text-vaporize.is-vaporizing .text-vaporize-particle {
+        animation: none;
+      }
+    }
+
     .about-goals-wrap {
       margin-top: 44px;
     }
@@ -1204,30 +1259,178 @@
       gap: 10px;
     }
 
-    /* 갤러리 */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
+    /* 활동사진 Coverflow */
+    .gallery-coverflow {
+      position: relative;
+      overflow: hidden;
+      padding: 8px 58px 0;
+      border-radius: 24px;
+      background: linear-gradient(145deg, #eef7f2 0%, #f8fbf9 52%, #edf3ef 100%);
+      border: 1px solid #dcebe3;
+    }
+
+    .gallery-stage {
+      position: relative;
+      height: clamp(300px, 38vw, 430px);
+      perspective: 1300px;
+      transform-style: preserve-3d;
+      touch-action: pan-y;
     }
 
     .gallery-item {
-      border-radius: 14px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(58%, 620px);
+      aspect-ratio: 16 / 10;
+      padding: 0;
       overflow: hidden;
-      border: 1px solid #e5e5e5;
-      background: #000;
+      border: 1px solid rgba(8, 101, 80, .16);
+      border-radius: 20px;
+      background: #07130f;
+      box-shadow: 0 22px 54px rgba(5, 52, 41, .2);
+      cursor: pointer;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(.68);
+      transition: transform .58s cubic-bezier(.2, .75, .25, 1), opacity .4s ease, filter .4s ease;
+      visibility: hidden;
+    }
+
+    .gallery-item[data-offset="0"] {
+      z-index: 5;
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) rotateY(0) scale(1);
+    }
+
+    .gallery-item[data-offset="-1"] {
+      z-index: 4;
+      opacity: .74;
+      visibility: visible;
+      filter: brightness(.78);
+      transform: translate(-112%, -50%) rotateY(32deg) scale(.8);
+    }
+
+    .gallery-item[data-offset="1"] {
+      z-index: 4;
+      opacity: .74;
+      visibility: visible;
+      filter: brightness(.78);
+      transform: translate(12%, -50%) rotateY(-32deg) scale(.8);
+    }
+
+    .gallery-item[data-offset="-2"] {
+      z-index: 3;
+      opacity: .3;
+      visibility: visible;
+      filter: brightness(.58);
+      transform: translate(-158%, -50%) rotateY(42deg) scale(.64);
+    }
+
+    .gallery-item[data-offset="2"] {
+      z-index: 3;
+      opacity: .3;
+      visibility: visible;
+      filter: brightness(.58);
+      transform: translate(58%, -50%) rotateY(-42deg) scale(.64);
     }
 
     .gallery-item img {
       display: block;
       width: 100%;
-      height: 170px;
+      height: 100%;
       object-fit: cover;
-      transition: transform .25s ease;
+      pointer-events: none;
     }
 
-    .gallery-item:hover img {
-      transform: scale(1.05);
+    .gallery-item:focus-visible,
+    .gallery-control:focus-visible,
+    .gallery-dot:focus-visible {
+      outline: 3px solid #ed5807;
+      outline-offset: 3px;
+    }
+
+    .gallery-control {
+      position: absolute;
+      top: 50%;
+      z-index: 8;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border: 1px solid rgba(8, 101, 80, .22);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .92);
+      color: #086550;
+      font-size: 1.75rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(5, 52, 41, .14);
+      transform: translateY(-50%);
+    }
+
+    .gallery-control:hover { background: #fff; }
+    .gallery-control.is-prev { left: 16px; }
+    .gallery-control.is-next { right: 16px; }
+
+    .gallery-meta {
+      min-height: 66px;
+      padding: 2px 12px 16px;
+      text-align: center;
+    }
+
+    .gallery-caption {
+      margin: 0 0 10px;
+      color: #173f34;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .gallery-dots {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .gallery-dot {
+      width: 10px;
+      height: 10px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #b8cdc4;
+      cursor: pointer;
+      transition: width .2s ease, background .2s ease;
+    }
+
+    .gallery-dot[aria-current="true"] {
+      width: 28px;
+      border-radius: 999px;
+      background: #086550;
+    }
+
+    @media (max-width: 700px) {
+      .gallery-coverflow {
+        padding: 4px 0 0;
+        border-radius: 18px;
+      }
+
+      .gallery-stage { height: clamp(245px, 72vw, 320px); }
+      .gallery-item { width: 78%; border-radius: 16px; }
+      .gallery-item[data-offset="-1"] { transform: translate(-112%, -50%) rotateY(28deg) scale(.76); }
+      .gallery-item[data-offset="1"] { transform: translate(12%, -50%) rotateY(-28deg) scale(.76); }
+      .gallery-item[data-offset="-2"],
+      .gallery-item[data-offset="2"] { opacity: 0; visibility: hidden; }
+      .gallery-control { width: 46px; height: 46px; }
+      .gallery-control.is-prev { left: 8px; }
+      .gallery-control.is-next { right: 8px; }
+      .gallery-caption { font-size: .95rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-item,
+      .gallery-dot { transition: none; }
     }
 
     /* 활동사진 라이트박스 */
@@ -2706,12 +2909,12 @@
       <div class="about-top-grid">
         <article class="about-statement">
           <span class="about-eyebrow">MISSION</span>
-          <h3>주민이 지역의 변화를 함께 기획하고 실행할 수 있도록 지원합니다.</h3>
+          <h3 class="text-vaporize">주민이 지역의 변화를 함께 기획하고 실행할 수 있도록 지원합니다.</h3>
         </article>
 
         <article class="about-statement about-statement--vision">
           <span class="about-eyebrow">VISION</span>
-          <h3>주민이 주도하고 공동체가 성장하는 지속가능한 양양</h3>
+          <h3 class="text-vaporize">주민이 주도하고 공동체가 성장하는 지속가능한 양양</h3>
         </article>
       </div>
 
@@ -3023,19 +3226,27 @@
         </p>
       </div>
 
-      <div class="gallery-grid">
-        <div class="gallery-item"><img src="images/PD사진/24성과공유회 (2).JPG" alt="성과공유회 사진" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg" alt="두레동아리 워크숍" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/두레동아리 (3).jpg" alt="두레동아리 활동 2" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/두레동아리 (4).jpg" alt="두레동아리 활동 3" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/두레동아리.jpg" alt="두레동아리 활동 4" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/문화배달 (1).jpg" alt="문화배달 활동 1" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/문화배달 (2).jpg" alt="문화배달 활동 2" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/문화배달 (3).jpg" alt="문화배달 활동 3" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/문화배달 (4).jpg" alt="문화배달 활동 4" loading="lazy" /></div>
-        <div class="gallery-item"><img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 활동 5" loading="lazy" /></div>
+      <div class="gallery-coverflow" id="activity-coverflow" role="region" aria-label="활동사진 Coverflow">
+        <div class="gallery-stage">
+          <button type="button" class="gallery-item"><img src="images/PD사진/24성과공유회 (2).JPG" alt="성과공유회 사진" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/24성과공유회.jpg" alt="성과공유회 사진 2" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg" alt="두레동아리 워크숍" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/두레동아리 (2).jpg" alt="두레동아리 활동 1" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/두레동아리 (3).jpg" alt="두레동아리 활동 2" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/두레동아리 (4).jpg" alt="두레동아리 활동 3" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/두레동아리.jpg" alt="두레동아리 활동 4" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/문화배달 (1).jpg" alt="문화배달 활동 1" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/문화배달 (2).jpg" alt="문화배달 활동 2" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/문화배달 (3).jpg" alt="문화배달 활동 3" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/문화배달 (4).jpg" alt="문화배달 활동 4" loading="lazy" /></button>
+          <button type="button" class="gallery-item"><img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 활동 5" loading="lazy" /></button>
+        </div>
+        <button type="button" class="gallery-control is-prev" aria-label="이전 활동사진">‹</button>
+        <button type="button" class="gallery-control is-next" aria-label="다음 활동사진">›</button>
+        <div class="gallery-meta">
+          <p class="gallery-caption" id="gallery-caption" aria-live="polite"></p>
+          <div class="gallery-dots" id="gallery-dots" aria-label="활동사진 선택"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -3479,16 +3690,160 @@
 
   <script>
     (function () {
+      const headings = document.querySelectorAll(".text-vaporize");
+      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (!headings.length || reduceMotionQuery.matches) return;
+
+      function buildLetters(heading) {
+        const label = heading.textContent.trim();
+        heading.textContent = "";
+        heading.setAttribute("aria-label", label);
+
+        label.split(" ").forEach((word, wordIndex, words) => {
+          const wordElement = document.createElement("span");
+          wordElement.className = "text-vaporize-word";
+          wordElement.setAttribute("aria-hidden", "true");
+
+          Array.from(word).forEach((letter) => {
+            const letterElement = document.createElement("span");
+            const glyph = document.createElement("span");
+            letterElement.className = "text-vaporize-letter";
+            glyph.className = "text-vaporize-glyph";
+            glyph.textContent = letter;
+            letterElement.style.setProperty("--vapor-x", `${Math.round(Math.random() * 10 - 5)}px`);
+            letterElement.style.setProperty("--vapor-y", `${Math.round(-8 - Math.random() * 10)}px`);
+            letterElement.append(glyph);
+
+            for (let i = 0; i < 3; i += 1) {
+              const particle = document.createElement("span");
+              particle.className = "text-vaporize-particle";
+              particle.style.setProperty("--particle-x", `${Math.round(Math.random() * 24 - 12)}px`);
+              particle.style.setProperty("--particle-y", `${Math.round(-10 - Math.random() * 20)}px`);
+              letterElement.append(particle);
+            }
+
+            wordElement.append(letterElement);
+          });
+
+          heading.append(wordElement);
+          if (wordIndex < words.length - 1) heading.append(" ");
+        });
+      }
+
+      function playVaporize(heading) {
+        if (heading.dataset.vaporizing === "true") return;
+        const letters = Array.from(heading.querySelectorAll(".text-vaporize-letter"));
+        const order = letters.map((_, index) => index);
+
+        for (let i = order.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [order[i], order[j]] = [order[j], order[i]];
+        }
+
+        order.forEach((letterIndex, delayIndex) => {
+          letters[letterIndex].style.setProperty("--vapor-delay", `${delayIndex * 20}ms`);
+        });
+
+        heading.dataset.vaporizing = "true";
+        heading.classList.remove("is-vaporizing");
+        void heading.offsetWidth;
+        heading.classList.add("is-vaporizing");
+
+        window.setTimeout(() => {
+          heading.classList.remove("is-vaporizing");
+          heading.dataset.vaporizing = "false";
+        }, 1500);
+      }
+
+      headings.forEach((heading) => {
+        buildLetters(heading);
+        heading.closest(".about-statement")?.addEventListener("mouseenter", () => playVaporize(heading));
+      });
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          playVaporize(entry.target);
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: .55 });
+
+      headings.forEach((heading) => observer.observe(heading));
+    })();
+  </script>
+
+  <script>
+    (function () {
       const lightbox = document.getElementById("gallery-lightbox");
       const lightboxImg = document.getElementById("gallery-lightbox-img");
       const lightboxCaption = document.getElementById("gallery-lightbox-caption");
       const closeBtn = document.getElementById("gallery-lightbox-close");
       const overlay = lightbox.querySelector(".gallery-lightbox-overlay");
-      const galleryImages = document.querySelectorAll(".gallery-item img");
+      const coverflow = document.getElementById("activity-coverflow");
+      const stage = coverflow?.querySelector(".gallery-stage");
+      const items = Array.from(coverflow?.querySelectorAll(".gallery-item") || []);
+      const prevBtn = coverflow?.querySelector(".gallery-control.is-prev");
+      const nextBtn = coverflow?.querySelector(".gallery-control.is-next");
+      const caption = document.getElementById("gallery-caption");
+      const dots = document.getElementById("gallery-dots");
+      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-      if (!lightbox || !lightboxImg || !overlay || !galleryImages.length) return;
+      if (!lightbox || !lightboxImg || !overlay || !coverflow || !stage || !items.length || !dots) return;
+
+      let activeIndex = 0;
+      let autoplayTimer = null;
+      let pointerStartX = null;
+      let didSwipe = false;
+      let lastFocusedItem = null;
+
+      function wrapIndex(index) {
+        return (index + items.length) % items.length;
+      }
+
+      function relativeOffset(index) {
+        let offset = index - activeIndex;
+        if (offset > items.length / 2) offset -= items.length;
+        if (offset < -items.length / 2) offset += items.length;
+        return offset;
+      }
+
+      function renderCoverflow() {
+        items.forEach((item, index) => {
+          const offset = relativeOffset(index);
+          const isActive = offset === 0;
+          const image = item.querySelector("img");
+          item.dataset.offset = Math.abs(offset) <= 2 ? String(offset) : "hidden";
+          item.tabIndex = isActive ? 0 : -1;
+          item.setAttribute("aria-current", isActive ? "true" : "false");
+          item.setAttribute("aria-label", `${image?.alt || "활동사진"} ${isActive ? "크게 보기" : "선택"}`);
+        });
+
+        dots.querySelectorAll(".gallery-dot").forEach((dot, index) => {
+          dot.setAttribute("aria-current", index === activeIndex ? "true" : "false");
+        });
+
+        const activeImage = items[activeIndex].querySelector("img");
+        if (caption) caption.textContent = `${activeIndex + 1} / ${items.length} · ${activeImage?.alt || "활동사진"}`;
+      }
+
+      function setActive(index) {
+        activeIndex = wrapIndex(index);
+        renderCoverflow();
+      }
+
+      function stopAutoplay() {
+        if (autoplayTimer) window.clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+
+      function startAutoplay() {
+        stopAutoplay();
+        if (reduceMotionQuery.matches || lightbox.classList.contains("is-open")) return;
+        autoplayTimer = window.setInterval(() => setActive(activeIndex + 1), 5000);
+      }
 
       function openLightbox(src, alt) {
+        stopAutoplay();
         lightboxImg.src = src;
         lightboxImg.alt = alt || "활동 사진";
         lightboxCaption.textContent = alt || "";
@@ -3502,12 +3857,62 @@
         lightbox.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
         lightboxImg.src = "";
+        lastFocusedItem?.focus();
       }
 
-      galleryImages.forEach(img => {
-        img.addEventListener("click", () => {
-          openLightbox(img.src, img.alt);
+      items.forEach((item, index) => {
+        const image = item.querySelector("img");
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "gallery-dot";
+        dot.setAttribute("aria-label", `${index + 1}번째 활동사진 보기`);
+        dot.addEventListener("click", () => setActive(index));
+        dots.appendChild(dot);
+
+        item.addEventListener("click", () => {
+          if (didSwipe) return;
+          if (index !== activeIndex) {
+            setActive(index);
+            return;
+          }
+          lastFocusedItem = item;
+          openLightbox(image.src, image.alt);
         });
+      });
+
+      prevBtn?.addEventListener("click", () => setActive(activeIndex - 1));
+      nextBtn?.addEventListener("click", () => setActive(activeIndex + 1));
+
+      coverflow.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          setActive(activeIndex + (event.key === "ArrowRight" ? 1 : -1));
+          items[activeIndex].focus();
+        }
+      });
+
+      stage.addEventListener("pointerdown", (event) => {
+        pointerStartX = event.clientX;
+        didSwipe = false;
+        stopAutoplay();
+      });
+
+      stage.addEventListener("pointerup", (event) => {
+        if (pointerStartX === null) return;
+        const distance = event.clientX - pointerStartX;
+        pointerStartX = null;
+        if (Math.abs(distance) < 45) return;
+        didSwipe = true;
+        setActive(activeIndex + (distance < 0 ? 1 : -1));
+        window.setTimeout(() => { didSwipe = false; }, 0);
+      });
+
+      stage.addEventListener("pointercancel", () => { pointerStartX = null; });
+      coverflow.addEventListener("mouseenter", stopAutoplay);
+      coverflow.addEventListener("mouseleave", startAutoplay);
+      coverflow.addEventListener("focusin", stopAutoplay);
+      coverflow.addEventListener("focusout", (event) => {
+        if (!coverflow.contains(event.relatedTarget)) startAutoplay();
       });
 
       closeBtn.addEventListener("click", closeLightbox);
@@ -3517,6 +3922,10 @@
           closeLightbox();
         }
       });
+
+      reduceMotionQuery.addEventListener?.("change", startAutoplay);
+      renderCoverflow();
+      startAutoplay();
     })();
   </script>
 
