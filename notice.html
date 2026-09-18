@@ -1325,7 +1325,9 @@
 
     /* ===== 조회수 (Google Apps Script + 시트) ===== */
     const VIEWS_API = (window.SHEET_CONFIG && window.SHEET_CONFIG.notices && window.SHEET_CONFIG.notices.viewsApiUrl) || "";
+    const VIEWS_CSV = (window.SHEET_CONFIG && window.SHEET_CONFIG.notices && window.SHEET_CONFIG.notices.viewsCsvUrl) || "";
     let VIEW_COUNTS = {};
+    let VIEW_IDS = {};
     const viewedThisSession = new Set();
 
     function viewsUrl(params) {
@@ -1345,11 +1347,38 @@
     }
 
     async function loadViewCounts() {
-      if (!VIEWS_API) return; // 미설정 시 조용히 통과 ('-' 유지)
+      if (!VIEWS_API && !VIEWS_CSV) return; // 미설정 시 조용히 통과 ('-' 유지)
       try {
-        const res = await fetch(viewsUrl("action=getViews"));
-        const json = await res.json();
-        VIEW_COUNTS = (json && json.data) ? json.data : (json || {});
+        const [apiResult, csvResult] = await Promise.allSettled([
+          VIEWS_API ? fetch(viewsUrl("action=getViews"), { cache: "no-store" }).then(res => res.json()) : Promise.reject(new Error("views API not configured")),
+          VIEWS_CSV ? window.CSVUtils.fetchCSV(VIEWS_CSV) : Promise.reject(new Error("views CSV not configured"))
+        ]);
+
+        const countsById = apiResult.status === "fulfilled"
+          ? ((apiResult.value && apiResult.value.data) ? apiResult.value.data : (apiResult.value || {}))
+          : {};
+
+        VIEW_COUNTS = {};
+        VIEW_IDS = {};
+        if (csvResult.status === "fulfilled" && Array.isArray(csvResult.value) && csvResult.value.length > 1) {
+          const rows = csvResult.value;
+          const headers = rows[0].map(h => window.CSVUtils.normalizeHeader(h));
+          const idCol = headers.findIndex(h => h === "id" || h.includes("번호"));
+          const countCol = headers.findIndex(h => h.includes("count") || h.includes("조회"));
+          const titleCol = headers.findIndex(h => h.includes("title") || h.includes("제목"));
+          rows.slice(1).forEach(row => {
+            const id = idCol >= 0 ? String(row[idCol] || "").trim() : "";
+            const title = titleCol >= 0 ? String(row[titleCol] || "").trim() : "";
+            if (!title) return;
+            VIEW_IDS[title] = id;
+            const apiCount = id && countsById[id] != null ? countsById[id] : null;
+            const csvCount = countCol >= 0 ? parseInt(row[countCol], 10) : NaN;
+            VIEW_COUNTS[title] = apiCount != null ? apiCount : (Number.isFinite(csvCount) ? csvCount : 0);
+          });
+        } else {
+          VIEW_COUNTS = countsById;
+        }
+
         document.querySelectorAll(".notice-views[data-key]").forEach(td => {
           if (td.hasAttribute("data-manual")) return;
           const key = td.getAttribute("data-key");
@@ -1363,14 +1392,15 @@
 
     function addViewCount(notice) {
       const key = viewKeyOf(notice);
-      if (!VIEWS_API || !key) return;
+      const id = VIEW_IDS[key] || String(notice && notice.no || "").trim();
+      if (!VIEWS_API || !key || !id) return;
       if (viewedThisSession.has(key)) return; // 같은 세션 중복 카운트 방지
       viewedThisSession.add(key);
       const cur = (parseInt(VIEW_COUNTS[key], 10) || 0) + 1;
       VIEW_COUNTS[key] = cur;
       const td = Array.from(document.querySelectorAll(".notice-views[data-key]")).find(el => el.getAttribute("data-key") === key);
       if (td) td.textContent = cur;
-      fetch(viewsUrl("action=addView&id=" + encodeURIComponent(key)), { cache: "no-store", keepalive: true }).catch(() => {});
+      fetch(viewsUrl("action=addView&id=" + encodeURIComponent(id)), { cache: "no-store", keepalive: true }).catch(() => {});
     }
 
     function parseAttachments(raw) {
