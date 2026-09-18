@@ -1481,7 +1481,8 @@
 
         buildTypeFilter();
         applyNoticeFilter();
-        loadViewCounts();
+        await loadViewCounts();
+        renderNoticeTable();
       } catch (err) {
         console.error("Notice error:", err);
       }
