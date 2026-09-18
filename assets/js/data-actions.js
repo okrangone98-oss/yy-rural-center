@@ -64,6 +64,17 @@
           window.openModal(Number(rowIndex));
         }
         break;
+      case 'notice-preview-row':
+        var noticeIndex = target.getAttribute('data-notice-index');
+        if (window.NoticesModule && typeof window.NoticesModule.openPreview === 'function' && noticeIndex !== null) {
+          window.NoticesModule.openPreview(Number(noticeIndex));
+        }
+        break;
+      case 'close-home-notice-modal':
+        if (window.NoticesModule && typeof window.NoticesModule.closePreview === 'function') {
+          window.NoticesModule.closePreview();
+        }
+        break;
       default:
         break;
     }

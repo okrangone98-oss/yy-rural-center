@@ -1332,15 +1332,28 @@
       return VIEWS_API + (VIEWS_API.indexOf("?") >= 0 ? "&" : "?") + params + "&t=" + Date.now();
     }
 
+    function viewKeyOf(notice) {
+      return String((notice && notice.title) || "").trim();
+    }
+
+    function escapeAttr(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
     async function loadViewCounts() {
       if (!VIEWS_API) return; // 미설정 시 조용히 통과 ('-' 유지)
       try {
         const res = await fetch(viewsUrl("action=getViews"));
         const json = await res.json();
         VIEW_COUNTS = (json && json.data) ? json.data : (json || {});
-        document.querySelectorAll(".notice-views[data-no]").forEach(td => {
-          const no = td.getAttribute("data-no");
-          if (no && VIEW_COUNTS[no] != null) td.textContent = VIEW_COUNTS[no];
+        document.querySelectorAll(".notice-views[data-key]").forEach(td => {
+          if (td.hasAttribute("data-manual")) return;
+          const key = td.getAttribute("data-key");
+          if (key && VIEW_COUNTS[key] != null) td.textContent = VIEW_COUNTS[key];
           else if (td.textContent === "-") td.textContent = "0";
         });
       } catch (e) {
@@ -1348,15 +1361,16 @@
       }
     }
 
-    function addViewCount(no) {
-      if (!VIEWS_API || !no) return;
-      if (viewedThisSession.has(no)) return; // 같은 세션 중복 카운트 방지
-      viewedThisSession.add(no);
-      const cur = (parseInt(VIEW_COUNTS[no], 10) || 0) + 1;
-      VIEW_COUNTS[no] = cur;
-      const td = document.querySelector('.notice-views[data-no="' + no + '"]');
+    function addViewCount(notice) {
+      const key = viewKeyOf(notice);
+      if (!VIEWS_API || !key) return;
+      if (viewedThisSession.has(key)) return; // 같은 세션 중복 카운트 방지
+      viewedThisSession.add(key);
+      const cur = (parseInt(VIEW_COUNTS[key], 10) || 0) + 1;
+      VIEW_COUNTS[key] = cur;
+      const td = Array.from(document.querySelectorAll(".notice-views[data-key]")).find(el => el.getAttribute("data-key") === key);
       if (td) td.textContent = cur;
-      fetch(viewsUrl("action=addView&id=" + encodeURIComponent(no))).catch(() => {});
+      fetch(viewsUrl("action=addView&id=" + encodeURIComponent(key)), { cache: "no-store", keepalive: true }).catch(() => {});
     }
 
     function parseAttachments(raw) {
@@ -1406,7 +1420,8 @@
           content: norm.findIndex(h => h.includes("내용") || h.includes("본문")),
           url: norm.findIndex(h => h.includes("링크") || h.includes("타겟")),
           image: norm.findIndex(h => h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
-          file: norm.findIndex(h => h.includes("첨부") || h.includes("파일url") || h.includes("fileurl"))
+            file: norm.findIndex(h => h.includes("첨부") || h.includes("파일url") || h.includes("fileurl")),
+            views: norm.findIndex(h => h.includes("조회"))
         };
 
         NOTICES = rows.slice(1).map(r => {
@@ -1418,8 +1433,10 @@
           const files = parseAttachments(attachRaw);
 
           const no = colIndex.no >= 0 ? String(r[colIndex.no] || "").trim() : "";
+          const viewsManual = colIndex.views >= 0 ? String(r[colIndex.views] || "").trim() : "";
           return {
             no,
+            viewsManual,
             type: r[colIndex.type] || "공지",
             title: r[colIndex.title] || "",
             date: r[colIndex.date] || "",
@@ -1467,7 +1484,7 @@
           <td><span class="notice-type">${n.type}</span></td>
           <td class="notice-title">${n.title}</td>
           <td class="notice-date">${n.date}</td>
-          <td class="notice-views" data-no="${n.no}">${n.no && VIEW_COUNTS[n.no] != null ? VIEW_COUNTS[n.no] : "-"}</td>
+          <td class="notice-views" data-key="${escapeAttr(viewKeyOf(n))}"${n.viewsManual ? ` data-manual="${escapeAttr(n.viewsManual)}"` : ""}>${n.viewsManual || (VIEW_COUNTS[viewKeyOf(n)] != null ? VIEW_COUNTS[viewKeyOf(n)] : "-")}</td>
         </tr>
       `).join("") : '<tr><td colspan="4" class="notice-empty">아직 등록된 공지사항이 없어요. 새 소식이 올라오면 이곳에서 가장 먼저 확인할 수 있어요.</td></tr>';
 
@@ -1495,7 +1512,7 @@
       const n = FILTERED_NOTICES[idx];
       if (!n) return;
 
-      addViewCount(n.no);
+      addViewCount(n);
 
       document.getElementById("modal-title").textContent = n.title;
       document.getElementById("modal-type").textContent = n.type;

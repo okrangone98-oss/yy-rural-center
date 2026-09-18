@@ -1088,6 +1088,33 @@
       flex: 1;
     }
 
+    #notice-preview-modal .modal-card {
+      width: min(680px, 100%);
+      position: relative;
+      z-index: 1;
+    }
+
+    #notice-preview-modal .modal-backdrop-overlay {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: transparent;
+      cursor: default;
+    }
+
+    .notice-preview-modal-meta {
+      color: #66756f;
+      font-size: .85rem;
+      margin-bottom: 18px;
+    }
+
+    .notice-preview-modal-content {
+      color: #37433f;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+
     .teacher-submit-title {
       font-size: 1rem;
       font-weight: 700;
@@ -3216,6 +3243,23 @@
     </div>
   </section>
 
+  <div id="notice-preview-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-preview-modal-title">
+      <div class="modal-header">
+        <div class="modal-title" id="notice-preview-modal-title">공지사항</div>
+        <button type="button" class="modal-close" data-action="close-home-notice-modal" aria-label="공지사항 팝업 닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice-preview-modal-meta" id="notice-preview-modal-meta"></div>
+        <div class="notice-preview-modal-content" id="notice-preview-modal-content"></div>
+        <div style="margin-top:20px;">
+          <a id="notice-preview-modal-link" class="btn-unified" href="notice.html">전체 공지사항에서 보기</a>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="modal-backdrop-overlay" data-action="close-home-notice-modal" aria-label="팝업 닫기"></button>
+  </div>
+
   <!-- 활동사진 -->
   <section id="gallery">
     <div class="container">
@@ -3589,7 +3633,7 @@
     </div>
   </div>
 
-  <script src="assets/js/config.js?v=20260205e" defer></script>
+  <script src="assets/js/config.js?v=20260918a" defer></script>
   <script src="assets/js/utils.js" defer></script>
   <script src="assets/js/teachers.js?v=20260205d" defer></script>
   <script src="assets/js/notices.js" defer></script>
