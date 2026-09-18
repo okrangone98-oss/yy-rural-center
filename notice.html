@@ -1365,7 +1365,9 @@
           const headers = rows[0].map(h => window.CSVUtils.normalizeHeader(h));
           const idCol = headers.findIndex(h => h === "id" || h.includes("번호"));
           const countCol = headers.findIndex(h => h.includes("count") || h.includes("조회"));
-          const titleCol = headers.findIndex(h => h.includes("title") || h.includes("제목"));
+          const detectedTitleCol = headers.findIndex(h => h.includes("title") || h.includes("제목"));
+          // 조회수 탭은 현재 세 번째 열의 헤더가 비어 있고 실제 값만 제목으로 사용합니다.
+          const titleCol = detectedTitleCol >= 0 ? detectedTitleCol : (rows[0].length >= 3 ? 2 : -1);
           rows.slice(1).forEach(row => {
             const id = idCol >= 0 ? String(row[idCol] || "").trim() : "";
             const title = titleCol >= 0 ? String(row[titleCol] || "").trim() : "";
