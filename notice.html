@@ -1349,6 +1349,9 @@
     }
 
     function compareNoticeOrder(a, b) {
+      if (a.no && b.no && Number.isFinite(Number(a.no)) && Number.isFinite(Number(b.no))) {
+        return Number(a.no) - Number(b.no);
+      }
       const dateDifference = noticeOrderValue(b.date) - noticeOrderValue(a.date);
       if (dateDifference) return dateDifference;
       const noA = Number(a.no);
@@ -1413,7 +1416,7 @@
 
     function addViewCount(notice) {
       const key = viewKeyOf(notice);
-      const id = VIEW_IDS[key] || String(notice && notice.no || "").trim();
+      const id = VIEW_IDS[key];
       if (!VIEWS_API || !key || !id) return;
       if (viewedThisSession.has(key)) return; // 같은 세션 중복 카운트 방지
       viewedThisSession.add(key);

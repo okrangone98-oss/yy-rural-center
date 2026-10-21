@@ -41,6 +41,9 @@ window.NoticesModule = (function(){
           images: colIndex.image>=0 ? window.CSVUtils.safeText(r[colIndex.image]).split(/[\r\n,]+/).map(s=>s.trim()).filter(Boolean) : [],
         }))
         .sort((a,b)=>{
+          if (a.no && b.no && Number.isFinite(Number(a.no)) && Number.isFinite(Number(b.no))) {
+            return Number(a.no) - Number(b.no);
+          }
           const toTime = (value) => {
             const m = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
             return m ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3])).getTime() : 0;
