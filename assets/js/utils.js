@@ -22,7 +22,8 @@ window.CSVUtils = (function(){
   }
 
   async function fetchCSV(url){
-    const res = await fetch(url);
+    const cacheBustedUrl = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+    const res = await fetch(cacheBustedUrl, { cache: "no-store" });
     if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
     const text = await res.text();
     return parseCSV(text);
