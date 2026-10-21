@@ -1334,8 +1334,12 @@
       return VIEWS_API + (VIEWS_API.indexOf("?") >= 0 ? "&" : "?") + params + "&t=" + Date.now();
     }
 
+    function normalizeNoticeKey(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
     function viewKeyOf(notice) {
-      return String((notice && notice.title) || "").trim();
+      return normalizeNoticeKey(notice && notice.title);
     }
 
     function escapeAttr(value) {
@@ -1370,7 +1374,7 @@
           const titleCol = detectedTitleCol >= 0 ? detectedTitleCol : (rows[0].length >= 3 ? 2 : -1);
           rows.slice(1).forEach(row => {
             const id = idCol >= 0 ? String(row[idCol] || "").trim() : "";
-            const title = titleCol >= 0 ? String(row[titleCol] || "").trim() : "";
+            const title = titleCol >= 0 ? normalizeNoticeKey(row[titleCol]) : "";
             if (!title) return;
             VIEW_IDS[title] = id;
             const apiCount = id && countsById[id] != null ? countsById[id] : null;
@@ -1445,15 +1449,16 @@
         const headers = rows[0].map(h => window.CSVUtils.safeText(h).trim());
         const norm = headers.map(window.CSVUtils.normalizeHeader);
         const colIndex = {
-          no: norm.findIndex(h => h.includes("번호") || h === "no" || h === "id"),
+          no: norm.findIndex(h => h.includes("번호") || h.includes("공지id") || h === "no" || h === "id"),
           type: norm.findIndex(h => h.includes("구분") || h.includes("카테고리")),
           title: norm.findIndex(h => h.includes("제목") || h.includes("title")),
           date: norm.findIndex(h => h.includes("날짜") || h.includes("date")),
           content: norm.findIndex(h => h.includes("내용") || h.includes("본문")),
           url: norm.findIndex(h => h.includes("링크") || h.includes("타겟")),
           image: norm.findIndex(h => h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
-            file: norm.findIndex(h => h.includes("첨부") || h.includes("파일url") || h.includes("fileurl")),
-            views: norm.findIndex(h => h.includes("조회"))
+          file: norm.findIndex(h => h.includes("첨부") || h.includes("파일url") || h.includes("fileurl")),
+          views: norm.findIndex(h => h.includes("조회")),
+          status: norm.findIndex(h => h.includes("게시상태") || h.includes("노출") || h === "상태")
         };
 
         NOTICES = rows.slice(1).map(r => {
@@ -1466,9 +1471,11 @@
 
           const no = colIndex.no >= 0 ? String(r[colIndex.no] || "").trim() : "";
           const viewsManual = colIndex.views >= 0 ? String(r[colIndex.views] || "").trim() : "";
+          const status = colIndex.status >= 0 ? String(r[colIndex.status] || "").trim() : "";
           return {
             no,
             viewsManual,
+            status,
             type: r[colIndex.type] || "공지",
             title: r[colIndex.title] || "",
             date: r[colIndex.date] || "",
@@ -1477,7 +1484,7 @@
             images,
             files
           };
-        }).filter(n => n.title);
+        }).filter(n => n.title && !["비공개", "숨김", "임시저장"].includes(n.status));
 
         buildTypeFilter();
         applyNoticeFilter();
