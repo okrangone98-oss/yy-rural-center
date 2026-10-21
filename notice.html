@@ -1342,6 +1342,21 @@
       return normalizeNoticeKey(notice && notice.title);
     }
 
+    function noticeOrderValue(value) {
+      const match = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+      if (!match) return 0;
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime();
+    }
+
+    function compareNoticeOrder(a, b) {
+      const dateDifference = noticeOrderValue(b.date) - noticeOrderValue(a.date);
+      if (dateDifference) return dateDifference;
+      const noA = Number(a.no);
+      const noB = Number(b.no);
+      if (Number.isFinite(noA) && Number.isFinite(noB)) return noB - noA;
+      return 0;
+    }
+
     function escapeAttr(value) {
       return String(value || "")
         .replace(/&/g, "&amp;")
@@ -1484,7 +1499,8 @@
             images,
             files
           };
-        }).filter(n => n.title && !["비공개", "숨김", "임시저장"].includes(n.status));
+        }).filter(n => n.title && !["비공개", "숨김", "임시저장"].includes(n.status))
+          .sort(compareNoticeOrder);
 
         buildTypeFilter();
         applyNoticeFilter();

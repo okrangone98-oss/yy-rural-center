@@ -14,6 +14,7 @@ window.NoticesModule = (function(){
       const norm = headers.map(window.CSVUtils.normalizeHeader);
 
       const colIndex = {
+        no:    norm.findIndex(h=>h.includes("번호") || h.includes("공지id") || h === "no" || h === "id"),
         type:  norm.findIndex(h=>h.includes("구분") || h.includes("분류") || h.includes("type")),
         title: norm.findIndex(h=>h.includes("제목") || h.includes("title")),
         date:  norm.findIndex(h=>h.includes("날짜") || h.includes("등록일") || h.includes("date")),
@@ -28,16 +29,27 @@ window.NoticesModule = (function(){
         .filter(r=>{
           if(colIndex.status<0) return true;
           const st=window.CSVUtils.safeText(r[colIndex.status]).trim();
-          return st==="" || st==="활성" || st.toLowerCase()==="active";
+          return st==="" || st==="활성" || st==="공개" || st.toLowerCase()==="active" || st.toLowerCase()==="public";
         })
         .map(r=>({
+          no:    colIndex.no>=0 ? window.CSVUtils.safeText(r[colIndex.no]).trim() : "",
           type:  colIndex.type>=0 ? window.CSVUtils.safeText(r[colIndex.type]).trim() : "공지",
           title: window.CSVUtils.safeText(r[colIndex.title]).trim(),
           date:  colIndex.date>=0 ? window.CSVUtils.safeText(r[colIndex.date]).trim() : "",
           url:   colIndex.url>=0  ? window.CSVUtils.safeText(r[colIndex.url]).trim() : "",
           content: colIndex.content>=0 ? window.CSVUtils.safeText(r[colIndex.content]) : "",
           images: colIndex.image>=0 ? window.CSVUtils.safeText(r[colIndex.image]).split(/[\r\n,]+/).map(s=>s.trim()).filter(Boolean) : [],
-        }));
+        }))
+        .sort((a,b)=>{
+          const toTime = (value) => {
+            const m = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+            return m ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3])).getTime() : 0;
+          };
+          const dateDifference = toTime(b.date) - toTime(a.date);
+          if (dateDifference) return dateDifference;
+          const noDifference = Number(b.no) - Number(a.no);
+          return Number.isFinite(noDifference) ? noDifference : 0;
+        });
 
       renderPreview();
     }catch(err){
