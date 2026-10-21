@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Teachers
-  if (window.TeachersModule) {
+  if (window.TeachersModule && document.getElementById("teacher-list")) {
     window.TeachersModule.bindFilterButtons();
     window.TeachersModule.load();
   }
