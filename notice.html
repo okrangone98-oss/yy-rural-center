@@ -1045,6 +1045,51 @@
     .is-large { max-height: 60px !important; }
     .is-xlarge { max-height: 70px !important; }
     .is-rural-center { max-height: 56px !important; }
+    /* Keep mobile notices compact after the shared table rules. */
+    @media (max-width: 640px) {
+      main .container { min-width: 0; width: auto; margin-inline: 16px; padding-inline: 0; }
+      .page-sub { overflow-wrap: anywhere; }
+      .notice-wrapper { padding: 16px; box-sizing: border-box; }
+      .notice-table, .notice-table tbody { display: block; width: 100%; }
+      .notice-table tr.notice-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 12px;
+        width: auto;
+        padding: 18px 0;
+        margin: 0;
+        border: 0;
+        border-bottom: 1px solid #e7ece9;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+      }
+      .notice-table tr.notice-row:hover { background: transparent; }
+      .notice-table tr.notice-row > td {
+        display: block;
+        width: auto;
+        min-width: 0;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        background: transparent;
+      }
+      .notice-table tr.notice-row > td:first-child,
+      .notice-table tr.notice-row > td.notice-title { grid-column: 1 / -1; }
+      .notice-table tr.notice-row > td.notice-title {
+        color: #222;
+        font-size: 1rem;
+        line-height: 1.6;
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
+      }
+      .notice-table tr.notice-row > td.notice-date,
+      .notice-table tr.notice-row > td.notice-views { font-size: .82rem; color: #66736c; text-align: left; }
+      .notice-table td.notice-views::before { content: "조회 "; }
+      .notice-empty { width: auto; }
+      .notice-search-input, .notice-filter-select, .notice-page-btn { min-height: 44px; }
+    }
   </style>
 </head>
 
