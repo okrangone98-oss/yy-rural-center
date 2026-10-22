@@ -29,7 +29,7 @@ window.NoticesModule = (function(){
         .filter(r=>{
           if(colIndex.status<0) return true;
           const st=window.CSVUtils.safeText(r[colIndex.status]).trim();
-          return st==="" || st==="활성" || st==="공개" || st.toLowerCase()==="active" || st.toLowerCase()==="public";
+          return !["비공개", "숨김", "임시저장"].includes(st);
         })
         .map(r=>({
           no:    colIndex.no>=0 ? window.CSVUtils.safeText(r[colIndex.no]).trim() : "",
