@@ -1,5 +1,7 @@
 ﻿window.VideosModule = (function(){
   let VIDEOS = [];
+  let previewIndex = 0;
+  let thumbnailObserver;
   const PREVIEW_LIMIT = 5;
   const PREVIEW_SECONDS = 8;
   const DEFAULT_POSTER = "images/hero-home.jpg";
@@ -15,7 +17,7 @@
 
   function parseDateToTime(str){
     if(!str) return 0;
-    const m = str.match(/(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
+    const m = str.match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
     if(!m) return 0;
     const y = m[1];
     const mo = m[2].padStart(2, "0");
@@ -38,9 +40,9 @@
   function isActiveStatus(value){
     if(!value) return true;
     const v = safe(value).toLowerCase();
+    if(v.includes("비공개") || v.includes("inactive") || v === "숨김" || v === "임시저장") return false;
     if(v === "" || v === "active") return true;
     if(v.includes("활성") || v.includes("공개")) return true;
-    if(v.includes("비공개") || v.includes("inactive")) return false;
     return true;
   }
 
@@ -145,10 +147,32 @@
       tbody.appendChild(tr);
     });
 
+    previewIndex = 0;
     renderHeroPreview(VIDEOS[0]);
+    const previous = document.getElementById("video-preview-prev");
+    const next = document.getElementById("video-preview-next");
+    if(previous) previous.onclick = () => selectPreview(previewIndex - 1);
+    if(next) next.onclick = () => selectPreview(previewIndex + 1);
+    updatePreviewPosition();
   }
 
-  function renderHeroPreview(video){
+  function selectPreview(index){
+    if(!VIDEOS.length) return;
+    previewIndex = (index + VIDEOS.length) % VIDEOS.length;
+    renderHeroPreview(VIDEOS[previewIndex], false);
+    updatePreviewPosition();
+  }
+
+  function updatePreviewPosition(){
+    const position = document.getElementById("video-preview-position");
+    if(position) position.textContent = VIDEOS.length ? `${previewIndex + 1} / ${VIDEOS.length}` : "";
+    ["video-preview-prev", "video-preview-next"].forEach(id => {
+      const button = document.getElementById(id);
+      if(button) button.disabled = VIDEOS.length < 2;
+    });
+  }
+
+  function renderHeroPreview(video, updateLandingMedia = true){
     const mediaLink = document.getElementById("video-preview-media");
     const videoEl = document.getElementById("video-preview-video");
     const imageEl = document.getElementById("video-preview-image");
@@ -190,7 +214,11 @@
     metaEl.textContent = `${video.type || "활동영상"} · ${video.date || ""}`.trim();
     descEl.textContent = video.content ? truncateText(video.content, 140) : "영상 상세 내용은 상세페이지에서 확인하실 수 있습니다.";
 
-    mediaLink.href = "videos.html";
+    mediaLink.href = detailHref;
+    mediaLink.setAttribute("aria-label", `${video.title} 영상 보기`);
+    videoEl.pause();
+    videoEl.onloadedmetadata = null;
+    videoEl.ontimeupdate = null;
 
     if(video.url && isVideoFile(video.url)){
       videoEl.src = video.url;
@@ -224,16 +252,16 @@
       videoEl.style.display = "none";
     }
 
-    if(heroMini){
+    if(updateLandingMedia && heroMini){
       const miniSrc = video.thumbnail || DEFAULT_POSTER;
       heroMini.style.backgroundImage = `url('${miniSrc}')`;
     }
-    if(heroMiniVideo){
+    if(updateLandingMedia && heroMiniVideo){
       heroMiniVideo.src = video.url || "";
       heroMiniVideo.poster = video.thumbnail || DEFAULT_POSTER;
       heroMiniVideo.play().catch(()=>{});
     }
-    if(heroThumbVideo){
+    if(updateLandingMedia && heroThumbVideo){
       heroThumbVideo.src = video.url || "";
       heroThumbVideo.poster = video.thumbnail || DEFAULT_POSTER;
       heroThumbVideo.play().catch(()=>{});
@@ -276,7 +304,7 @@
         const posterAttr = ` poster="${fallbackPoster}"`;
         mediaHtml = `
           <img class="video-card-poster" src="${fallbackPoster}" data-fallback="${DEFAULT_POSTER_ALT}" alt="${v.title}" />
-          <video class="video-card-video" muted playsinline preload="metadata"${posterAttr} src="${v.url}" style="display:none;"></video>
+          ${thumb ? "" : `<video class="video-card-video" muted playsinline preload="metadata"${posterAttr} data-preview-src="${v.url}" style="display:none;"></video>`}
         `;
       }else if(thumb){
         mediaHtml = `<img src="${thumb}" data-fallback="${DEFAULT_POSTER_ALT}" alt="${v.title}" />`;
@@ -285,7 +313,7 @@
       }
 
       card.innerHTML = `
-        <div class="video-card-thumb" style="${hasValidPoster ? `background-image:url('${fallbackPoster}');background-size:cover;background-position:center;` : ""}">${mediaHtml}</div>
+        <a class="video-card-thumb" href="video-detail.html?id=${encodeURIComponent(v.id)}" aria-label="${v.title} 영상 보기" style="${hasValidPoster ? `background-image:url('${fallbackPoster}');background-size:cover;background-position:center;` : ""}">${mediaHtml}</a>
         <div class="video-card-body">
           <div class="video-card-type">${v.type || "활동영상"}</div>
           <h3 class="video-card-title">${v.title}</h3>
@@ -308,19 +336,31 @@
     });
 
     const previewVideos = list.querySelectorAll(".video-card-video");
+    if(thumbnailObserver) thumbnailObserver.disconnect();
+    const canObserve = typeof IntersectionObserver === "function";
+    function loadThumbnail(video){
+      const source = video.getAttribute("data-preview-src");
+      if(!source) return;
+      video.src = source;
+      video.removeAttribute("data-preview-src");
+      video.load();
+    }
     previewVideos.forEach(video => {
       const wrapper = video.closest(".video-card-thumb");
       const posterImg = wrapper ? wrapper.querySelector(".video-card-poster") : null;
 
       video.addEventListener("loadedmetadata", () => {
         try{
-          video.currentTime = 0.1;
+          video.currentTime = Number.isFinite(video.duration) && video.duration > 0 ? Math.min(5, video.duration / 3) : 0.1;
         }catch(e){
           // ignore
         }
       });
       video.addEventListener("seeked", () => {
         video.pause();
+        video.style.display = "block";
+        video.setAttribute("aria-hidden", "true");
+        if(posterImg) posterImg.style.display = "none";
       });
       video.addEventListener("error", () => {
         if(posterImg){
@@ -328,7 +368,20 @@
         }
         video.style.display = "none";
       });
+      if(!canObserve) loadThumbnail(video);
     });
+    if(canObserve){
+      // Observe visible links, not their initially display:none video children.
+      thumbnailObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if(!entry.isIntersecting) return;
+          const video = entry.target.querySelector(".video-card-video");
+          if(video) loadThumbnail(video);
+          thumbnailObserver.unobserve(entry.target);
+        });
+      }, { rootMargin: "120px" });
+      previewVideos.forEach(video => thumbnailObserver.observe(video.closest(".video-card-thumb")));
+    }
   }
 
   function renderListError(){
@@ -411,6 +464,25 @@
         <div class="video-detail-desc">${descHtml}</div>
       </div>
     `;
+    const index = VIDEOS.indexOf(video);
+    const navigation = document.createElement("nav");
+    navigation.className = "video-navigation";
+    navigation.setAttribute("aria-label", "다른 활동영상 보기");
+    if(VIDEOS.length > 1){
+      const previous = VIDEOS[(index - 1 + VIDEOS.length) % VIDEOS.length];
+      const next = VIDEOS[(index + 1) % VIDEOS.length];
+      const addLink = (item, label) => {
+        const link = document.createElement("a");
+        link.className = "video-navigation-button";
+        link.href = `video-detail.html?id=${encodeURIComponent(item.id)}`;
+        link.textContent = label;
+        link.setAttribute("aria-label", `${label}: ${item.title}`);
+        navigation.appendChild(link);
+      };
+      addLink(previous, "← 이전 영상");
+      addLink(next, "다음 영상 →");
+      wrap.appendChild(navigation);
+    }
   }
 
   function renderDetailError(){

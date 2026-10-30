@@ -2647,11 +2647,12 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="assets/css/video-navigation.css" />
 </head>
 
 <body>
   <!-- 첫 화면: 2026 온라인 성과공유집 안내 -->
-  <link rel="stylesheet" href="assets/css/home-announcement.css" />
+  <link rel="stylesheet" href="assets/css/home-announcement.css?v=20261022-2" />
   <dialog id="home-announcement" class="home-announcement" aria-labelledby="announcement-title">
     <div class="announcement-cover">
       <p class="announcement-kicker">2026 · 양양군 농촌활성화지원센터</p>
@@ -2670,7 +2671,8 @@
       <button type="button" data-close-announcement>닫기</button>
     </div>
   </dialog>
-  <script src="assets/js/home-announcement.js" defer></script>
+  <button type="button" class="announcement-reopen" id="announcement-reopen" aria-haspopup="dialog" aria-controls="home-announcement" hidden>성과공유집 안내 <span aria-hidden="true">↗</span></button>
+  <script src="assets/js/home-announcement.js?v=20261022-2" defer></script>
 
   <header>
     <div class="container nav">
@@ -3280,6 +3282,11 @@
             <a id="video-preview-title" class="video-preview-title" href="videos.html">활동영상</a>
             <div id="video-preview-meta" class="video-preview-meta"></div>
             <p id="video-preview-desc" class="video-preview-desc"></p>
+            <div class="video-navigation" aria-label="활동영상 미리보기 전환">
+              <button type="button" id="video-preview-prev" class="video-navigation-button" aria-label="이전 영상 미리보기" disabled>← 이전</button>
+              <span id="video-preview-position" class="video-navigation-position" role="status" aria-live="polite"></span>
+              <button type="button" id="video-preview-next" class="video-navigation-button" aria-label="다음 영상 미리보기" disabled>다음 →</button>
+            </div>
           </div>
         </div>
 
@@ -3430,7 +3437,7 @@
   <script src="assets/js/utils.js" defer></script>
   <script src="assets/js/instructor-embed.js" defer></script>
   <script src="assets/js/notices.js" defer></script>
-  <script src="assets/js/videos.js" defer></script>
+  <script src="assets/js/videos.js?v=20261030-1" defer></script>
   <script src="assets/js/programs.js?v=20260205d" defer></script>
   <script src="assets/js/pd.js" defer></script>
   <script src="assets/js/main.js" defer></script>

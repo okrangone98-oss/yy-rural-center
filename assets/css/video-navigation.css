@@ -1,0 +1,9 @@
+.video-navigation { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; }
+.video-navigation-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border: 1px solid #bbd9ca; border-radius: 999px; background: #f2f8f4; color: #086550; font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.video-navigation-button:hover { background: #e0efe6; }
+.video-navigation-button:disabled { opacity: .4; cursor: default; }
+.video-navigation-button:focus-visible, .video-card-thumb:focus-visible { outline: 3px solid #086550; outline-offset: 3px; }
+.video-navigation-position { min-width: 44px; text-align: center; color: #52675c; font-size: 14px; font-variant-numeric: tabular-nums; }
+.video-card-thumb { position: relative; }
+.video-card-thumb::after { content: '▶'; position: absolute; right: 12px; bottom: 12px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: #086550; background: #fffffff0; box-shadow: 0 2px 8px #0002; font-size: 13px; }
+@media (max-width: 640px) { .video-navigation-button { padding-inline: 14px; } }
