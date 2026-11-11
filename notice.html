@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://drive.google.com https://script.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
   <title>공지사항 - 양양군 농촌활성화지원센터</title>
   <meta name="description" content="양양군 농촌활성화지원센터의 공식 공지사항. 사업 일정, 교육·행사 안내, 모집 공고 등 최신 소식을 확인하세요." />
   <meta name="keywords" content="양양, 농촌활성화지원센터, 공지사항, 공고, 양양군 공지, 두레동아리 공지" />
@@ -514,17 +514,6 @@
         box-sizing: border-box;
       }
 
-      .modal-img-frame img {
-        max-height: 280px;
-      }
-      .modal-images.is-poster .modal-img-frame img {
-        max-height: none;
-      }
-
-      .modal-img-nav {
-        width: 30px;
-        height: 30px;
-      }
     }
 
     /* 공지사항 특화 CSS */
@@ -758,101 +747,6 @@
       border-bottom: 1px solid #eee;
     }
 
-    .modal-images {
-      margin: 10px 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .modal-img-frame {
-      position: relative;
-      flex: 1;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-img-frame img {
-      max-width: 100%;
-      max-height: 400px;
-      display: block;
-      object-fit: contain;
-    }
-
-    /* 포스터 전체 표시 모드 */
-    .modal-images.is-poster {
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-images.is-poster .modal-img-frame {
-      width: 100%;
-    }
-    .modal-images.is-poster .modal-img-frame img {
-      max-height: none;
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-    }
-    .modal-images.is-poster .modal-img-nav {
-      display: none;
-    }
-
-    /* 파일 다운로드 버튼 */
-    .modal-file-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      background: #f0faf5;
-      border: 1.5px solid #b2dac7;
-      color: #0b7c5b;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      margin-top: 4px;
-    }
-    .modal-file-btn:hover {
-      background: #d6f0e4;
-      border-color: #086550;
-    }
-
-    .modal-img-indicator {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    .modal-img-nav {
-      border: none;
-      background: #e0e0e0;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-      color: #333;
-    }
-
-    .modal-img-nav:hover {
-      background: #d0d0d0;
-    }
 
     .modal-body {
       flex: 1;
@@ -957,66 +851,6 @@
       }
     }
 
-    /* 첨부파일 목록 */
-    .modal-file-list {
-      margin-top: 14px;
-      border-top: 1px solid #e0ebe4;
-      padding-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .modal-file-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      background: #f5f9f6;
-      border: 1px solid #cde3d5;
-      border-radius: 10px;
-    }
-
-    .modal-file-item-name {
-      flex: 1;
-      font-size: 0.88rem;
-      color: #1a3326;
-      word-break: break-all;
-      line-height: 1.4;
-    }
-
-    .modal-file-open-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: #fff;
-      border: 1.5px solid #086550;
-      color: #086550;
-      border-radius: 7px;
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 700;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-      flex-shrink: 0;
-    }
-
-    .modal-file-open-btn:hover {
-      background: #086550;
-      color: #fff;
-    }
-
-    @media (max-width: 480px) {
-      .modal-file-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .modal-file-open-btn {
-        width: 100%;
-        justify-content: center;
-      }
-    }
 
     /* 푸터 스타일 */
     footer {
@@ -1095,6 +929,7 @@
       .notice-search-input, .notice-filter-select, .notice-page-btn { min-height: 44px; }
     }
   </style>
+  <link rel="stylesheet" href="assets/css/notice-attachments.css" />
 </head>
 
 <body>
@@ -1213,19 +1048,12 @@
       <div class="modal-meta">
         <span id="modal-type" style="font-weight:700; color:#086550;">공지</span> &nbsp;|&nbsp; <span id="modal-date">날짜</span>
       </div>
-      <div id="modal-images" class="modal-images">
-        <button type="button" class="modal-img-nav" id="modal-img-prev">&larr;</button>
-        <div class="modal-img-frame">
-          <img id="modal-img" src="" alt="첨부 이미지" />
-          <div class="modal-img-indicator" id="modal-img-indicator">1/1</div>
-        </div>
-        <button type="button" class="modal-img-nav" id="modal-img-next">&rarr;</button>
-      </div>
+      <div id="modal-photos" class="notice-attachments"></div>
       <div class="modal-body" id="modal-content"></div>
       <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
         <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">자세히 보기 &rarr;</a>
       </div>
-      <div id="modal-files" class="modal-file-list" style="display:none;"></div>
+      <div id="modal-files" class="notice-attachments"></div>
     </div>
   </div>
 
@@ -1243,6 +1071,7 @@
 
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/notice-data.js"></script>
+  <script src="assets/js/notice-attachments.js"></script>
   <script src="assets/js/config.js?v=20260918b"></script>
   <script>
     /* 로고 브랜드 스위칭 애니메이션 */
@@ -1460,36 +1289,6 @@
         });
     }
 
-    function parseAttachments(raw) {
-      if (!raw) return [];
-      // 1차: 쉼표·줄바꿈·세미콜론으로 분리
-      let parts = raw.split(/[\r\n,;]+/).map(s => s.trim()).filter(Boolean);
-      // 2차: 구분자 없이 붙어버린 URL 보강 — 한 항목에 http가 2개 이상이면 http 경계로 분리
-      //      (단, "파일명::URL" 형식은 그대로 보존)
-      const expanded = [];
-      parts.forEach(item => {
-        if (item.indexOf("::") >= 0) { expanded.push(item); return; }
-        const hits = item.match(/https?:\/\//gi);
-        if (hits && hits.length > 1) {
-          item.split(/(?=https?:\/\/)/i).forEach(u => { if (u.trim()) expanded.push(u.trim()); });
-        } else {
-          expanded.push(item);
-        }
-      });
-      return expanded.map((item, i) => {
-        const sep = item.indexOf("::");
-        let name, url;
-        if (sep >= 0) {
-          name = item.slice(0, sep).trim();
-          url = item.slice(sep + 2).trim();
-        } else {
-          name = "";
-          url = item.trim();
-        }
-        if (!/^https?:\/\//i.test(url)) return null;
-        return { name: name || `첨부파일 ${i + 1}`, url };
-      }).filter(Boolean);
-    }
 
     async function loadNotices() {
       try {
@@ -1513,12 +1312,8 @@
         };
 
         NOTICE_SOURCE = rows.slice(1).map(r => {
-          const images = colIndex.image >= 0
-            ? (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean)
-            : [];
-
-          const attachRaw = colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "";
-          const files = parseAttachments(attachRaw);
+          const images = window.NoticeAttachments.parse(r[colIndex.image], "포스터");
+          const files = window.NoticeAttachments.parse(r[colIndex.file]);
 
           const viewsManual = colIndex.views >= 0 ? String(r[colIndex.views] || "").trim() : "";
           const status = colIndex.status >= 0 ? String(r[colIndex.status] || "").trim() : "";
@@ -1596,8 +1391,6 @@
     }
 
     const modal = document.getElementById("noticeModal");
-    let currentImgIndex = 0;
-    let currentImages = [];
 
     window.openModal = openModal;
     function openModal(idx) {
@@ -1621,66 +1414,19 @@
       if (n.url) { link.href = n.url; link.style.display = "inline-flex"; }
       else { link.style.display = "none"; }
 
-      const filesEl = document.getElementById("modal-files");
-      if (n.files && n.files.length > 0) {
-        const driveIconSvg = `<svg width="15" height="15" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>`;
-        const fileIconSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#086550" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-        filesEl.innerHTML = n.files.map(f => `
-          <div class="modal-file-item">
-            ${fileIconSvg}
-            <span class="modal-file-item-name">${f.name}</span>
-            <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="modal-file-open-btn">
-              ${driveIconSvg} 드라이브에서 열기
-            </a>
-          </div>
-        `).join("");
-        filesEl.style.display = "flex";
-      } else {
-        filesEl.style.display = "none";
-      }
-
-      const imagesEl = document.getElementById("modal-images");
-      currentImages = n.images || [];
-      currentImgIndex = 0;
-
-      if (currentImages.length > 0) {
-        const isPoster = currentImages.length === 1;
-        imagesEl.style.display = "flex";
-        imagesEl.classList.toggle("is-poster", isPoster);
-        updateModalImage();
-      } else {
-        imagesEl.style.display = "none";
-        imagesEl.classList.remove("is-poster");
-      }
+      window.NoticeAttachments.render(document.getElementById("modal-photos"), n.images, { photo: true });
+      window.NoticeAttachments.render(document.getElementById("modal-files"), n.files);
 
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
     }
 
-    function updateModalImage() {
-      if (!currentImages.length) return;
-      const img = document.getElementById("modal-img");
-      const indicator = document.getElementById("modal-img-indicator");
-      img.src = currentImages[currentImgIndex];
-      img.alt = `첨부 이미지 ${currentImgIndex + 1}`;
-      indicator.textContent = `${currentImgIndex + 1}/${currentImages.length}`;
-    }
-
-    document.getElementById("modal-img-prev").addEventListener("click", () => {
-      if (currentImages.length <= 1) return;
-      currentImgIndex = (currentImgIndex - 1 + currentImages.length) % currentImages.length;
-      updateModalImage();
-    });
-
-    document.getElementById("modal-img-next").addEventListener("click", () => {
-      if (currentImages.length <= 1) return;
-      currentImgIndex = (currentImgIndex + 1) % currentImages.length;
-      updateModalImage();
-    });
 
     function closeModal() {
       modal.classList.remove("is-open");
       modal.setAttribute("aria-hidden", "true");
+      document.getElementById("modal-photos").replaceChildren();
+      document.getElementById("modal-files").replaceChildren();
     }
 
     document.getElementById("modal-close-btn").addEventListener("click", closeModal);

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https://firebasestorage.googleapis.com blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://script.google.com https://app.yycenter.kr; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://script.google.com https://script.googleusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https://firebasestorage.googleapis.com blob:; connect-src 'self' https://docs.google.com https://script.google.com https://*.googleusercontent.com https://firestore.googleapis.com https://firebasestorage.googleapis.com; frame-src https://drive.google.com https://script.google.com https://app.yycenter.kr; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https://script.google.com; object-src 'none'; upgrade-insecure-requests;">
   <title>양양군 농촌활성화지원센터</title>
 
   <!-- SEO 및 기본 메타 태그 -->
@@ -2648,6 +2648,7 @@
     }
   </style>
   <link rel="stylesheet" href="assets/css/video-navigation.css" />
+  <link rel="stylesheet" href="assets/css/notice-attachments.css" />
 </head>
 
 <body>
@@ -3046,7 +3047,9 @@
       </div>
       <div class="modal-body">
         <div class="notice-preview-modal-meta" id="notice-preview-modal-meta"></div>
+        <div id="notice-preview-modal-photos" class="notice-attachments"></div>
         <div class="notice-preview-modal-content" id="notice-preview-modal-content"></div>
+        <div id="notice-preview-modal-files" class="notice-attachments"></div>
         <div style="margin-top:20px;">
           <a id="notice-preview-modal-link" class="btn-unified" href="notice.html">전체 공지사항에서 보기</a>
         </div>
@@ -3437,7 +3440,8 @@
   <script src="assets/js/utils.js" defer></script>
   <script src="assets/js/instructor-embed.js" defer></script>
   <script src="assets/js/notice-data.js" defer></script>
-  <script src="assets/js/notices.js?v=20261111" defer></script>
+  <script src="assets/js/notice-attachments.js" defer></script>
+  <script src="assets/js/notices.js?v=20261111b" defer></script>
   <script src="assets/js/videos.js?v=20261030-1" defer></script>
   <script src="assets/js/programs.js?v=20260205d" defer></script>
   <script src="assets/js/pd.js" defer></script>

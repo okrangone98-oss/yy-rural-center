@@ -20,6 +20,7 @@ window.NoticesModule = (function(){
         url:   norm.findIndex(h=>h.includes("url") || h.includes("링크")),
         content: norm.findIndex(h=>h.includes("내용") || h.includes("본문") || h.includes("content")),
         image: norm.findIndex(h=>h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
+        file: norm.findIndex(h=>h.includes("첨부") || h.includes("파일url") || h.toLowerCase().includes("fileurl")),
         status: norm.findIndex(h=>h.includes("상태") || h.includes("status"))
       };
 
@@ -36,7 +37,8 @@ window.NoticesModule = (function(){
           date:  colIndex.date>=0 ? window.CSVUtils.safeText(r[colIndex.date]).trim() : "",
           url:   colIndex.url>=0  ? window.CSVUtils.safeText(r[colIndex.url]).trim() : "",
           content: colIndex.content>=0 ? window.CSVUtils.safeText(r[colIndex.content]) : "",
-          images: colIndex.image>=0 ? window.CSVUtils.safeText(r[colIndex.image]).split(/[\r\n,]+/).map(s=>s.trim()).filter(Boolean) : [],
+          images: window.NoticeAttachments.parse(r[colIndex.image], "포스터"),
+          files: window.NoticeAttachments.parse(r[colIndex.file]),
         }))
         .sort(window.NoticeData.newestFirst);
 
@@ -107,6 +109,8 @@ window.NoticesModule = (function(){
     document.getElementById("notice-preview-modal-title").textContent = n.title;
     document.getElementById("notice-preview-modal-meta").textContent = [n.type || "공지", n.date].filter(Boolean).join(" · ");
     document.getElementById("notice-preview-modal-content").textContent = n.content || "공지사항 상세 내용은 전체 공지사항에서 확인해 주세요.";
+    window.NoticeAttachments.render(document.getElementById("notice-preview-modal-photos"), n.images, { photo: true });
+    window.NoticeAttachments.render(document.getElementById("notice-preview-modal-files"), n.files);
     const link = document.getElementById("notice-preview-modal-link");
     const params = new URLSearchParams();
     if(n.title) params.set("t", n.title);
@@ -121,6 +125,8 @@ window.NoticesModule = (function(){
     if(!modal) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    document.getElementById("notice-preview-modal-photos").replaceChildren();
+    document.getElementById("notice-preview-modal-files").replaceChildren();
   }
 
   document.addEventListener("keydown", (event) => {

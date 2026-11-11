@@ -1,0 +1,9 @@
+.notice-attachments { display: grid; gap: 12px; margin-block: 16px; }
+.notice-attachments:empty { display: none; }
+.notice-attachment { min-width: 0; margin: 0; border: 1px solid #cde3d5; border-radius: 10px; overflow: hidden; background: #f5f9f6; }
+.notice-attachment figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; color: #1a3326; font-size: .9rem; }
+.notice-attachment figcaption span { min-width: 0; overflow-wrap: anywhere; }
+.notice-attachment figcaption a { display: inline-flex; align-items: center; min-height: 40px; color: #086550; font-weight: 700; text-decoration: underline; }
+.notice-attachment img { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: contain; background: #fff; }
+.notice-attachment iframe { display: block; width: 100%; height: min(66vh, 520px); min-height: 260px; border: 0; background: #fff; }
+.notice-attachment p { margin: 0; padding: 12px 14px; font-size: .85rem; }

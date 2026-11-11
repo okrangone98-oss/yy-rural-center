@@ -40,6 +40,7 @@ function fixture(change = () => {}) {
   const root = path.join(__dirname, '..');
   vm.runInContext(fs.readFileSync(path.join(root, 'assets/js/utils.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(root, 'assets/js/notice-data.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'assets/js/notice-attachments.js'), 'utf8'), context);
   context.window.CSVUtils.fetchCSV = async url => url === 'notices' ? notices : views;
   const html = fs.readFileSync(path.join(root, 'notice.html'), 'utf8');
   vm.runInContext(html.slice(html.indexOf('// Notice Board Logic'), html.lastIndexOf('  </script>')), context);
