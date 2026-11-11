@@ -14,10 +14,9 @@ window.NoticesModule = (function(){
       const norm = headers.map(window.CSVUtils.normalizeHeader);
 
       const colIndex = {
-        no:    norm.findIndex(h=>h.includes("번호") || h.includes("공지id") || h === "no" || h === "id"),
         type:  norm.findIndex(h=>h.includes("구분") || h.includes("분류") || h.includes("type")),
         title: norm.findIndex(h=>h.includes("제목") || h.includes("title")),
-        date:  norm.findIndex(h=>h.includes("날짜") || h.includes("등록일") || h.includes("date")),
+        date:  norm.findIndex(h=>h.includes("날짜") || h.includes("작성일") || h.includes("등록일") || h.toLowerCase().includes("date")),
         url:   norm.findIndex(h=>h.includes("url") || h.includes("링크")),
         content: norm.findIndex(h=>h.includes("내용") || h.includes("본문") || h.includes("content")),
         image: norm.findIndex(h=>h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
@@ -32,7 +31,6 @@ window.NoticesModule = (function(){
           return !["비공개", "숨김", "임시저장"].includes(st);
         })
         .map(r=>({
-          no:    colIndex.no>=0 ? window.CSVUtils.safeText(r[colIndex.no]).trim() : "",
           type:  colIndex.type>=0 ? window.CSVUtils.safeText(r[colIndex.type]).trim() : "공지",
           title: window.CSVUtils.safeText(r[colIndex.title]).trim(),
           date:  colIndex.date>=0 ? window.CSVUtils.safeText(r[colIndex.date]).trim() : "",
@@ -40,19 +38,7 @@ window.NoticesModule = (function(){
           content: colIndex.content>=0 ? window.CSVUtils.safeText(r[colIndex.content]) : "",
           images: colIndex.image>=0 ? window.CSVUtils.safeText(r[colIndex.image]).split(/[\r\n,]+/).map(s=>s.trim()).filter(Boolean) : [],
         }))
-        .sort((a,b)=>{
-          if (a.no && b.no && Number.isFinite(Number(a.no)) && Number.isFinite(Number(b.no))) {
-            return Number(a.no) - Number(b.no);
-          }
-          const toTime = (value) => {
-            const m = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
-            return m ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3])).getTime() : 0;
-          };
-          const dateDifference = toTime(b.date) - toTime(a.date);
-          if (dateDifference) return dateDifference;
-          const noDifference = Number(b.no) - Number(a.no);
-          return Number.isFinite(noDifference) ? noDifference : 0;
-        });
+        .sort(window.NoticeData.newestFirst);
 
       renderPreview();
     }catch(err){

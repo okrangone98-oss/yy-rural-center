@@ -1050,7 +1050,6 @@
       footer .container { width: auto; min-width: 0; margin-inline: 16px; padding-inline: 0; }
       .footer-logos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
       .footer-logos img { min-width: 0; width: 100%; }
-      .notice-number { margin-right: 8px; color: #52675c; font-size: .82rem; font-variant-numeric: tabular-nums; }
       .notice-search-input, .notice-filter-select { font-size: 16px; box-sizing: border-box; width: 100%; min-width: 0; }
       main .container { min-width: 0; width: auto; margin-inline: 16px; padding-inline: 0; }
       .page-sub { overflow-wrap: anywhere; }
@@ -1191,7 +1190,7 @@
           <table class="notice-table">
             <thead>
               <tr>
-                <th style="width:120px;">번호 / 구분</th>
+                <th style="width:100px;">구분</th>
                 <th>제목</th>
                 <th style="width:120px;">작성일</th>
                 <th style="width:64px;">조회</th>
@@ -1243,6 +1242,7 @@
   </footer>
 
   <script src="assets/js/utils.js"></script>
+  <script src="assets/js/notice-data.js"></script>
   <script src="assets/js/config.js?v=20260918b"></script>
   <script>
     /* 로고 브랜드 스위칭 애니메이션 */
@@ -1368,6 +1368,7 @@
     // Notice Board Logic
     const NOTICE_CSV_URL = window.SHEET_CONFIG?.notices?.csvUrl || "";
     let NOTICES = [];
+    let NOTICE_SOURCE = [];
     let FILTERED_NOTICES = [];
     let currentTypeFilter = "전체";
     let currentKeyword = "";
@@ -1378,37 +1379,14 @@
     const VIEWS_API = (window.SHEET_CONFIG && window.SHEET_CONFIG.notices && window.SHEET_CONFIG.notices.viewsApiUrl) || "";
     const VIEWS_CSV = (window.SHEET_CONFIG && window.SHEET_CONFIG.notices && window.SHEET_CONFIG.notices.viewsCsvUrl) || "";
     let VIEW_COUNTS = {};
-    let VIEW_IDS = {};
     const viewedThisSession = new Set();
 
     function viewsUrl(params) {
       return VIEWS_API + (VIEWS_API.indexOf("?") >= 0 ? "&" : "?") + params + "&t=" + Date.now();
     }
 
-    function normalizeNoticeKey(value) {
-      return String(value || "").replace(/\s+/g, " ").trim();
-    }
-
     function viewKeyOf(notice) {
-      return notice && notice.storageId ? "id:" + notice.storageId : normalizeNoticeKey(notice && notice.title);
-    }
-
-    function noticeOrderValue(value) {
-      const match = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
-      if (!match) return 0;
-      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime();
-    }
-
-    function compareNoticeOrder(a, b) {
-      if (a.no && b.no && Number.isFinite(Number(a.no)) && Number.isFinite(Number(b.no))) {
-        return Number(a.no) - Number(b.no);
-      }
-      const dateDifference = noticeOrderValue(b.date) - noticeOrderValue(a.date);
-      if (dateDifference) return dateDifference;
-      const noA = Number(a.no);
-      const noB = Number(b.no);
-      if (Number.isFinite(noA) && Number.isFinite(noB)) return noB - noA;
-      return 0;
+      return notice?.viewRecordId ? "id:" + notice.viewRecordId : "";
     }
 
     function escapeAttr(value) {
@@ -1432,45 +1410,27 @@
           : {};
 
         VIEW_COUNTS = {};
-        VIEW_IDS = {};
-        const csvCountsById = {};
+        let records = [];
         if (csvResult.status === "fulfilled" && Array.isArray(csvResult.value) && csvResult.value.length > 1) {
           const rows = csvResult.value;
-          const headers = rows[0].map(h => window.CSVUtils.normalizeHeader(h));
+          const headers = rows[0].map(h => window.CSVUtils.normalizeHeader(h).toLowerCase());
           const idCol = headers.findIndex(h => h === "id" || h.includes("번호"));
           const countCol = headers.findIndex(h => h.includes("count") || h.includes("조회"));
           const detectedTitleCol = headers.findIndex(h => h.includes("title") || h.includes("제목"));
-          // 조회수 탭은 현재 세 번째 열의 헤더가 비어 있고 실제 값만 제목으로 사용합니다.
           const titleCol = detectedTitleCol >= 0 ? detectedTitleCol : (rows[0].length >= 3 ? 2 : -1);
-          rows.slice(1).forEach(row => {
-            const id = idCol >= 0 ? String(row[idCol] || "").trim() : "";
-            const title = titleCol >= 0 ? normalizeNoticeKey(row[titleCol]) : "";
-            const storedCount = countCol >= 0 ? parseInt(row[countCol], 10) : NaN;
-            if (id && Number.isFinite(storedCount)) csvCountsById[id] = storedCount;
-            if (!title) return;
-            VIEW_IDS[title] = id;
-            const apiCount = id && countsById[id] != null ? countsById[id] : null;
-            const csvCount = countCol >= 0 ? parseInt(row[countCol], 10) : NaN;
-            VIEW_COUNTS[title] = apiCount != null ? apiCount : (Number.isFinite(csvCount) ? csvCount : 0);
-          });
-        } else {
-          VIEW_COUNTS = countsById;
+          const dateCol = headers.findIndex(h => ["날짜", "작성일", "등록일", "게시일", "date"].includes(h));
+          records = rows.slice(1).map(row => ({
+            id: String(row[idCol] || "").trim(),
+            title: row[titleCol] || "",
+            date: row[dateCol] || "",
+            count: parseInt(row[countCol], 10) || 0
+          })).filter(record => record.id);
         }
 
-        // Display numbers can change; view counts always use the immutable storage ID.
-        NOTICES.forEach(notice => {
-          const key = viewKeyOf(notice);
-          const id = notice.storageId || VIEW_IDS[normalizeNoticeKey(notice.title)];
-          if (!id) return;
-          VIEW_IDS[key] = id;
-          VIEW_COUNTS[key] = countsById[id] != null ? countsById[id] : (csvCountsById[id] || 0);
-        });
-
-        document.querySelectorAll(".notice-views[data-key]").forEach(td => {
-          if (td.hasAttribute("data-manual")) return;
-          const key = td.getAttribute("data-key");
-          if (key && VIEW_COUNTS[key] != null) td.textContent = VIEW_COUNTS[key];
-          else if (td.textContent === "-") td.textContent = "0";
+        window.NoticeData.bindViewRecords(NOTICE_SOURCE, records).forEach((record, index) => {
+          const notice = NOTICE_SOURCE[index];
+          notice.viewRecordId = record?.id || "";
+          if (record) VIEW_COUNTS[viewKeyOf(notice)] = countsById[record.id] ?? record.count;
         });
       } catch (e) {
         /* 조회수 실패해도 페이지는 정상 동작 */
@@ -1479,7 +1439,7 @@
 
     function addViewCount(notice) {
       const key = viewKeyOf(notice);
-      const id = notice.storageId || VIEW_IDS[key];
+      const id = notice.viewRecordId;
       if (!VIEWS_API || !key || !id) return;
       if (viewedThisSession.has(key)) return; // 같은 세션 중복 카운트 방지
       viewedThisSession.add(key);
@@ -1541,10 +1501,9 @@
         const norm = headers.map(window.CSVUtils.normalizeHeader);
         const colIndex = {
           storageId: norm.findIndex(h => h.toLowerCase() === "저장id" || h.toLowerCase() === "storageid"),
-          no: norm.findIndex(h => h.includes("번호") || h.includes("공지id") || h === "no" || h === "id"),
           type: norm.findIndex(h => h.includes("구분") || h.includes("카테고리")),
           title: norm.findIndex(h => h.includes("제목") || h.includes("title")),
-          date: norm.findIndex(h => h.includes("날짜") || h.includes("date")),
+          date: norm.findIndex(h => h.includes("날짜") || h.includes("작성일") || h.includes("등록일") || h.toLowerCase().includes("date")),
           content: norm.findIndex(h => h.includes("내용") || h.includes("본문")),
           url: norm.findIndex(h => h.includes("링크") || h.includes("타겟")),
           image: norm.findIndex(h => h.includes("사진") || h.includes("이미지") || h.includes("포스터")),
@@ -1553,7 +1512,7 @@
           status: norm.findIndex(h => h.includes("게시상태") || h.includes("노출") || h === "상태")
         };
 
-        NOTICES = rows.slice(1).map(r => {
+        NOTICE_SOURCE = rows.slice(1).map(r => {
           const images = colIndex.image >= 0
             ? (r[colIndex.image] || "").split(",").map(s => s.trim()).filter(Boolean)
             : [];
@@ -1561,12 +1520,10 @@
           const attachRaw = colIndex.file >= 0 ? (r[colIndex.file] || "").trim() : "";
           const files = parseAttachments(attachRaw);
 
-          const no = colIndex.no >= 0 ? String(r[colIndex.no] || "").trim() : "";
           const viewsManual = colIndex.views >= 0 ? String(r[colIndex.views] || "").trim() : "";
           const status = colIndex.status >= 0 ? String(r[colIndex.status] || "").trim() : "";
           return {
             storageId: colIndex.storageId >= 0 ? String(r[colIndex.storageId] || "").trim() : "",
-            no,
             viewsManual,
             status,
             type: r[colIndex.type] || "공지",
@@ -1577,8 +1534,9 @@
             images,
             files
           };
-        }).filter(n => n.title && !["비공개", "숨김", "임시저장"].includes(n.status))
-          .sort(compareNoticeOrder);
+        }).filter(n => window.NoticeData.titleKey(n.title));
+        NOTICES = NOTICE_SOURCE.filter(n => !["비공개", "숨김", "임시저장"].includes(n.status))
+          .sort(window.NoticeData.newestFirst);
 
         buildTypeFilter();
         applyNoticeFilter();
@@ -1615,7 +1573,7 @@
 
       tbody.innerHTML = paged.length ? paged.map((n, i) => `
         <tr class="notice-row" data-action="notice-row" data-row-index="${start + i}">
-          <td><span class="notice-number" aria-label="공지번호 ${escapeAttr(n.no)}">${escapeAttr(n.no)}</span> <span class="notice-type">${n.type}</span></td>
+          <td><span class="notice-type">${n.type}</span></td>
           <td class="notice-title">${n.title}</td>
           <td class="notice-date">${n.date}</td>
           <td class="notice-views" data-key="${escapeAttr(viewKeyOf(n))}"${n.viewsManual ? ` data-manual="${escapeAttr(n.viewsManual)}"` : ""}>${n.viewsManual || (VIEW_COUNTS[viewKeyOf(n)] != null ? VIEW_COUNTS[viewKeyOf(n)] : "-")}</td>
