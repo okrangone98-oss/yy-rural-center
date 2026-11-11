@@ -748,9 +748,13 @@
     }
 
 
-    .modal-body {
-      flex: 1;
+    .modal-scroll {
+      min-height: 0;
       overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .modal-body {
       padding-right: 8px;
       font-size: 1rem;
       line-height: 1.7;
@@ -1048,12 +1052,14 @@
       <div class="modal-meta">
         <span id="modal-type" style="font-weight:700; color:#086550;">공지</span> &nbsp;|&nbsp; <span id="modal-date">날짜</span>
       </div>
-      <div class="modal-body" id="modal-content"></div>
-      <div id="modal-photos" class="notice-attachments"></div>
-      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
-        <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">자세히 보기 &rarr;</a>
+      <div class="modal-scroll" id="modal-scroll">
+        <div class="modal-body" id="modal-content"></div>
+        <div id="modal-photos" class="notice-attachments"></div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
+          <a id="modal-link" class="modal-link" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">자세히 보기 &rarr;</a>
+        </div>
+        <div id="modal-files" class="notice-attachments"></div>
       </div>
-      <div id="modal-files" class="notice-attachments"></div>
     </div>
   </div>
 
@@ -1419,6 +1425,7 @@
 
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
+      document.getElementById("modal-scroll").scrollTop = 0;
     }
 
 
