@@ -12,6 +12,14 @@ const context = { window: {}, URL, document: { createElement: element } };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../assets/js/notice-attachments.js'), 'utf8'), context);
 const { parse, previewFor, render } = context.window.NoticeAttachments;
 
+test('notice text precedes photos and files in both dialogs', () => {
+  for (const [file, prefix] of [['index.html', 'notice-preview-modal'], ['notice.html', 'modal']]) {
+    const html = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    const offsets = ['content', 'photos', 'files'].map(section => html.indexOf(`id="${prefix}-${section}"`));
+    assert.ok(offsets[0] >= 0 && offsets[0] < offsets[1] && offsets[1] < offsets[2], file);
+  }
+});
+
 test('named and legacy attachment links retain their labels', () => {
   const list = parse('워크숍 포스터::https://example.test/poster.png\nhttps://drive.google.com/file/d/public_1/view');
   assert.equal(list[0].name, '워크숍 포스터');
