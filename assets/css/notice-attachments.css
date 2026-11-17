@@ -1,9 +1,167 @@
+/* 공지사항 첨부 미리보기 — 모바일 스크롤 통과 + 크게 보기 + 세로 슬라이드 막대기 */
 .notice-attachments { display: grid; gap: 12px; margin-block: 16px; }
 .notice-attachments:empty { display: none; }
-.notice-attachment { min-width: 0; margin: 0; border: 1px solid #cde3d5; border-radius: 10px; overflow: hidden; background: #f5f9f6; }
+.notice-attachment { min-width: 0; margin: 0; border: 1px solid #cde3d5; border-radius: 10px; overflow: hidden; background: #f5f9f6; position: relative; }
 .notice-attachment figcaption { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; color: #1a3326; font-size: .9rem; }
-.notice-attachment figcaption span { min-width: 0; overflow-wrap: anywhere; }
+.notice-attachment figcaption span { min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
 .notice-attachment figcaption a { display: inline-flex; align-items: center; min-height: 40px; color: #086550; font-weight: 700; text-decoration: underline; }
-.notice-attachment img { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: contain; background: #fff; }
+.notice-attachment img { display: block; width: 100%; height: auto; max-height: 72vh; object-fit: contain; background: #fff; -webkit-user-drag: none; touch-action: pan-y; }
 .notice-attachment iframe { display: block; width: 100%; height: min(66vh, 520px); min-height: 260px; border: 0; background: #fff; }
 .notice-attachment p { margin: 0; padding: 12px 14px; font-size: .85rem; }
+
+/* 크게 보기 버튼 */
+.notice-attachment-big-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #086550;
+  border-radius: 999px;
+  background: #fff;
+  color: #086550;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.notice-attachment-big-view:hover,
+.notice-attachment-big-view:focus-visible { background: #086550; color: #fff; outline: none; }
+
+/* 드라이브 미리보기 위 보호 레이어: 위아래 스와이프는 모달 스크롤로 통과, 탭하면 크게 보기 */
+.notice-attachment-frame { position: relative; }
+.notice-attachment-frame iframe { pointer-events: none; touch-action: pan-y; }
+.notice-attachment-shield {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: zoom-in;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+.notice-attachment-shield span {
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(8, 101, 80, .92);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .24);
+}
+
+/* ── 모달 오른쪽 세로 슬라이드 막대기 ───────────────────────── */
+[data-notice-scroll] { scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior: contain; }
+[data-notice-scroll]::-webkit-scrollbar { width: 0; height: 0; }
+
+.notice-scrollbar {
+  position: absolute;
+  right: 2px;
+  top: 0;
+  width: 16px;
+  z-index: 6;
+  touch-action: none;
+  transition: opacity .15s ease;
+}
+.notice-scrollbar[aria-hidden="true"] { display: none; }
+.notice-scrollbar-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(8, 101, 80, .07);
+}
+.notice-scrollbar-thumb {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 0;
+  min-height: 40px;
+  border-radius: 999px;
+  background: #4a735f;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .28);
+  cursor: grab;
+}
+.notice-scrollbar.is-dragging .notice-scrollbar-thumb { background: #086550; cursor: grabbing; }
+
+@media (pointer: coarse) {
+  .notice-scrollbar { width: 20px; right: 0; }
+  .notice-scrollbar-thumb { left: 4px; right: 4px; }
+}
+
+/* ── 크게 보기 라이트박스 ──────────────────────────────────── */
+.notice-lightbox { display: none; position: fixed; inset: 0; z-index: 3000; }
+.notice-lightbox.is-open { display: block; }
+.notice-lightbox-backdrop { position: absolute; inset: 0; background: #08120e; }
+.notice-lightbox-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: #fff;
+}
+.notice-lightbox-bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px 6px; }
+.notice-lightbox-title { flex: 1 1 auto; min-width: 0; font-size: .95rem; font-weight: 700; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notice-lightbox-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.notice-lightbox-close:hover { background: rgba(255, 255, 255, .28); }
+.notice-lightbox-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 12px 10px; }
+.notice-lightbox-tools button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.notice-lightbox-tools button[aria-pressed="true"] { background: #fff; border-color: #fff; color: #0b3227; }
+.notice-lightbox-hint { margin-left: auto; font-size: .72rem; color: rgba(255, 255, 255, .68); }
+.notice-lightbox-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  cursor: grab;
+}
+.notice-lightbox-viewport.is-dragging { cursor: grabbing; }
+.notice-lightbox-stage { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.notice-lightbox-stage img { display: block; width: 100%; height: auto; max-height: 100%; object-fit: contain; -webkit-user-drag: none; user-select: none; }
+.notice-lightbox-stage iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.notice-lightbox-error { margin: 24px; font-size: .9rem; line-height: 1.6; text-align: center; color: #fff; }
+body.notice-lightbox-open { overflow: hidden; }
+
+@media (max-width: 640px) {
+  .notice-attachment { border-radius: 12px; }
+  .notice-attachment figcaption { padding: 10px 12px; gap: 6px; }
+  .notice-attachment-big-view { min-height: 44px; padding: 0 12px; }
+  .notice-lightbox-title { font-size: .9rem; }
+  .notice-lightbox-hint { display: none; }
+}
