@@ -118,11 +118,13 @@ window.NoticeAttachments = (function () {
       const preview = previewFor(url.href, photo);
       if (preview?.kind === "image") {
         caption.append(bigViewButton(file.name, () => openLightbox({ title: file.name, kind: "image", src: preview.url })));
-        card.append(imageElement(file, preview.url, () => {
+        let photo;
+        photo = imageElement(file, preview.url, () => {
           const message = document.createElement("p");
           message.textContent = "이미지를 불러오지 못했습니다. 원본 열기를 이용해 주세요.";
-          image.replaceWith(message);
-        }));
+          photo.replaceWith(message);
+        });
+        card.append(photo);
       } else if (preview?.kind === "drive") {
         card.className = "notice-attachment notice-attachment-drive";
         // 썸네일을 못 불러오면(PDF 등) 미리보기 iframe으로 바꾸고, 크게 보기도 그에 맞춘다.

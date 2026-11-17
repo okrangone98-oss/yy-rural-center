@@ -101,6 +101,16 @@ test('drive posters fall back to the preview frame when the thumbnail cannot loa
   assert.equal(frame.children[1].getAttribute('aria-label'), '안내문 크게 보기');
 });
 
+test('broken poster images are replaced with a readable message', () => {
+  const container = element('div');
+  render(container, parse('포스터::https://example.test/missing.png'));
+  const card = container.children[0];
+  const image = card.children[1];
+  image.dispatch('error');
+  assert.equal(card.children[1].tag, 'p');
+  assert.match(card.children[1].textContent, /이미지를 불러오지 못했습니다/);
+});
+
 test('every preview offers a big-view action that opens the lightbox', () => {
   const container = element('div');
   render(container, parse('포스터::https://drive.google.com/file/d/poster_1/view'));
