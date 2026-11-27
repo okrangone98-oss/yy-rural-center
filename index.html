@@ -2226,6 +2226,7 @@
 
       .mobile-menu-btn {
         display: flex !important;
+        order: 2;
       }
 
       .nav {
@@ -2235,7 +2236,9 @@
         padding-bottom: 14px;
       }
 
+      /* 메뉴를 열어도 햄버거 버튼이 제자리(오른쪽 위)에 남도록 순서 고정 */
       .nav-links {
+        order: 3;
         display: none;
         flex-wrap: wrap;
         width: 100%;
@@ -3447,6 +3450,7 @@
   <script src="assets/js/pd.js" defer></script>
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/board_contact.js" defer></script>
+  <script src="assets/js/nav-fit.js" defer></script>
   <script src="assets/js/data-actions.js?v=20260728a" defer></script>
 
   <script>

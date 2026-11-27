@@ -54,7 +54,8 @@ html:has(.home-announcement[open]) { overflow: hidden; }
 .announcement-reopen:hover { background: #e8f3eb; }
 .announcement-reopen:focus-visible { outline: 3px solid #de9b37; outline-offset: 3px; }
 @media (max-width: 640px) {
-  #archive-menu { left: 50%; transform: translateX(-50%); }
+  /* 모바일에서는 트리거 기준(왼쪽 정렬)으로 열고, 화면 밖으로 나가지 않도록 nav-fit.js가 보정합니다. */
+  #archive-menu { left: 0; transform: none; }
   .home-announcement { border-radius: 20px; }
   .announcement-cover { padding: 28px 22px 24px; }
   .announcement-body { padding: 22px; font-size: 14px; line-height: 1.8; }
