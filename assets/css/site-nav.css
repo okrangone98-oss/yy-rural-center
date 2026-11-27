@@ -1,0 +1,356 @@
+/* ============================================================
+   상단 메뉴 공통 스타일
+   - 홈(index) · 공지사항(notice) · Q&A(qna) · 강사 상세(teacher_detail)에서 동일하게 동작
+   - 모바일: index.html과 같은 알약(pill) 버튼 구조
+   - 열림/닫힘 상태는 항상 is-open 클래스 하나로만 결정
+     (터치 기기에서 손가락 탭 뒤 :hover 가 고정되어 메뉴가 닫히지 않던 문제 방지)
+   ============================================================ */
+
+/* 드롭다운 트리거 기본 모양 통일 (버튼 기본 테두리·배경 제거) */
+.nav-links .dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 데스크톱 공통 버튼(프로그램 신청 · 간편접수 · 공동체 관리시스템) ---------- */
+.nav-links .nav-enroll-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: 1px solid #086550;
+  border-radius: 12px;
+  background: #086550;
+  color: #fff !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-links .nav-enroll-link:hover {
+  background: #086550 !important;
+  border-color: #086550;
+  color: #fff !important;
+}
+
+.nav-links .nav-community-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px !important;
+  border: 1px solid #ffdecb;
+  border-radius: 12px;
+  background: #fff5f0;
+  color: #ed5807 !important;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-links .nav-community-link:hover {
+  background: #ed5807 !important;
+  border-color: #ed5807;
+  color: #fff !important;
+}
+
+.nav-links .nav-quick-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-links .nav-quick-label {
+  font-weight: 600;
+}
+
+.nav-links .nav-quick-desc {
+  display: none;
+}
+
+/* 마우스 hover 가 없는 터치 기기: hover 로는 열리지 않고 is-open 으로만 열림 */
+@media (hover: none) {
+  .nav-links .dropdown:not(.is-open) > .dropdown-content {
+    display: none !important;
+  }
+
+  .nav-links .dropdown.is-open > .dropdown-content {
+    display: block !important;
+  }
+
+  .nav-links .nested-dropdown:not(.is-open) > .nested-content {
+    display: none !important;
+  }
+
+  .nav-links .nested-dropdown.is-open > .nested-content {
+    display: block !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* 1) 열림 상태(is-open)로만 서브메뉴 표시 ------------------------------ */
+  .nav-links .dropdown:not(.is-open) > .dropdown-content {
+    display: none !important;
+  }
+
+  .nav-links .dropdown.is-open > .dropdown-content {
+    display: block !important;
+  }
+
+  .nav-links .nested-dropdown:not(.is-open) > .nested-content {
+    display: none !important;
+  }
+
+  .nav-links .nested-dropdown.is-open > .nested-content {
+    display: block !important;
+  }
+
+  /* 닫힌 버튼에 남는 hover/focus 잔상 제거 (닫힘이 눈에 보이도록) */
+  .nav-links .dropdown:not(.is-open) > .dropdown-trigger:hover,
+  .nav-links .dropdown:not(.is-open) > .dropdown-trigger:focus {
+    background: #f4f6f3 !important;
+    color: #333 !important;
+  }
+
+  .nav-links .dropdown:not(.is-open) > .dropdown-trigger:hover::after,
+  .nav-links .dropdown:not(.is-open) > .dropdown-trigger:focus::after {
+    color: #999 !important;
+  }
+
+  /* 2) 헤더 배치: 로고(왼쪽) · 햄버거(오른쪽) · 메뉴(아래 줄) ------------- */
+  .nav {
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+
+  .nav > .logo {
+    order: 1;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+    order: 2;
+    margin-left: auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    background: none;
+    border: 0;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .nav-links {
+    order: 3;
+    display: none !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 8px 10px !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .nav-links.is-mobile-open {
+    display: flex !important;
+  }
+
+  .nav-links .dropdown {
+    position: relative !important;
+    display: inline-block !important;
+    width: auto !important;
+  }
+
+  /* 3) 알약 버튼 -------------------------------------------------------- */
+  .nav-links > a:not(.nav-community-link):not(.nav-enroll-link),
+  .nav-links > .dropdown > .dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #f4f6f3;
+    color: #333;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-links > a:not(.nav-community-link):not(.nav-enroll-link):hover,
+  .nav-links > .dropdown.is-open > .dropdown-trigger {
+    background: #086550 !important;
+    color: #fff !important;
+  }
+
+  /* 프로그램 신청 (강조 버튼) */
+  .nav-links .nav-enroll-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 44px;
+    padding: 10px 14px !important;
+    border: 1px solid #086550;
+    border-radius: 999px;
+    background: #086550 !important;
+    color: #fff !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* 간편접수 (설명 포함 두 줄) */
+  .nav-links .nav-quick-link {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 44px;
+    padding: 8px 14px !important;
+    border-radius: 14px !important;
+    line-height: 1.25;
+    white-space: normal !important;
+  }
+
+  .nav-links .nav-quick-desc {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    opacity: 0.75;
+    margin-top: 2px;
+    white-space: normal;
+  }
+
+  /* 공동체 관리시스템 (아이콘 버튼) */
+  .nav-links .nav-community-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    border: 0;
+    border-radius: 50%;
+    background: #f4f6f3;
+    color: #333 !important;
+    font-size: 0 !important;
+    overflow: hidden;
+  }
+
+  .nav-links .nav-community-link svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
+  /* 4) 서브메뉴 패널 (트리거 아래로 펼침, nav-fit.js가 좌우 잘림 보정) ---- */
+  .nav-links .dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: none;
+    min-width: 200px;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+    margin-top: 6px !important;
+    padding: 6px 0 !important;
+    background: #fff !important;
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+    overflow: visible !important;
+    z-index: 120 !important;
+  }
+
+  .nav-links .dropdown-content > a,
+  .nav-links .dropdown-content .nested-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 16px !important;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #333;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-links .dropdown-content > a:hover,
+  .nav-links .dropdown-content .nested-dropdown-trigger:hover {
+    background: #f7f9f8 !important;
+    color: #086550 !important;
+    padding-left: 20px !important;
+  }
+
+  /* 2단계 서브메뉴는 아래로 펼침 */
+  .nav-links .nested-dropdown > .nested-dropdown-trigger::after {
+    content: '▸';
+    margin-left: auto;
+    padding-left: 8px;
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .nav-links .nested-dropdown.is-open > .nested-dropdown-trigger::after {
+    content: '▾';
+    color: #086550;
+  }
+
+  .nav-links .nested-content {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    min-width: auto !important;
+    margin: 4px 0 6px !important;
+    padding: 0 !important;
+    background: #fcfcfc !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .nav-links .nested-content a {
+    padding-left: 34px !important;
+  }
+}
