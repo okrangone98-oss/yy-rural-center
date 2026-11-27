@@ -2652,6 +2652,7 @@
   </style>
   <link rel="stylesheet" href="assets/css/video-navigation.css" />
   <link rel="stylesheet" href="assets/css/notice-attachments.css?v=20261118-ux" />
+  <link rel="stylesheet" href="assets/css/site-nav.css?v=20261128" />
 </head>
 
 <body>
@@ -2774,103 +2775,6 @@
     </div>
   </header>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const mobileBtn = document.getElementById('mobile-menu-btn');
-      const navLinks = document.querySelector('.nav-links');
-      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
-
-      const closeDropdown = (dropdown) => {
-        dropdown.classList.remove('is-open');
-        dropdown.querySelector(':scope > .dropdown-trigger')?.setAttribute('aria-expanded', 'false');
-        dropdown.querySelectorAll('.nested-dropdown').forEach(nested => {
-          nested.classList.remove('is-open');
-          nested.querySelector('.nested-dropdown-trigger')?.setAttribute('aria-expanded', 'false');
-        });
-      };
-
-      const setMobileMenu = (open, returnFocus = false) => {
-        navLinks.classList.toggle('is-mobile-open', open);
-        mobileBtn.setAttribute('aria-expanded', String(open));
-        mobileBtn.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
-        if (!open) {
-          dropdowns.forEach(closeDropdown);
-          if (returnFocus) mobileBtn.focus();
-        }
-      };
-
-      if (mobileBtn && navLinks) {
-        mobileBtn.addEventListener('click', () => {
-          setMobileMenu(!navLinks.classList.contains('is-mobile-open'));
-        });
-      }
-
-      dropdowns.forEach(dropdown => {
-        const trigger = dropdown.querySelector(':scope > .dropdown-trigger');
-        if (trigger) {
-          trigger.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-              e.preventDefault();
-              const willOpen = !dropdown.classList.contains('is-open');
-              dropdowns.forEach(d => { if (d !== dropdown) closeDropdown(d); });
-              dropdown.classList.toggle('is-open', willOpen);
-              trigger.setAttribute('aria-expanded', String(willOpen));
-            } else {
-              const href = trigger.getAttribute('data-href');
-              if (href) {
-                location.href = href;
-              } else {
-                const willOpen = !dropdown.classList.contains('is-open');
-                dropdown.classList.toggle('is-open', willOpen);
-                trigger.setAttribute('aria-expanded', String(willOpen));
-              }
-            }
-          });
-
-          trigger.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              dropdown.classList.add('is-open');
-              trigger.setAttribute('aria-expanded', 'true');
-              dropdown.querySelector('.dropdown-content a, .nested-dropdown-trigger')?.focus();
-            }
-          });
-        }
-
-        dropdown.addEventListener('focusin', () => trigger?.setAttribute('aria-expanded', 'true'));
-        dropdown.addEventListener('focusout', () => {
-          requestAnimationFrame(() => {
-            if (!dropdown.contains(document.activeElement)) closeDropdown(dropdown);
-          });
-        });
-      });
-
-      document.querySelectorAll('.nested-dropdown').forEach(nested => {
-        const trigger = nested.querySelector('.nested-dropdown-trigger');
-        trigger?.addEventListener('click', () => {
-          const willOpen = !nested.classList.contains('is-open');
-          nested.classList.toggle('is-open', willOpen);
-          trigger.setAttribute('aria-expanded', String(willOpen));
-        });
-      });
-
-      const links = document.querySelectorAll('.nav-links a');
-      links.forEach(link => {
-        link.addEventListener('click', () => {
-          if (window.innerWidth <= 768) {
-            setMobileMenu(false);
-          }
-        });
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape') return;
-        const wasOpen = navLinks.classList.contains('is-mobile-open');
-        dropdowns.forEach(closeDropdown);
-        if (wasOpen) setMobileMenu(false, true);
-      });
-    });
-  </script>
 
   <!-- 새 히어로 배경 이미지 (센터소개 영역) -->
   <section id="home" class="hero-top" aria-label="메인 배경 이미지">
@@ -3451,6 +3355,7 @@
   <script src="assets/js/main.js" defer></script>
   <script src="assets/js/board_contact.js" defer></script>
   <script src="assets/js/nav-fit.js" defer></script>
+  <script src="assets/js/site-nav.js?v=20261128" defer></script>
   <script src="assets/js/data-actions.js?v=20260728a" defer></script>
 
   <script>

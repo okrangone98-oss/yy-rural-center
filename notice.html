@@ -291,49 +291,7 @@
       display: block;
     }
 
-    /* 모바일 반응형 */
-    @media (max-width: 768px) {
-      .mobile-menu-btn {
-        display: block;
-      }
-
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        box-sizing: border-box;
-        max-width: 100%;
-        background: #fff;
-        flex-direction: column;
-        padding: 16px;
-        gap: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-
-      .nav-links.is-mobile-open {
-        display: flex;
-      }
-
-      .dropdown {
-        width: 100%;
-      }
-
-      .dropdown-content {
-        position: static;
-        transform: none;
-        width: 100%;
-        box-shadow: none;
-        border: none;
-        padding: 0 0 0 16px;
-        display: none;
-      }
-
-      .dropdown.is-open .dropdown-content {
-        display: block;
-      }
-    }
+    /* 모바일 상단 메뉴는 assets/css/site-nav.css 에서 공통 처리 */
 
     /* 모바일 공지사항 전용 카드 레이아웃 (≤640px) */
     @media (max-width: 640px) {
@@ -935,6 +893,7 @@
     }
   </style>
   <link rel="stylesheet" href="assets/css/notice-attachments.css?v=20261118-ux" />
+  <link rel="stylesheet" href="assets/css/site-nav.css?v=20261128" />
 </head>
 
 <body>
@@ -949,52 +908,77 @@
           </span>
         </span>
       </a>
-      <nav class="nav-links">
+      <nav class="nav-links" id="primary-navigation" aria-label="주요 메뉴">
         <div class="dropdown">
-          <span class="dropdown-trigger" data-action="nav-home-about">홈</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" data-href="index.html#home" aria-expanded="false"
+            aria-controls="home-menu">홈</button>
+          <div class="dropdown-content" id="home-menu">
             <a href="index.html#about"><span>🏢</span> 센터 소개</a>
-            <div class="nested-dropdown nested-dropdown-trigger">
-              <span style="display: flex; align-items: center; gap: 10px;"><span>💼</span> 주요사업</span>
-              <div class="nested-content">
-                <a href="index.html#programs">2026년</a>
-                <a href="index.html#programs">2025년</a>
-                <a href="index.html#programs">2024년</a>
+            <div class="nested-dropdown">
+              <button type="button" class="nested-dropdown-trigger" aria-expanded="false"
+                aria-controls="program-year-menu"><span>💼</span> 주요사업</button>
+              <div class="nested-content" id="program-year-menu">
+                <a href="index.html#programs" data-action="program-year" data-year="2026">2026년</a>
+                <a href="index.html#programs" data-action="program-year" data-year="2025">2025년</a>
+                <a href="index.html#programs" data-action="program-year" data-year="2024">2024년</a>
               </div>
             </div>
             <a href="index.html#pd-section"><span>🧑‍🏫</span> 양양 PD</a>
           </div>
         </div>
-
         <div class="dropdown">
-          <span class="dropdown-trigger" data-action="nav-home-teachers">이음터</span>
-          <div class="dropdown-content">
-            <a href="/iumteo"><span>✨</span> 양양 이음터</a>
-            <a href="index.html#teachers"><span>🔍</span> 양양 강사 정보</a>
+          <button type="button" class="dropdown-trigger" data-href="index.html#teachers" aria-expanded="false"
+            aria-controls="iumteo-menu">이음터</button>
+          <div class="dropdown-content" id="iumteo-menu">
+            <a href="https://app.yycenter.kr"><span>✨</span> 양양 이음터</a>
+            <a href="https://app.yycenter.kr/instructors"><span>🔍</span> 양양 강사 정보</a>
           </div>
         </div>
+        <a href="https://yangyang-resident-platform.vercel.app/" target="_blank" rel="noopener noreferrer"
+          class="nav-enroll-link" title="주민 프로그램 신청 페이지로 이동합니다">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+          </svg>
+          프로그램 신청
+        </a>
         <a href="notice.html">공지사항</a>
         <div class="dropdown">
-          <span class="dropdown-trigger">아카이브</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" aria-expanded="false"
+            aria-controls="archive-menu">아카이브</button>
+          <div class="dropdown-content" id="archive-menu">
             <a href="index.html#gallery"><span>🖼️</span> 활동사진</a>
             <a href="index.html#video-preview"><span>🎬</span> 활동영상</a>
             <a href="https://2026.yycenter.kr" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">📖</span> 2026년 온라인 성과공유집</a>
           </div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-trigger">안내 & 정보</span>
-          <div class="dropdown-content">
+          <button type="button" class="dropdown-trigger" aria-expanded="false"
+            aria-controls="information-menu">안내 &amp; 정보</button>
+          <div class="dropdown-content" id="information-menu">
             <a href="index.html#contact"><span>📍</span> 문의 및 오시는 길</a>
-            <a href="qna.html"><span>❓</span> Q&A</a>
+            <a href="index.html#site-links"><span>🔗</span> 유관기관 및 지역정보</a>
+            <a href="qna.html"><span>❓</span> Q&amp;A</a>
           </div>
         </div>
+        <a href="https://script.google.com/macros/s/AKfycbznD8TgSTjqE7q6-l15h6wM-BKhLbvjtQo7TKfajNMN03G0QwDdDOJf4gNngkW18yMoSA/exec"
+          target="_blank" rel="noopener noreferrer" class="nav-quick-link"
+          title="일반 강사 증빙서류 및 재료비 신청">
+          <span class="nav-quick-label">간편접수</span>
+          <small class="nav-quick-desc">일반 강사 증빙서류 및 재료비 신청</small>
+        </a>
         <a href="https://script.google.com/macros/s/AKfycbz6nzIYIQeURu91FcI85W684o32ToJbwwFfFOd3jlYLNA9PNukb2UAlnTWIfDvvs3Snow/exec"
-          target="_blank" rel="noopener noreferrer" class="nav-community-link">
-          관리시스템
+          target="_blank" rel="noopener noreferrer" class="nav-community-link" title="참여자 및 직원 전용 관리시스템">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          공동체 관리시스템
         </a>
       </nav>
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1171,30 +1155,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Mobile menu toggle
-      const mobileBtn = document.getElementById('mobile-menu-btn');
-      const navLinks = document.querySelector('.nav-links');
-      if (mobileBtn && navLinks) {
-        mobileBtn.addEventListener('click', () => {
-          navLinks.classList.toggle('is-mobile-open');
-        });
-      }
-
-      // Dropdown toggle on mobile
-      const dropdowns = document.querySelectorAll('.nav-links .dropdown');
-      dropdowns.forEach(dropdown => {
-        const trigger = dropdown.querySelector('.dropdown-trigger');
-        if (trigger) {
-          trigger.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-              e.preventDefault();
-              // data-action 페이지 이동보다 모바일 서브메뉴 열기를 우선
-              e.stopPropagation();
-              dropdown.classList.toggle('is-open');
-            }
-          });
-        }
-      });
 
       // Year for footer
       const yearEl = document.getElementById("year");
@@ -1470,6 +1430,8 @@
       }
     });
   </script>
+  <script src="assets/js/nav-fit.js" defer></script>
+  <script src="assets/js/site-nav.js?v=20261128" defer></script>
   <script src="assets/js/data-actions.js" defer></script>
 </body>
 
