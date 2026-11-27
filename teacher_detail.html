@@ -566,6 +566,8 @@
                     trigger.addEventListener('click', (e) => {
                         if (window.innerWidth <= 768) {
                             e.preventDefault();
+                            // data-action 페이지 이동보다 모바일 서브메뉴 열기를 우선
+                            e.stopPropagation();
                             dropdown.classList.toggle('is-open');
                         }
                     });
