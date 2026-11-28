@@ -30,28 +30,47 @@
 .home-announcement :focus-visible { outline: 3px solid #de9b37; outline-offset: 3px; }
 html:has(.home-announcement[open]) { overflow: hidden; }
 #archive-menu { width: 286px; max-width: calc(100vw - 28px); }
-.announcement-reopen {
-  position: fixed;
-  right: max(20px, env(safe-area-inset-right));
-  bottom: max(20px, env(safe-area-inset-bottom));
-  z-index: 40;
-  display: inline-flex;
+.home-booklet {
+  display: flex;
+  align-items: stretch;
+  min-height: 52px;
+  margin-bottom: clamp(22px, 3vw, 36px);
+  border: 1px solid #d5e0d8;
+  border-radius: 8px;
+  background: #f0f5ef;
+  color: #174536;
+  font-size: .9rem;
+}
+.home-booklet-link {
+  display: flex;
+  flex: 1;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  min-height: 48px;
-  padding: 12px 18px;
-  border: 1px solid #c6dbcf;
-  border-radius: 999px;
-  background: #fffefa;
-  color: #086550;
-  box-shadow: 0 4px 20px #173d2926;
+  padding: 10px 14px;
+  border-radius: 8px 0 0 8px;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+.announcement-kind { white-space: nowrap; }
+.home-announcement[data-auto-open="false"] .announcement-footer { justify-content: flex-end; }
+.announcement-reopen {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-inline-start: 1px solid #d5e0d8;
+  border-radius: 0 8px 8px 0;
+  background: transparent;
+  color: inherit;
   font: inherit;
-  font-size: 14px;
-  font-weight: 700;
   cursor: pointer;
 }
 .announcement-reopen[hidden] { display: none; }
+.home-booklet-link:hover,
 .announcement-reopen:hover { background: #e8f3eb; }
+.home-booklet-link:focus-visible,
 .announcement-reopen:focus-visible { outline: 3px solid #de9b37; outline-offset: 3px; }
 @media (max-width: 640px) {
   /* 모바일에서는 트리거 기준(왼쪽 정렬)으로 열고, 화면 밖으로 나가지 않도록 nav-fit.js가 보정합니다. */

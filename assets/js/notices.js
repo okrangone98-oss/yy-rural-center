@@ -7,7 +7,11 @@ window.NoticesModule = (function(){
 
     try{
       const rows = await window.CSVUtils.fetchCSV(url);
-      if(!rows.length) return;
+      if(!rows.length){
+        NOTICES = [];
+        renderPreview();
+        return;
+      }
 
       const headers  = rows[0].map(h=>window.CSVUtils.safeText(h).trim());
       const dataRows = rows.slice(1);
@@ -70,13 +74,10 @@ window.NoticesModule = (function(){
     }
 
     tbody.innerHTML = "";
-    NOTICES.forEach(n=>{
+    NOTICES.slice(0, 4).forEach((n, index)=>{
       const tr      = document.createElement("tr");
       tr.dataset.action = "notice-preview-row";
-      tr.dataset.noticeIndex = String(NOTICES.indexOf(n));
-      tr.tabIndex = 0;
-      tr.setAttribute("role", "button");
-      tr.setAttribute("aria-label", `${n.title} 상세 보기`);
+      tr.dataset.noticeIndex = String(index);
       const typeTd  = document.createElement("td");
       const titleTd = document.createElement("td");
       const dateTd  = document.createElement("td");
@@ -104,7 +105,7 @@ window.NoticesModule = (function(){
   function openPreview(index){
     const n = NOTICES[index];
     const modal = document.getElementById("notice-preview-modal");
-    if(!n || !modal) return;
+    if(!n || !modal || modal.open) return;
 
     document.getElementById("notice-preview-modal-title").textContent = n.title;
     document.getElementById("notice-preview-modal-meta").textContent = [n.type || "공지", n.date].filter(Boolean).join(" · ");
@@ -117,35 +118,32 @@ window.NoticesModule = (function(){
     if(n.date) params.set("d", n.date);
     link.href = "notice.html" + (params.toString() ? `?${params.toString()}` : "");
     modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden", "false");
+    modal.showModal();
   }
 
   function closePreview(){
     const modal = document.getElementById("notice-preview-modal");
-    if(!modal) return;
+    if(!modal?.open) return;
+    modal.close();
     modal.classList.remove("is-open");
-    modal.setAttribute("aria-hidden", "true");
     document.getElementById("notice-preview-modal-photos").replaceChildren();
     document.getElementById("notice-preview-modal-files").replaceChildren();
   }
 
-  document.addEventListener("keydown", (event) => {
-    const row = event.target.closest?.('[data-action="notice-preview-row"]');
-    if(row && (event.key === "Enter" || event.key === " ")){
-      event.preventDefault();
-      openPreview(Number(row.dataset.noticeIndex));
-    }
-    if(event.key === "Escape") closePreview();
+  document.getElementById("notice-preview-modal")?.addEventListener("cancel", event => {
+    event.preventDefault();
+    closePreview();
   });
 
   document.addEventListener("click", (event) => {
     const row = event.target.closest?.('[data-action="notice-preview-row"]');
     if(row){
       event.preventDefault();
+      row.querySelector("button").focus({ preventScroll: true });
       openPreview(Number(row.dataset.noticeIndex));
       return;
     }
-    if(event.target.closest?.('[data-action="close-home-notice-modal"]') || event.target.closest?.("#notice-preview-modal .modal-backdrop-overlay")) closePreview();
+    if(event.target.closest?.('[data-action="close-home-notice-modal"]') || event.target.id === "notice-preview-modal") closePreview();
   });
 
   return { load, openPreview, closePreview };

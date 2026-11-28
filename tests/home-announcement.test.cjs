@@ -4,12 +4,13 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-function setup(saved, blocked = false) {
+function setup(saved, blocked = false, autoOpen = true) {
   const handlers = {};
   const checkbox = { checked: false };
   const launcher = { hidden: true, addEventListener: (event, fn) => { handlers.reopen = fn; } };
   const dialog = {
     open: false,
+    dataset: { autoOpen: String(autoOpen) },
     showModal() { this.open = true; },
     close() { this.open = false; },
     querySelectorAll: () => [{ addEventListener: (event, fn) => { handlers.close = fn; } }],
@@ -23,7 +24,7 @@ function setup(saved, blocked = false) {
     removeItem() { if (blocked) throw Error('blocked'); value = null; },
   };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../assets/js/home-announcement.js'), 'utf8'), {
-    document: { getElementById: id => ({ 'home-announcement': dialog, 'announcement-reopen': launcher, 'announcement-hide-today': checkbox })[id] },
+    document: { getElementById: id => ({ 'home-announcement': dialog, 'announcement-reopen': launcher, 'announcement-hide-today': autoOpen ? checkbox : null })[id] },
     localStorage: storage, Date, Number,
   });
   return { handlers, dialog, launcher, checkbox, stored: () => value };
@@ -64,4 +65,19 @@ test('blocked browser storage does not prevent opening or closing', () => {
   f.handlers.close();
   assert.equal(f.dialog.open, false);
   assert.equal(f.launcher.hidden, false);
+});
+
+
+test('manual homepage announcement opens only on request and leaves the opener available', () => {
+  const f = setup('unchanged', false, false);
+  assert.equal(f.dialog.open, false);
+  assert.equal(f.launcher.hidden, false);
+
+  f.handlers.reopen();
+  assert.equal(f.dialog.open, true);
+  assert.equal(f.launcher.hidden, false);
+
+  f.handlers.close();
+  assert.equal(f.dialog.open, false);
+  assert.equal(f.stored(), 'unchanged');
 });

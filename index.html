@@ -34,14 +34,10 @@
   <meta name="apple-mobile-web-app-title" content="양양 농활센터" />
   <link rel="manifest" href="manifest.json" />
 
-  <!-- 모바일 LCP 개선: hero 이미지·배경 preload (가장 먼저 그려져야 할 자원) -->
-  <link rel="preload" as="image" href="images/hero-home.svg" fetchpriority="high" />
-  <link rel="preload" as="image" href="images/hero-home.jpg?v=20260205f" />
-
   <!-- 웹폰트 — preconnect + display=swap 적용으로 폰트 로딩 중 텍스트 표시 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;800&display=swap" rel="stylesheet" />
 
   <style>
     * {
@@ -67,8 +63,7 @@
       --tracking-wide: 0.025em;
       --radius: 12px;
       --shadow-soft: 0 12px 28px rgba(0, 0, 0, .08);
-      --hero-video-x: 75.6%;
-      --hero-video-y: 28.7%;
+      --ease-interaction: cubic-bezier(0.23, 1, 0.32, 1);
     }
 
     body {
@@ -128,74 +123,7 @@
       color: var(--text);
     }
 
-    .logo-switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      letter-spacing: var(--tracking-tight);
-      line-height: 1.1;
-    }
-
-    .logo-switch-viewport {
-      position: relative;
-      display: block;
-      height: 1.15em;
-      min-width: 1ch;
-      overflow: hidden;
-    }
-
-    .logo-switch-slot {
-      position: absolute;
-      top: 0;
-      left: 0;
-      white-space: nowrap;
-      opacity: 0;
-      transform: translateY(-115%);
-      filter: blur(4px);
-      transition:
-        transform .58s cubic-bezier(.2, .8, .2, 1),
-        opacity .42s ease,
-        filter .42s ease;
-      will-change: transform, opacity, filter;
-    }
-
-    .logo-switch-slot.is-active {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-
-    .logo-switch-slot.is-entering {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-
-    .logo-switch-slot.is-leaving {
-      opacity: 0;
-      transform: translateY(115%);
-      filter: blur(4px);
-    }
-
-    .logo-switch-slot[data-tone="rural"] {
-      color: #086550;
-    }
-
-    .logo-switch-slot[data-tone="agri"] {
-      color: #ed5807;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .logo-switch-slot {
-        transition: none;
-        transform: translateY(0);
-        filter: none;
-      }
-
-      .logo-switch-slot:not(.is-active) {
-        opacity: 0;
-      }
-    }
+    .logo-name { color: #086550; }
 
     .mobile-menu-btn {
       display: none;
@@ -307,125 +235,185 @@
     }
 
     /* 히어로 */
-    .hero-top {
-      background: #fff;
+    /* 홈 첫 화면 */
+    #home {
       padding: 0;
-    }
-
-    .hero-top .container {
-      max-width: none;
-      padding: 0;
-    }
-
-    .hero-top-frame {
       background: #fff;
-      border-radius: 0;
-      border: 1px solid #e5e5e5;
-      box-shadow: var(--shadow-soft);
-      overflow: hidden;
-      width: 100%;
-      max-width: none;
-      margin: 0;
-      aspect-ratio: 1080 / 473;
-      min-height: 240px;
+      border-bottom: 1px solid #e6e9e6;
     }
 
-    .hero-top-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
+    .home-film-panel {
+      background: #14211d;
+      color: #f6f8f5;
     }
 
-    .hero-top-image {
+    .home-film {
+      display: block;
       width: 100%;
       height: auto;
-      object-fit: contain;
+      max-height: min(61svh, 660px);
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .home-film-progress {
+      height: 2px;
+      background: #ffffff24;
+    }
+
+    .home-film-progress span {
       display: block;
-      pointer-events: none;
-    }
-
-    .hero-hotspot {
-      position: absolute;
-      display: block;
-      z-index: 2;
-      border-radius: 999px;
-      outline: 2px solid transparent;
-      transition: box-shadow .16s ease, outline-color .16s ease, background .16s ease;
-    }
-
-    .hero-hotspot:focus-visible,
-    .hero-hotspot:hover {
-      outline-color: #ffbf47;
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, .92), 0 6px 16px rgba(0, 0, 0, .2);
-      background: rgba(255, 255, 255, .08);
-    }
-
-    .hero-mobile-content {
-      display: none;
-    }
-
-    .hero-hotspot-programs {
-      left: 21.9%;
-      top: 71.8%;
-      width: 11.0%;
-      height: 5.35%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid #9ade31;
-      background: rgba(19, 94, 71, .96);
-      color: #fff;
-      font-size: clamp(9px, 1.05vw, 17px);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .hero-hotspot-programs:hover,
-    .hero-hotspot-programs:focus-visible {
-      background: rgba(19, 94, 71, 1);
-    }
-
-    .hero-hotspot-contact {
-      left: 21.9%;
-      top: 78.9%;
-      width: 11.0%;
-      height: 5.35%;
-    }
-
-    .hero-video-thumb {
-      position: absolute;
-      left: var(--hero-video-x);
-      top: var(--hero-video-y);
-      width: 8.5%;
-      height: 10.5%;
-      transform: translate(-50%, -50%);
-      border-radius: 999px;
-      overflow: hidden;
-      background: #1f2a26;
-      border: none;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, .25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .hero-video-thumb-media {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      display: block;
+      background: #bde4c5;
+      transform: scaleX(0);
+      transform-origin: left;
     }
 
-    .hero-video-thumb::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .25));
-      pointer-events: none;
+    .home-film-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 20px;
+      min-height: 56px;
+      padding-block: 6px;
     }
 
-    .hero-top+section {
-      padding-top: 48px;
+    #home-film-fallback {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .home-film-caption {
+      font-size: .88rem;
+      font-weight: 700;
+      line-height: 1.4;
+      word-break: keep-all;
+    }
+
+    .home-film-controls {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 4px;
+    }
+
+    .home-film-controls[hidden] { display: none; }
+
+    .home-film-controls button {
+      min-width: 44px;
+      min-height: 44px;
+      padding-inline: 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: .83rem;
+      cursor: pointer;
+      transition: background-color 140ms ease, scale 140ms var(--ease-interaction);
+    }
+
+    .home-film-controls button:active { scale: .96; }
+
+    @media (hover: hover) and (pointer: fine) {
+      .home-film-controls button:hover { background: #ffffff17; }
+    }
+
+    .home-intro {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px 24px;
+      padding-block: clamp(24px, 4vw, 46px);
+    }
+
+    .home-intro h1 {
+      color: #14211d;
+      font-size: clamp(1.5rem, 3.2vw, 2.45rem);
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -.045em;
+      word-break: keep-all;
+      text-wrap: balance;
+    }
+
+    .home-intro-description {
+      margin-top: 8px;
+      color: #4e6056;
+      font-size: .95rem;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    .home-intro-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .home-intro-action {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 9px 16px;
+      border: 1px solid #718578;
+      border-radius: 8px;
+      color: #174536;
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .home-intro-action--primary {
+      border-color: #194d3b;
+      background: #194d3b;
+      color: #fff;
+      box-shadow: 0 1px 2px #122e2426, 0 4px 10px #122e241a;
+    }
+
+    .home-intro-action:active,
+    #notice-preview .notice-more-btn:active {
+      scale: .96;
+    }
+
+    .home-intro-action,
+    #notice-preview .notice-more-btn {
+      transition: background-color 140ms ease, scale 140ms var(--ease-interaction);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .home-intro-action:hover { background-color: #e8ede3; }
+      .home-intro-action--primary:hover { background-color: #113a2c; }
+    }
+
+    @media (max-width: 740px) {
+      .home-film { max-height: none; }
+      .home-intro { display: grid; }
+      .home-intro-actions .home-intro-action { padding-inline: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .home-intro-action,
+      .home-film-controls button,
+      #notice-preview .notice-more-btn { transition: none; }
+
+      .home-intro-action:active,
+      .home-film-controls button:active,
+      #notice-preview .notice-more-btn:active { scale: none; }
+    }
+
+    #home,
+    #notice-preview,
+    #contact {
+      scroll-margin-top: 78px;
+    }
+
+    .contact-link {
+      color: #086550;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      overflow-wrap: anywhere;
     }
 
     .hero {
@@ -558,65 +546,12 @@
     }
 
     .about-statement h3 {
+      word-break: keep-all;
+      text-wrap: balance;
       max-width: 17em;
       font-size: clamp(1.35rem, 2.4vw, 2rem);
       line-height: 1.5;
       letter-spacing: var(--tracking-tight);
-    }
-
-    .text-vaporize-word {
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    .text-vaporize-letter {
-      position: relative;
-      display: inline-block;
-      vertical-align: bottom;
-    }
-
-    .text-vaporize-glyph {
-      display: block;
-      will-change: transform;
-    }
-
-    .text-vaporize-particle {
-      position: absolute;
-      top: 46%;
-      left: 50%;
-      width: 3px;
-      height: 3px;
-      border-radius: 50%;
-      background: currentColor;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .text-vaporize.is-vaporizing .text-vaporize-glyph {
-      animation: vaporize-glyph .88s ease-in-out var(--vapor-delay) both;
-    }
-
-    .text-vaporize.is-vaporizing .text-vaporize-particle {
-      animation: vaporize-particle .88s ease-out var(--vapor-delay) both;
-    }
-
-    @keyframes vaporize-glyph {
-      0%, 22% { opacity: 1; filter: blur(0); transform: translate(0, 0) scale(1); }
-      48%, 58% { opacity: .08; filter: blur(5px); transform: translate(var(--vapor-x), var(--vapor-y)) scale(.9); }
-      100% { opacity: 1; filter: blur(0); transform: translate(0, 0) scale(1); }
-    }
-
-    @keyframes vaporize-particle {
-      0%, 20% { opacity: 0; transform: translate(0, 0) scale(.5); }
-      42% { opacity: .8; }
-      70%, 100% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.15); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .text-vaporize.is-vaporizing .text-vaporize-glyph,
-      .text-vaporize.is-vaporizing .text-vaporize-particle {
-        animation: none;
-      }
     }
 
     .about-goals-wrap {
@@ -1094,12 +1029,18 @@
       z-index: 1;
     }
 
-    #notice-preview-modal .modal-backdrop-overlay {
-      position: absolute;
-      inset: 0;
+    #notice-preview-modal {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      max-height: none;
+      margin: 0;
       border: 0;
-      background: transparent;
-      cursor: default;
+    }
+
+    #notice-preview-modal .modal-close {
+      flex: 0 0 44px;
+      min-height: 44px;
     }
 
     .notice-preview-modal-meta {
@@ -1461,6 +1402,138 @@
     }
 
     /* 활동사진 라이트박스 */
+    .photo-archive-open {
+      margin-top: 12px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .photo-archive {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(900px, calc(100% - 24px));
+      max-height: calc(100dvh - 24px);
+      padding: clamp(12px, 3vw, 24px);
+      border: 1px solid #dedfd4;
+      border-radius: 18px;
+      background: #f5f3ea;
+      color: #15382d;
+      box-shadow: 0 2px 8px #142b221c, 0 24px 64px #142b2240;
+    }
+
+    .photo-archive::backdrop { background: #132820bd; }
+
+    .photo-archive-toolbar,
+    .photo-archive-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .photo-archive-toolbar { margin-bottom: 12px; }
+
+    .photo-archive-toolbar h2 {
+      font-size: 1.05rem;
+      line-height: 1.35;
+    }
+
+    .photo-archive-controls {
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .photo-archive button {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 8px 12px;
+      border: 1px solid #718578;
+      border-radius: 8px;
+      background: #fff;
+      color: #174536;
+      font: inherit;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: scale 140ms var(--ease-interaction);
+    }
+
+    .photo-archive button:active:not(:disabled) { scale: .96; }
+
+    .photo-archive button:disabled {
+      border-color: #d8ddd5;
+      background: transparent;
+      color: #526057;
+      cursor: default;
+    }
+
+    .photo-archive-position {
+      min-width: 52px;
+      text-align: center;
+      font-size: .87rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .photo-archive-spread {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      overflow: hidden;
+      border-radius: 10px;
+      background: #fffdf6;
+      outline: 1px solid #0000001a;
+      outline-offset: -1px;
+      box-shadow: 0 1px 3px #142b221a, 0 8px 24px #142b221a;
+      transform-origin: 50% 50%;
+    }
+
+    .photo-archive-spread[hidden] { display: none; }
+
+    .photo-archive-spread img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      max-height: 58dvh;
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+
+    .photo-archive-story {
+      display: grid;
+      align-content: center;
+      gap: 10px;
+      padding: clamp(16px, 4vw, 48px);
+      border-inline-start: 1px solid #dedfd4;
+    }
+
+    .photo-archive-story h3 {
+      font-family: "Noto Serif KR", "Batang", serif;
+      font-size: clamp(1.45rem, 4vw, 2.7rem);
+      line-height: 1.25;
+      text-wrap: balance;
+      word-break: keep-all;
+    }
+
+    .photo-archive-story p {
+      color: #47594e;
+      font-size: .95rem;
+      word-break: keep-all;
+    }
+
+    @media (max-width: 600px) {
+      .photo-archive-spread { grid-template-columns: minmax(0, 1fr); }
+      .photo-archive-spread img { aspect-ratio: 4 / 3; max-height: 34dvh; }
+      .photo-archive-story {
+        border-inline-start: 0;
+        border-block-start: 1px solid #dedfd4;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .photo-archive button { transition: none; }
+      .photo-archive button:active:not(:disabled) { scale: none; }
+    }
+
     .gallery-lightbox {
       position: fixed;
       inset: 0;
@@ -1732,6 +1805,56 @@
 
     .notice-more-btn:hover {
       background: #4a735f;
+    }
+
+    #notice-preview .notice-wrapper {
+      border-color: #dce5dd;
+      box-shadow: 0 1px 2px #142b2210, 0 8px 22px #142b220b;
+    }
+
+    #notice-preview .notice-preview-body {
+      max-height: none;
+      overflow: visible;
+      padding-right: 0;
+    }
+
+    #notice-preview .notice-table th:first-child { width: 80px; }
+    #notice-preview .notice-table th:last-child { width: 104px; }
+
+    #notice-preview .notice-table td:nth-child(2) {
+      overflow: visible;
+      white-space: normal;
+      padding-block: 0;
+    }
+
+    #notice-preview .notice-preview-title-button {
+      min-height: 44px;
+      padding-block: 9px;
+      word-break: keep-all;
+      text-wrap: pretty;
+    }
+
+    #notice-preview .notice-preview-title-button:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    #notice-preview .notice-date {
+      color: #4e5e54;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #notice-preview .notice-more-btn {
+      min-height: 44px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      #notice-preview .notice-wrapper { padding: 12px; }
+      #notice-preview .notice-table th,
+      #notice-preview .notice-table td { padding-inline: 6px; }
+      #notice-preview .notice-table th:first-child { width: 56px; }
+      #notice-preview .notice-table th:last-child { width: 86px; }
     }
 
     /* 활동영상 프리뷰 */
@@ -2362,108 +2485,7 @@
         display: block;
       }
 
-      .hero-top {
-        padding: 0;
-      }
-
-      .hero-top-frame {
-        border-radius: 0;
-        border: none;
-        box-shadow: none;
-        overflow: hidden;
-        aspect-ratio: auto;
-        height: auto;
-        min-height: 0;
-      }
-
-      .hero-top-inner {
-        width: 100%;
-        height: auto;
-        overflow: hidden;
-      }
-
-      .hero-top-image {
-        width: 180%;
-        max-width: none;
-        height: auto;
-        margin-left: -15%;
-      }
-
-      .hero-hotspot,
-      .hero-video-thumb {
-        display: none;
-      }
-
-      .hero-top-frame {
-        min-height: 0;
-        aspect-ratio: auto;
-        border: 0;
-        box-shadow: none;
-      }
-
-      .hero-top-image {
-        display: none;
-      }
-
-      .hero-mobile-content {
-        display: block;
-        padding: 48px 20px;
-        color: #fff;
-        background:
-          linear-gradient(135deg, rgba(8, 101, 80, .97), rgba(73, 139, 86, .94)),
-          #086550;
-      }
-
-      .hero-mobile-eyebrow {
-        display: block;
-        margin-bottom: 12px;
-        color: #dff19c;
-        font-size: .82rem;
-        font-weight: 700;
-        letter-spacing: .12em;
-      }
-
-      .hero-mobile-content h1 {
-        margin-bottom: 14px;
-        font-size: clamp(1.85rem, 8vw, 2.35rem);
-        line-height: 1.35;
-        letter-spacing: var(--tracking-tight);
-        word-break: keep-all;
-      }
-
-      .hero-mobile-content p {
-        max-width: 30em;
-        color: rgba(255, 255, 255, .88);
-        font-size: 1rem;
-        line-height: 1.75;
-      }
-
-      .hero-mobile-actions {
-        display: grid;
-        gap: 10px;
-        margin-top: 26px;
-      }
-
-      .hero-mobile-actions a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 48px;
-        padding: 12px 18px;
-        border: 1px solid #dff19c;
-        border-radius: var(--radius);
-        background: #dff19c;
-        color: #17493b;
-        font-weight: 700;
-      }
-
-      .hero-mobile-actions a:last-child {
-        border-color: rgba(255, 255, 255, .7);
-        background: transparent;
-        color: #fff;
-      }
-
-      .hero-top+section {
+      #home + section {
         padding-top: 24px;
       }
 
@@ -2636,18 +2658,6 @@
       .hero-subtitle {
         font-size: 1.12rem;
       }
-
-      .hero-top {
-        padding: 0;
-      }
-
-      .hero-top .container {
-        max-width: none;
-      }
-
-      .hero-top-frame {
-        max-width: none;
-      }
     }
   </style>
   <link rel="stylesheet" href="assets/css/video-navigation.css" />
@@ -2657,8 +2667,8 @@
 
 <body>
   <!-- 첫 화면: 2026 온라인 성과공유집 안내 -->
-  <link rel="stylesheet" href="assets/css/home-announcement.css?v=20261022-2" />
-  <dialog id="home-announcement" class="home-announcement" aria-labelledby="announcement-title">
+  <link rel="stylesheet" href="assets/css/home-announcement.css?v=20261128" />
+  <dialog id="home-announcement" class="home-announcement" data-auto-open="false" aria-labelledby="announcement-title">
     <div class="announcement-cover">
       <p class="announcement-kicker">2026 · 양양군 농촌활성화지원센터</p>
       <button type="button" class="announcement-close" data-close-announcement aria-label="성과공유집 안내 닫기" autofocus>×</button>
@@ -2672,24 +2682,17 @@
       <a class="announcement-link" href="https://2026.yycenter.kr" target="_blank" rel="noopener noreferrer">온라인 성과공유집 보기 <span aria-hidden="true">↗</span></a>
     </div>
     <div class="announcement-footer">
-      <label><input type="checkbox" id="announcement-hide-today" />오늘 하루 보지 않기</label>
       <button type="button" data-close-announcement>닫기</button>
     </div>
   </dialog>
-  <button type="button" class="announcement-reopen" id="announcement-reopen" aria-haspopup="dialog" aria-controls="home-announcement" hidden>성과공유집 안내 <span aria-hidden="true">↗</span></button>
-  <script src="assets/js/home-announcement.js?v=20261022-2" defer></script>
+  <script src="assets/js/home-announcement.js?v=20261128" defer></script>
 
   <header>
     <div class="container nav">
-      <div class="logo" id="site-logo" aria-label="양양군 농촌활성화지원센터">
-        <span class="logo-prefix" aria-hidden="true">양양군</span>
-        <span class="logo-switch" aria-hidden="true">
-          <span class="logo-switch-viewport" id="logo-switch-viewport">
-            <span class="logo-switch-slot is-active" id="logo-switch-slot-a" data-tone="rural">농촌활성화지원센터</span>
-            <span class="logo-switch-slot" id="logo-switch-slot-b" data-tone="agri">농업기술센터</span>
-          </span>
-        </span>
-      </div>
+      <a class="logo" href="#home" aria-label="양양군 농촌활성화지원센터 홈">
+        <span class="logo-prefix">양양군</span>
+        <span class="logo-name">농촌활성화지원센터</span>
+      </a>
       <nav class="nav-links" id="primary-navigation" aria-label="주요 메뉴">
         <div class="dropdown">
           <button type="button" class="dropdown-trigger" data-href="#home" aria-expanded="false"
@@ -2776,26 +2779,77 @@
   </header>
 
 
-  <!-- 새 히어로 배경 이미지 (센터소개 영역) -->
-  <section id="home" class="hero-top" aria-label="메인 배경 이미지">
+  <section id="home" aria-labelledby="home-title">
+    <div class="home-film-panel">
+      <video class="home-film" id="home-film" controls muted playsinline preload="none"
+        poster="images/center-home-highlight.webp" width="1280" height="720"
+        aria-label="모여모양 웰컴센터 활동영상, 음성 없음">
+        <source src="assets/center-home-highlight.mp4" type="video/mp4" />
+      </video>
+      <div class="home-film-progress" aria-hidden="true"><span id="home-film-progress"></span></div>
+      <div class="container home-film-bar">
+        <p id="home-film-caption" class="home-film-caption">모여모양 웰컴센터</p>
+        <a id="home-film-fallback" href="videos.html" hidden>활동영상 목록 보기 →</a>
+        <div id="home-film-controls" class="home-film-controls" hidden>
+          <button type="button" id="home-film-toggle" aria-controls="home-film">재생</button>
+          <button type="button" id="home-film-next" aria-controls="home-film">다음 영상 <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="container home-intro">
+      <div>
+        <h1 id="home-title">양양군 농촌활성화지원센터</h1>
+        <p class="home-intro-description">주민이 기획하고 함께 만드는 양양의 마을 활동을 지원합니다.</p>
+      </div>
+      <nav class="home-intro-actions" aria-label="주민 바로가기">
+        <a class="home-intro-action home-intro-action--primary"
+          href="https://yangyang-resident-platform.vercel.app/" target="_blank" rel="noopener noreferrer">
+          프로그램 신청 <span aria-hidden="true">↗</span>
+        </a>
+        <a class="home-intro-action" href="#notice-preview">공지사항</a>
+        <a class="home-intro-action" href="#contact">문의 및 상담</a>
+      </nav>
+    </div>
     <div class="container">
-      <div class="hero-top-frame">
-        <div class="hero-top-inner">
-          <img class="hero-top-image" src="images/hero-home.svg" alt="양양군 농촌활성화지원센터 메인 배경 이미지" width="1600" height="900" fetchpriority="high" decoding="async" />
-          <a class="hero-hotspot hero-hotspot-programs" href="#programs" data-action="program-year" data-year="2026" aria-label="2026 주요사업 보기">2026 주요사업 보기</a>
-          <a class="hero-hotspot hero-hotspot-contact" href="#contact" aria-label="문의 및 상담"></a>
-          <a class="hero-video-thumb" href="#video-preview" aria-label="활동영상 섹션으로 이동">
-            <video class="hero-video-thumb-media" muted playsinline preload="metadata"></video>
-          </a>
-          <div class="hero-mobile-content">
-            <span class="hero-mobile-eyebrow">YANGYANG RURAL COMMUNITY</span>
-            <h1>농촌에 활력을 더하고<br>양양의 더 나은 내일을 디자인합니다.</h1>
-            <p>주민이 주도하고 공동체가 성장하는 지속가능한 양양을 위해 교육·컨설팅·네트워크를 지원합니다.</p>
-            <div class="hero-mobile-actions">
-              <a href="#programs" data-action="program-year" data-year="2026">2026 주요사업 보기</a>
-              <a href="#contact">문의 및 상담</a>
-            </div>
-          </div>
+      <div class="home-booklet">
+        <a class="home-booklet-link" href="https://2026.yycenter.kr/" target="_blank" rel="noopener noreferrer">
+          <span><strong>2026 양양에 오면</strong> <span class="announcement-kind">온라인 성과공유집</span></span>
+          <span aria-hidden="true">↗</span>
+        </a>
+        <button type="button" class="announcement-reopen" id="announcement-reopen"
+          aria-label="성과공유집 안내" aria-haspopup="dialog" aria-controls="home-announcement" hidden>안내</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 공지사항 미리보기 -->
+  <section id="notice-preview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">공지사항</h2>
+        <p class="section-subtitle">
+          주민 모집과 센터 운영 소식을 확인하세요.
+        </p>
+      </div>
+
+      <div class="notice-wrapper">
+        <div class="notice-preview-body">
+          <table class="notice-table">
+            <thead>
+              <tr>
+                <th scope="col">구분</th>
+                <th scope="col">제목</th>
+                <th scope="col">날짜</th>
+              </tr>
+            </thead>
+            <tbody id="notice-preview-tbody">
+              <tr><td colspan="3" class="notice-empty">최신 공지사항을 불러오는 중입니다.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="notice-preview-footer">
+          <a href="notice.html" class="notice-more-btn">전체 공지사항 보기</a>
         </div>
       </div>
     </div>
@@ -2815,12 +2869,12 @@
       <div class="about-top-grid">
         <article class="about-statement">
           <span class="about-eyebrow">MISSION</span>
-          <h3 class="text-vaporize">주민이 지역의 변화를 함께 기획하고 실행할 수 있도록 지원합니다.</h3>
+          <h3>주민이 지역의 변화를 함께 기획하고 실행할 수 있도록 지원합니다.</h3>
         </article>
 
         <article class="about-statement about-statement--vision">
           <span class="about-eyebrow">VISION</span>
-          <h3 class="text-vaporize">주민이 주도하고 공동체가 성장하는 지속가능한 양양</h3>
+          <h3>주민이 주도하고 공동체가 성장하는 지속가능한 양양</h3>
         </article>
       </div>
 
@@ -2915,42 +2969,11 @@
       </div>
   </section>
 
-  <!-- 공지사항 미리보기 -->
-  <section id="notice-preview">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">공지사항</h2>
-        <p class="section-subtitle">
-          양양군 농촌활성화지원센터의 주요 안내와 새 소식을 확인하실 수 있습니다.
-        </p>
-      </div>
-
-      <div class="notice-wrapper">
-        <div class="notice-preview-body">
-          <table class="notice-table">
-            <thead>
-              <tr>
-                <th style="width:80px;">구분</th>
-                <th>제목</th>
-                <th style="width:120px;">날짜</th>
-              </tr>
-            </thead>
-            <tbody id="notice-preview-tbody"></tbody>
-          </table>
-        </div>
-
-        <div class="notice-preview-footer">
-          <a href="notice.html" class="notice-more-btn">전체 공지사항 보기</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div id="notice-preview-modal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-preview-modal-title">
+  <dialog id="notice-preview-modal" class="modal-backdrop" aria-labelledby="notice-preview-modal-title">
+    <div class="modal-card">
       <div class="modal-header">
         <div class="modal-title" id="notice-preview-modal-title">공지사항</div>
-        <button type="button" class="modal-close" data-action="close-home-notice-modal" aria-label="공지사항 팝업 닫기">×</button>
+        <button type="button" class="modal-close" data-action="close-home-notice-modal" autofocus aria-label="공지사항 팝업 닫기">×</button>
       </div>
       <div class="modal-body" data-notice-scroll>
         <div class="notice-preview-modal-meta" id="notice-preview-modal-meta"></div>
@@ -2962,8 +2985,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="modal-backdrop-overlay" data-action="close-home-notice-modal" aria-label="팝업 닫기"></button>
-  </div>
+  </dialog>
 
   <!-- 활동사진 -->
   <section id="gallery">
@@ -2973,6 +2995,8 @@
         <p class="section-subtitle">
           현장 프로그램, 교육, 행사의 모습을 일부 담았습니다.
         </p>
+        <button type="button" class="home-intro-action photo-archive-open" id="photo-archive-open"
+          aria-haspopup="dialog" aria-controls="photo-archive">사진책으로 보기 <span aria-hidden="true">→</span></button>
       </div>
 
       <div class="gallery-coverflow" id="activity-coverflow" role="region" aria-label="활동사진 Coverflow">
@@ -3013,8 +3037,8 @@
       <div class="contact-grid">
         <div class="contact-card">
           <h3>연락처 정보</h3>
-          <div class="contact-row"><span class="contact-label">전화</span><span>033-673-0221</span></div>
-          <div class="contact-row"><span class="contact-label">이메일</span><span>yyfarmct@naver.com</span></div>
+          <div class="contact-row"><span class="contact-label">전화</span><a class="contact-link" href="tel:0336730221">033-673-0221</a></div>
+          <div class="contact-row"><span class="contact-label">이메일</span><a class="contact-link" href="mailto:yyfarmct@naver.com">yyfarmct@naver.com</a></div>
           <div class="contact-row"><span class="contact-label">주소</span><span>강원특별자치도 양양군 동해대로 2558, 행복나눔터2층
               (농촌활성화지원센터)</span></div>
           <div class="contact-row"><span class="contact-label">운영시간</span><span>월–금 09:00–18:00 (공휴일 휴무)</span></div>
@@ -3231,6 +3255,39 @@
     </div>
   </footer>
 
+  <dialog id="photo-archive" class="photo-archive" aria-labelledby="photo-archive-title">
+    <div class="photo-archive-toolbar">
+      <h2 id="photo-archive-title">양양 활동사진책</h2>
+      <form method="dialog"><button autofocus aria-label="사진책 닫기">닫기</button></form>
+    </div>
+    <article class="photo-archive-spread">
+      <img src="images/PD사진/문화배달 (5).jpg" alt="문화배달 행사 야외 객석에 앉은 주민들" width="1200" height="777" loading="lazy" />
+      <div class="photo-archive-story">
+        <h3>마을로 찾아간 문화배달</h3>
+        <p>주민들이 야외에 모여 무대를 함께 즐겼습니다.</p>
+      </div>
+    </article>
+    <article class="photo-archive-spread" hidden>
+      <img src="images/PD사진/2025 양양군 의기양양 두레동아리 워크숍-28.jpg" alt="테이블에 둘러앉아 워크숍에 참여하는 두레동아리 회원들" width="1200" height="637" loading="lazy" />
+      <div class="photo-archive-story">
+        <h3>두레동아리 워크숍</h3>
+        <p>2025년 의기양양 두레동아리 회원들이 한자리에 모였습니다.</p>
+      </div>
+    </article>
+    <article class="photo-archive-spread" hidden>
+      <img src="images/PD사진/두레동아리 (3).jpg" alt="한 테이블에서 천과 여러 재료를 놓고 손작업을 하는 사람들" width="1200" height="899" loading="lazy" />
+      <div class="photo-archive-story">
+        <h3>두레동아리 활동</h3>
+        <p>주민들이 한 테이블에서 재료를 나누며 함께 손작업을 했습니다.</p>
+      </div>
+    </article>
+    <div class="photo-archive-controls">
+      <button type="button" id="photo-archive-prev" aria-label="이전 페이지">← 이전</button>
+      <span class="photo-archive-position" id="photo-archive-position" role="status">1 / 3</span>
+      <button type="button" id="photo-archive-next" aria-label="다음 페이지">다음 →</button>
+    </div>
+  </dialog>
+
   <!-- 활동사진 라이트박스 -->
   <div id="gallery-lightbox" class="gallery-lightbox" aria-hidden="true">
     <div class="gallery-lightbox-overlay"></div>
@@ -3348,7 +3405,7 @@
   <script src="assets/js/instructor-embed.js" defer></script>
   <script src="assets/js/notice-data.js" defer></script>
   <script src="assets/js/notice-attachments.js?v=20261118-ux" defer></script>
-  <script src="assets/js/notices.js?v=20261111b" defer></script>
+  <script src="assets/js/notices.js?v=20261128" defer></script>
   <script src="assets/js/videos.js?v=20261030-1" defer></script>
   <script src="assets/js/programs.js?v=20260205d" defer></script>
   <script src="assets/js/pd.js" defer></script>
@@ -3358,175 +3415,55 @@
   <script src="assets/js/site-nav.js?v=20261128" defer></script>
   <script src="assets/js/data-actions.js?v=20260728a" defer></script>
 
-  <script>
-    (function () {
-      const brand = document.getElementById("site-logo");
-      const viewport = document.getElementById("logo-switch-viewport");
-      const slots = [
-        document.getElementById("logo-switch-slot-a"),
-        document.getElementById("logo-switch-slot-b")
-      ];
-      if (!brand || !viewport || slots.some((slot) => !slot)) return;
-
-      const labels = [
-        { text: "농촌활성화지원센터", tone: "rural" },
-        { text: "농업기술센터", tone: "agri" }
-      ];
-      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      let activeSlotIndex = 0;
-      let activeLabelIndex = 0;
-      let isAnimating = false;
-
-      function applyLabel(slot, label, isActive) {
-        slot.textContent = label.text;
-        slot.dataset.tone = label.tone;
-        slot.className = isActive ? "logo-switch-slot is-active" : "logo-switch-slot";
-      }
-
-      function syncAriaLabel(label) {
-        brand.setAttribute("aria-label", `양양군 ${label.text}`);
-      }
-
-      function updateViewportWidth() {
-        const width = Math.max(...slots.map((slot) => slot.scrollWidth));
-        if (width > 0) {
-          viewport.style.width = `${Math.ceil(width)}px`;
-        }
-      }
-
-      function switchLogoText() {
-        if (isAnimating) return;
-
-        const nextLabelIndex = (activeLabelIndex + 1) % labels.length;
-        const activeSlot = slots[activeSlotIndex];
-        const nextSlotIndex = (activeSlotIndex + 1) % slots.length;
-        const nextSlot = slots[nextSlotIndex];
-        const nextLabel = labels[nextLabelIndex];
-
-        applyLabel(nextSlot, nextLabel, false);
-        updateViewportWidth();
-        syncAriaLabel(nextLabel);
-
-        if (reduceMotionQuery.matches) {
-          applyLabel(activeSlot, labels[activeLabelIndex], false);
-          applyLabel(nextSlot, nextLabel, true);
-          activeSlotIndex = nextSlotIndex;
-          activeLabelIndex = nextLabelIndex;
-          return;
-        }
-
-        isAnimating = true;
-
-        requestAnimationFrame(() => {
-          activeSlot.classList.add("is-leaving");
-          nextSlot.classList.add("is-entering");
-        });
-
-        window.setTimeout(() => {
-          applyLabel(activeSlot, labels[activeLabelIndex], false);
-          applyLabel(nextSlot, nextLabel, true);
-          activeSlotIndex = nextSlotIndex;
-          activeLabelIndex = nextLabelIndex;
-          isAnimating = false;
-        }, 620);
-      }
-
-      applyLabel(slots[0], labels[0], true);
-      applyLabel(slots[1], labels[1], false);
-      syncAriaLabel(labels[0]);
-      updateViewportWidth();
-
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(updateViewportWidth).catch(() => { });
-      }
-      window.addEventListener("resize", updateViewportWidth);
-      reduceMotionQuery.addEventListener?.("change", updateViewportWidth);
-
-      window.setInterval(switchLogoText, 5000);
-    })();
-  </script>
+  <script src="assets/js/home-film.js?v=20261128" defer></script>
 
   <script>
     (function () {
-      const headings = document.querySelectorAll(".text-vaporize");
-      const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      if (!headings.length || reduceMotionQuery.matches) return;
+      const book = document.getElementById("photo-archive");
+      const spreads = Array.from(book.querySelectorAll(".photo-archive-spread"));
+      const previous = document.getElementById("photo-archive-prev");
+      const next = document.getElementById("photo-archive-next");
+      const position = document.getElementById("photo-archive-position");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let current = 0;
+      let turnAnimation;
 
-      function buildLetters(heading) {
-        const label = heading.textContent.trim();
-        heading.textContent = "";
-        heading.setAttribute("aria-label", label);
-
-        label.split(" ").forEach((word, wordIndex, words) => {
-          const wordElement = document.createElement("span");
-          wordElement.className = "text-vaporize-word";
-          wordElement.setAttribute("aria-hidden", "true");
-
-          Array.from(word).forEach((letter) => {
-            const letterElement = document.createElement("span");
-            const glyph = document.createElement("span");
-            letterElement.className = "text-vaporize-letter";
-            glyph.className = "text-vaporize-glyph";
-            glyph.textContent = letter;
-            letterElement.style.setProperty("--vapor-x", `${Math.round(Math.random() * 10 - 5)}px`);
-            letterElement.style.setProperty("--vapor-y", `${Math.round(-8 - Math.random() * 10)}px`);
-            letterElement.append(glyph);
-
-            for (let i = 0; i < 3; i += 1) {
-              const particle = document.createElement("span");
-              particle.className = "text-vaporize-particle";
-              particle.style.setProperty("--particle-x", `${Math.round(Math.random() * 24 - 12)}px`);
-              particle.style.setProperty("--particle-y", `${Math.round(-10 - Math.random() * 20)}px`);
-              letterElement.append(particle);
-            }
-
-            wordElement.append(letterElement);
-          });
-
-          heading.append(wordElement);
-          if (wordIndex < words.length - 1) heading.append(" ");
-        });
+      function renderPage() {
+        spreads.forEach((spread, index) => { spread.hidden = index !== current; });
+        position.textContent = `${current + 1} / ${spreads.length}`;
+        previous.disabled = current === 0;
+        next.disabled = current === spreads.length - 1;
       }
 
-      function playVaporize(heading) {
-        if (heading.dataset.vaporizing === "true") return;
-        const letters = Array.from(heading.querySelectorAll(".text-vaporize-letter"));
-        const order = letters.map((_, index) => index);
+      function turnPage(direction, animate) {
+        const target = current + direction;
+        if (target < 0 || target >= spreads.length) return;
+        const activeControl = document.activeElement;
+        turnAnimation?.cancel();
+        current = target;
+        renderPage();
+        if (activeControl === previous && previous.disabled) next.focus({ preventScroll: true });
+        if (activeControl === next && next.disabled) previous.focus({ preventScroll: true });
 
-        for (let i = order.length - 1; i > 0; i -= 1) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [order[i], order[j]] = [order[j], order[i]];
+        if (animate && !reducedMotion.matches) {
+          turnAnimation = spreads[current].animate([
+            { transform: `perspective(900px) rotateY(${direction * -9}deg)`, opacity: .6 },
+            { transform: "perspective(900px) rotateY(0)", opacity: 1 }
+          ], { duration: 220, easing: "cubic-bezier(0.23, 1, 0.32, 1)" });
         }
-
-        order.forEach((letterIndex, delayIndex) => {
-          letters[letterIndex].style.setProperty("--vapor-delay", `${delayIndex * 20}ms`);
-        });
-
-        heading.dataset.vaporizing = "true";
-        heading.classList.remove("is-vaporizing");
-        void heading.offsetWidth;
-        heading.classList.add("is-vaporizing");
-
-        window.setTimeout(() => {
-          heading.classList.remove("is-vaporizing");
-          heading.dataset.vaporizing = "false";
-        }, 1500);
       }
 
-      headings.forEach((heading) => {
-        buildLetters(heading);
-        heading.closest(".about-statement")?.addEventListener("mouseenter", () => playVaporize(heading));
+      document.getElementById("photo-archive-open").addEventListener("click", () => {
+        renderPage();
+        book.showModal();
       });
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          playVaporize(entry.target);
-          observer.unobserve(entry.target);
-        });
-      }, { threshold: .55 });
-
-      headings.forEach((heading) => observer.observe(heading));
+      previous.addEventListener("click", event => turnPage(-1, event.detail > 0));
+      next.addEventListener("click", event => turnPage(1, event.detail > 0));
+      book.addEventListener("keydown", event => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        turnPage(event.key === "ArrowLeft" ? -1 : 1, false);
+      });
     })();
   </script>
 
